@@ -1,0 +1,10 @@
+{
+  "common":{
+    "sessionSecret":"AlaBalaNica",
+    "gravatar":{
+      "s":27,
+      "d":"mm",
+      "r":"g"
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "author": "Thomas White",
+  "name": "Links.to",
+  "description": "Collections of tagged links",
+  "version": "0.1.0",
+  "homepage": "http://links.to/",
+  "private": true,
+  "scripts": {
+    "test": "tap ./test"
+  },
+  "dependencies": {
+    "express": "3.1.0",
+    "consolidate": ">=0.8.0",
+    "hjs": "*",
+    "less-middleware": "*",
+    "async": "~0.1.18",
+    "bootstrap": ">=0.0.2",
+    "swig": "*",
+    "superagent": ">=0.12.4",
+    "config-chain": "~1.1.5",
+    "idgen": "*",
+    "optimist": "~0.3.5",
+    "string": "~1.2.1"
+  },
+  "devDependencies": {
+    "nodelint": "~0.6",
+    "uglify-js": ">=1.1.0",
+    "mocha": "~1.6",
+    "should": "*",
+    "expect.js": "~0.2",
+    "still": "*",
+    "less": "~1.3.1",
+    "zepto": "0.0.3",
+    "mocha-phantomjs": "~1.0.1",
+    "shelljs": "*",
+    "jscoverage": "*",
+    "tap": "~0.3.3"
+  },
+  "optionalDependencies": {},
+  "engines": {
+    "node": "*"
+  }
+}

@@ -12,3 +12,15 @@ logs
 results
 
 npm-debug.log
+
+# Settings unique to this server, including app secrets and
+# other things that shouldn't be shared in a public github repo
+config-local.js
+
+# Data files local to the server will live here
+data
+
+# Automatically generated things I do not want (github's suggested list)
+.DS_Store*
+ehthumbs.db
+Thumbs.db

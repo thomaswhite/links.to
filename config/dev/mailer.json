@@ -1,0 +1,10 @@
+{
+  "gmail":{
+    "service":"Gmail",
+    "auth":{
+      "user":"links.to.com@gmail.com",
+      "pass":"Silver+314"
+    }
+  }
+}
+

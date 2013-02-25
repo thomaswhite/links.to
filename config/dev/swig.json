@@ -1,0 +1,12 @@
+{
+  "swig":{
+    "allowErrors":false,
+    "autoescape":true,
+    "cache":false,
+    "encoding":"utf8",
+    "filters":{},
+    "tags": {},
+    "extensions": {},
+    "tzOffset": 0
+  }
+}
