@@ -1,0 +1,19 @@
+<script type="text/javascript" src="/static/js/clEditor/jquery.cleditor.js"></script>
+
+<script type="text/javascript">
+  $(document).ready(function() {
+    $("textarea.WYSIWYG").cleditor({
+      width:        600, // width not including margins, borders or padding
+      height:       250, // height not including margins, borders or padding
+      controls:     // controls to add to the toolbar
+          "bold italic underline strikethrough " +
+              "| color highlight removeformat | bullets numbering " +
+              "| undo redo | " +
+              "cut copy paste pastetext | source",
+
+      useCSS:       false, // use CSS to style HTML when possible (not supported in ie)
+      bodyStyle:    // style to assign to document body contained within the editor
+          "margin:4px; font:10pt Arial,Verdana; cursor:text"
+    });
+  });
+</script>

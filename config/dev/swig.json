@@ -1,6 +1,6 @@
 {
   "swig":{
-    "allowErrors":false,
+    "allowErrors":true,
     "autoescape":true,
     "cache":false,
     "encoding":"utf8",

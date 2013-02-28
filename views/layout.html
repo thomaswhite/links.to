@@ -1,0 +1,39 @@
+{% import 'macros.html' as macros %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    {% block metaTags %}
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    {% endblock %}
+    <title>Links.to: {% block pageTitle %}{% endblock %}</title>
+    <link href="/bootstrap/css/bootstrap.css" rel="stylesheet" />
+    <link href="/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+    <link href="/css/links-to.css" rel="stylesheet" />
+    {% block head %}{% endblock %}
+  </head>
+  <body calss="{% block bodyClass %}{% endblock %}">
+    {% include "navbar.html" %}
+    <div class="container">
+      {% block crumbs %}
+          {% include "breadcrumbs.html" ignore missing %}
+      {% endblock %}
+      <div class="row">
+        <div class="span8">
+          {% block title %}<h1>{{ title }}</h1>{% endblock %}
+        </div>
+      </div>
+      {% block content %} _some-content_ {% endblock %}
+      {% block contentRows %}{% endblock %}
+      {% block contentBottom %}{% endblock %}
+    </div>
+
+{% block pageBottom %}
+    <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
+    <script type="text/javascript" src="/bootstrap/js/bootstrap.min.js"></script>
+    {% if  WYSIWYG  %}
+      {% include 'cleditor-init.html' %}
+    {% endif %}
+{% endblock %}
+  </body>
+</html>

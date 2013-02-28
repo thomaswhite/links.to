@@ -1,0 +1,99 @@
+{% macro blocked_link link canEdit canDelete collection user %}
+<div class="row blocked-link">
+  <div class="span8">
+    <div class="row link-title">
+      <div class="span8">
+        <h4>
+          {% if 0 && link.favicon %}<img class="favicon" src="{{ link.favicon }}" >{% endif %}
+          {% if canEdit %}
+ {#         <span><a class="btn btn-warning btn-mini btn-success" href="/link/{{ link._id }}/edit/{{ collection._id  }}">Edit</a></span>        #}
+          <span><a class="btn btn-warning btn-mini edit-btn" href="/link/refresh/{{ link._id }}" title="refresh"><i class="icon-refresh"></i></a></span>
+          {% endif %}
+          {% if canDelete -%}
+          <a class="btn btn-danger btn-mini"  href="/link/delete/{{ link._id  }}/{{ collection._id }}" title="Delete"><i class="icon-trash" ></i></a>
+          {%- endif %}
+          <a class="link-title wrap {% if canEdit %}eip{% endif %}" href="{{ link.url }}?linked-from=www.links.to/w/c/{{ collection._id }}" target="_blank">{{ link.title }}</a>
+          <span title="description" class="description wrap {% if canEdit %}eip{% endif %} ta">{{ link.description }}
+            {% if  link.author -%}
+            Author:<span class="author">{{ link.author }}</span>
+            {%- endif %}
+          </span>
+        </h4>
+
+      </div>
+    </div>
+    <div class="row">
+    {% if link.img.length %}
+        <div class="span2 iddCont" >
+          <ul class="imgDropdown eipURL" data-url="/link/{{ link._id }}/eip" >
+              <li>
+                <a href="#" class="thumbnail" data-imagePos="{{ link.imagePos|default(0) }}">
+                <img src="{{ link.img[link.imagePos].src }}">
+               </a>
+             </li>
+       {% if canEdit && link.img.length > 1 %}
+          {% for img in link.img %}
+             {%if loop.index0 != (link.imagePos || 0) %}
+              <li>
+              <a href="#" class="thumbnail inactive" data-imagePos="{{ loop.index0 }}"><img src="{{ img.src }}"></a>
+              </li>
+             {% endif %}
+          {% endfor %}
+          <a href="#" class="iddDrop closed"><i class=" icon-chevron-down"></i></a>
+       {% endif %}
+          </ul>
+      </div>
+    {% endif %}
+      <div class="span{{ link.img.length ?  6 :8}}">
+         <p title ="summary" class="summary {% if canEdit %}eip{% endif %} ta">{% if link.h1  -%}<span class="minititle">{{ link.h1 }}</span>.{%- endif %}
+          {{ link.summary }}
+        </p>
+      </div>
+    </div>
+    <div class="row">
+      <div class="span8">
+        <p></p>
+        <p>
+          <i class="icon-calendar"></i>{{ link.updated|date('Y-m-d') }}
+        | <i class="icon-user"></i> <a href="#">{{ link.user_screen_name }}</a>
+       {% if  link.tags.length  -%}
+          | <i class="icon-tags"></i>&nbsp; {%- for tag in link.tags -%}
+               <span class="label label-info"> {{ tag.word }} {% if canEdit %}<a href="#"><i class="icon-remove"></i></a>{% endif %}  </span>&nbsp;
+            {%- else -%}
+            {%- endfor -%}
+            {%- if canEdit -%}
+            <button class="btn btn-mini"><i class="icon-plus"></i></button>
+            {%- endif %}
+       {% endif %}
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endmacro %}
+
+
+{% macro linkMiniIcons link user %}
+<div class="row">
+    <div class="span8">
+        <p></p>
+        <p>
+            <i class="icon-calendar"></i>{{ link.updated|date('Y-m-d') }}
+            | <i class="icon-user"></i> by <a href="#">Mark</a>
+            | <i class="icon-comment"></i> <a href="#">3 Comments</a>
+            | <i class="icon-share"></i> <a href="#">39 Shares</a>
+            | <i class="icon-tags"></i> Tags : <a href="#"><span class="label label-info">Snipp</span></a>
+            <a href="#"><span class="label label-info">Bootstrap</span></a>
+            <a href="#"><span class="label label-info">UI</span></a>
+            <a href="#"><span class="label label-info">growth</span></a>
+        </p>
+    </div>
+</div>
+{% endmacro %}
+
+{% macro eip canEdit %}{% if canEdit %}eip{% endif %}{% endmacro %}
+
+{% macro input type name id label value error %}
+<label for="{{ name }}">{{ label }}</label>
+<input {% if error %} class="error" {% endif %} type="{{ type }}" name="{{ name }}" id="{{ id }}" value="{{ value }}">
+{% endmacro %}

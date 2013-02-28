@@ -1,0 +1,200 @@
+/*
+import 'bootstrap';
+import 'responsive';
+
+@bodyBackground: #FAF7EC;
+@navbarBrandColor: #989CAE;
+
+
+.brand {
+  font-family: @monoFontFamily;
+}
+
+*/
+.noWrap {
+  white-space: nowrap;
+}
+.wrap {
+  -ms-word-break: break-all;
+  word-break: break-all;
+  word-break: break-word;
+  -webkit-hyphens: auto;
+  -moz-hyphens: auto;
+  hyphens: auto;
+}
+.wrap2 {
+  white-space: pre;
+  /* CSS 2.0 */
+
+  white-space: pre-wrap;
+  /* CSS 2.1 */
+
+  white-space: pre-line;
+  /* CSS 3.0 */
+
+  white-space: -pre-wrap;
+  /* Opera 4-6 */
+
+  white-space: -o-pre-wrap;
+  /* Opera 7 */
+
+  white-space: -moz-pre-wrap;
+  /* Mozilla */
+
+  white-space: -hp-pre-wrap;
+  /* HP Printers */
+
+  word-wrap: break-word;
+  /* IE 5+ */
+
+}
+.auth-icon,
+.auth-icon32 {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  line-height: 16px;
+  margin-right: .3em;
+  vertical-align: text-top;
+  background-position: 0 50%;
+  background-repeat: no-repeat;
+  background-color: transparent;
+  margin-right: 4px;
+}
+.auth-icon32 {
+  width: 32px;
+  height: 32px;
+  line-height: 32px;
+}
+.dropdown-menu li * {
+  vertical-align: middle;
+}
+.auth-google {
+  background-image: url("../images/social/google_16.png");
+}
+.auth-google32 {
+  background-image: url("../images/social/google_32.png");
+}
+.auth-yahoo {
+  background-image: url("../images/social/yahoo_16.png");
+}
+.auth-yahoo32 {
+  background-image: url("../images/social/yahoo_32.png");
+}
+.auth-facebook {
+  background-image: url("../images/social/facebook_16.png");
+}
+.auth-facebook32 {
+  background-image: url("../images/social/facebook_32.png");
+}
+.auth-twitter {
+  background-image: url("../images/social/twitter_16.png");
+}
+.auth-twitter32 {
+  background-image: url("../images/social/twitter_32.png");
+}
+.auth-twitter {
+  background-image: url("../images/social/twitter_16.png");
+}
+.auth-twitter32 {
+  background-image: url("../images/social/twitter_32.png");
+}
+.auth-linkedin {
+  background-image: url("../images/social/linkedin_16.png");
+}
+.auth-linkedin32 {
+  background-image: url("../images/social/linkedin_32.png");
+}
+.auth-windowslive {
+  background-image: url("../images/social/windowslive_16.png");
+}
+.auth-windowslive32 {
+  background-image: url("../images/social/windowslive_32.png");
+}
+.auth-meetup {
+  background-image: url("../images/social/meetup_16.png");
+}
+.auth-meetup32 {
+  background-image: url("../images/social/meetup_32.png");
+}
+.auth-meetup {
+  background-image: url("../images/social/meetup_16.png");
+}
+.auth-meetup32 {
+  background-image: url("../images/social/meetup_32.png");
+}
+.auth-dropbox {
+  background-image: url("../images/social/dropbox_16.png");
+}
+.auth-dropbox32 {
+  background-image: url("../images/social/dropbox_32.png");
+}
+.auth-linkedin {
+  background-image: url("../images/social/linkedin_16.png");
+}
+.auth-linkedin32 {
+  background-image: url("../images/social/linkedin_32.png");
+}
+.user-img96 {
+  width: 96px;
+  height: 96px;
+  margin-left: 5px;
+  border: 1px gray solid;
+  background-color: silver;
+}
+.user-img27,
+.missing-user27 {
+  width: 27px;
+  height: 27px;
+  /*	border: 1px gray solid; */
+
+  background-color: silver;
+}
+.user-name {
+  color: black;
+  font-size: 120%;
+  font-weight: bold;
+}
+.user-email {
+  color: black;
+}
+.missing-user27 {
+  background: url(../images/icons/24/user-3.png) no-repeat center;
+  display: inline-block;
+}
+.missing-user96 {
+  background: url(../images/icons/96/user-3.png) no-repeat center;
+  width: 96px;
+  height: 96px;
+  border: 1px gray solid;
+}
+.logged-user {
+  margin: 6px 0 0 0 !important;
+  padding: 0 !important;
+}
+.logged-user b.caret {
+  margin-top: 14px;
+}
+.dropdown-menu li * {
+  vertical-align: middle;
+}
+.navbar .brand {
+  font-weight: bold;
+  color: #fff;
+}
+.navbar .nav > li > a:hover {
+  color: yellow;
+}
+.logout {
+  margin-right: 0;
+}
+form.form-add-by-name {
+  margin-top: 1em;
+}
+.row.table-header {
+  margin-top: .8em;
+}
+.row.table-header > div {
+  border-bottom: 1px solid gray;
+  background-color: #ffffff;
+}

@@ -1,0 +1,55 @@
+{% extends "layout.html" %}
+
+{% block pageTitle -%}Links To - home{%- endblock %}
+{% block title -%}<h1 id="title">Links To - home</h1>{%- endblock %}
+
+
+
+{% block content %}
+  <div class="row">
+    <div class="span8 {%if canEdit %}eip{% endif %} ta wrap" id="description" >{{ collection.description }}</div>
+  </div>
+<div class="row">
+  <div class="span3 ">
+    <!-- span class="coll-e">Updated {{ collection.updated|date('Y-m-d H:i') }}</span -->
+  </div>
+</div>
+
+<div class="row">
+  <div class="span12 button">
+    {% include "add-button.html" %}
+  </div>
+</div>
+
+<div id="grid">
+{% for link in grid %}
+  {{ macros.blocked_link( link, canEdit, canDelete, collection) }}
+
+<!--
+  <ul>
+  {% for m in link.meta %}
+     <li>{{ loop.key }}:{{ m }}</li>
+  {% endfor %}
+  </ul>
+-->
+  {% else %}
+  <div class="row">
+    <div class="span6">No links in this collection yet.</div>
+  </div>
+{% endfor %}
+</div>
+{% endblock %}
+
+{% block contentBottom %}
+{% endblock %}
+
+{% block pageBottom %}
+   {% parent %}
+    <div class="eipBase" data-url="/coll/{{ collection._id }}/eip"><br/></div>
+    <script type="text/javascript" src="/static/js/jquery.editinplace.js"></script>
+    <script type="text/javascript" src="/static/js/jquery.autosize.js"></script>
+    <script type="text/javascript" src="/static/js/edit-in-place.js"></script>
+    <script type="text/javascript" src="/static/js/autoGrowInput.js"></script>
+
+     <script type="text/javascript" src="/static/js/collection-link-edit.js"></script>
+{% endblock %}

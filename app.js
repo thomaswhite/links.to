@@ -8,6 +8,7 @@ var express = require('express')
     , http = require('http')
     , path = require('path')
     , cons = require('consolidate')
+    , swig = require('swig')
 
     , cc = require('config-chain')
     , opts = require('optimist').argv
@@ -25,21 +26,33 @@ var express = require('express')
             path.join(configDir, 'swig.json'),
             cc.find('config.json'), //SEARCH PARENT DIRECTORIES FROM CURRENT DIR FOR FILE
             {
+              swig:{
+                root: path.join(__dirname, 'views')
+               }
+            },
+            {
+                views:path.join(__dirname, 'views'),
                 host:'localhost',
                 port:3000
             }
         )
+    , bootstrapPath = path.join(__dirname, 'node_modules', 'bootstrap')
     ;
 
+config.store.swig.root = config.store.views;
 
 var app = express();
 
-app.configure(function () {
-    app.set('port', config.get('port') );
-    app.engine('html', cons.swig);
-    app.set('view engine', 'html');
-    app.set('views', __dirname + '/views');
+module.exports.app = app;
 
+
+app.configure(function () {
+    app.engine('html', cons.swig );
+    app.set('view engine', 'html');
+    app.set('views',  config.store.views );
+    swig.init( config.store.swig );
+
+    app.set('port', config.get('port') );
     app.use(express.favicon());
     app.use(express.logger('dev'));
     app.use(express.bodyParser());
@@ -47,7 +60,17 @@ app.configure(function () {
     app.use(express.cookieParser('your secret here'));
     app.use(express.session( config.store.common.sessionSecret ));
     app.use(app.router);
-    app.use(require('less-middleware')({ src:__dirname + '/public' }));
+    app.use('/img', express['static'](path.join(bootstrapPath, 'img')));
+    app.use(require('less-middleware')({
+        src:__dirname + '/public',
+        dest   : path.join(__dirname, 'public'),
+        paths: ['.', path.join(bootstrapPath, 'less') ],
+        prefix : ['/stylesheets', '/less'],
+        once:false,
+        debug:true,
+        compress:'auto',
+        optimization: 2 // 0,1,2
+    }));
     app.use(express.static(path.join(__dirname, 'public')));
 });
 

@@ -1,0 +1,20 @@
+{% set buttonType = addButton.type|default('input')  %}
+{% set placeholder =  addButton.placeholder|default('Add')  %}
+
+{% if noAdd  %}
+{% else if user and canEdit %}
+   <form class="form-inline form-add-by-name" action="{{ addButton.link }}" method="post" id="add">
+     {% for item in addButton.hidden %}
+      <input type="hidden" name="{{ item.name }}"  value="{{ item.value }}"/>
+     {% endfor %}
+
+     {% if  buttonType == 'textarea' %}
+       <textarea class="input-xxlarge autoGrow" name="{{ addButton.name }}" placeholder="{{ placeholder }}" title="{{ placeholder }}" rows="1"></textarea>
+     {% else %}
+       <input type="text" class="input-large autoGrow" name="{{ addButton.name }}" id="{{ addButton.name }}" placeholder="{{ placeholder }}" title="{{ placeholder }}"/>
+     {% endif %}
+     <button type="submit" class="btn btn-primary btn-mall" href=""><i class="icon-plus icon-white"></i> {{ addButton.buttonText}}</button>
+   </form>
+{% else %}
+    <span class="loginPlease">{{ addButton.loginPlease }}</span>
+{% endif %}
