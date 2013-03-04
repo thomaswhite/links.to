@@ -3,8 +3,14 @@
  * GET home page.
  */
 
-var dummy = 1;
+var config = 1;
 
-exports.index = function(req, res){
-  res.render('layout', { title: 'Express' });
+exports.init = function( app, Config ){
+    config = Config;
+
+    this.test = function( req, res ){
+        res.render('layout', { title: 'Express' });
+    };
+
+    return this;
 };

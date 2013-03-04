@@ -1,0 +1,12 @@
+{
+  "less":{
+    "src":"/public",
+    "dest" : "public",
+    "paths": ["."],
+    "prefix" : ["/stylesheets", "/less"],
+    "once":false,
+    "debug":true,
+    "compress":"auto",
+    "optimization": 2
+  }
+}

@@ -1,50 +1,44 @@
-/**
- * Module dependencies.
- */
 
 var express = require('express')
-    , routes = require('./routes')
-    , user = require('./routes/user')
-    , http = require('http')
+    , app = express()
     , path = require('path')
-    , cons = require('consolidate')
-    , swig = require('swig')
+    ,  _ = require('underscore')
 
     , cc = require('config-chain')
     , opts = require('optimist').argv
     , env = opts.env || process.env.YOUR_APP_ENV || 'dev'
-    , configDir = path.join(__dirname, 'config', env)
-    , config = cc(
-            opts,
-            cc.env('links_'),  //myApp_foo = 'like this',
-            path.join(__dirname, 'config.' + env + '.json'),
-            env === 'prod' ? path.join(__dirname, 'special.json') : null,
-            path.join(configDir, 'common.json'),
-            path.join(configDir, 'db.json'),
-            path.join(configDir, 'mailer.json'),
-            path.join(configDir, 'passport.json'),
-            path.join(configDir, 'swig.json'),
-            cc.find('config.json'), //SEARCH PARENT DIRECTORIES FROM CURRENT DIR FOR FILE
-            {
-              swig:{
-                root: path.join(__dirname, 'views')
-               }
-            },
-            {
-                views:path.join(__dirname, 'views'),
-                host:'localhost',
-                port:3000
-            }
-        )
     , bootstrapPath = path.join(__dirname, 'node_modules', 'bootstrap')
+    , config = require('./config.js').init( __dirname, bootstrapPath )
+    , routes = require('./routes').init( config.store )
+    , passports  = require('./passports.js').init( app, config.store.passport )
+    , user = require('./routes/user')
+    , http = require('http')
+    , cons = require('consolidate')
+    , swig = require('swig')
+
+    , caterpillar = require ("caterpillar")
+    , logger = new caterpillar.Logger()
+    , inspect = require('eyes').inspector({
+        styles: {                 // Styles applied to stdout
+            all:     'cyan',      // Overall style applied to everything
+            label:   'underline', // Inspection labels, like 'array' in `array: [1, 2, 3]`
+            other:   'inverted',  // Objects which don't have a literal representation, such as functions
+            key:     'bold',      // The keys in object literals, like 'a' in `{a: 1}`
+            special: 'grey',      // null, undefined...
+            string:  'green',
+            number:  'magenta',
+            bool:    'blue',      // true false
+            regexp:  'green'      // /\d+/
+        },
+        pretty: true,             // Indent object literals
+            hideFunctions: false,     // Don't output functions at all
+            stream: process.stdout,   // Stream to write to, or null
+            maxLength: 2048           // Truncate output if longer
+    })
+
+    , db = require('./db.js').init( config.store.db )
+
     ;
-
-config.store.swig.root = config.store.views;
-
-var app = express();
-
-module.exports.app = app;
-
 
 app.configure(function () {
     app.engine('html', cons.swig );
@@ -58,19 +52,15 @@ app.configure(function () {
     app.use(express.bodyParser());
     app.use(express.methodOverride());
     app.use(express.cookieParser('your secret here'));
-    app.use(express.session( config.store.common.sessionSecret ));
+    app.use(express.session({
+        secret: config.store.common.sessionSecret
+        , cookie: {maxAge: 60000 * 15}
+        , store: db.mongoStore
+    }));
+
     app.use(app.router);
     app.use('/img', express['static'](path.join(bootstrapPath, 'img')));
-    app.use(require('less-middleware')({
-        src:__dirname + '/public',
-        dest   : path.join(__dirname, 'public'),
-        paths: ['.', path.join(bootstrapPath, 'less') ],
-        prefix : ['/stylesheets', '/less'],
-        once:false,
-        debug:true,
-        compress:'auto',
-        optimization: 2 // 0,1,2
-    }));
+    app.use(require('less-middleware')( config.store.less ));
     app.use(express.static(path.join(__dirname, 'public')));
 });
 
@@ -78,9 +68,9 @@ app.configure('development', function () {
     app.use(express.errorHandler());
 });
 
-app.get('/', routes.index );
+app.get('/', routes.test );
 app.get('/users', user.list);
 
 http.createServer(app).listen(app.get('port'), function () {
-    console.log("Express server listening on port " + app.get('port'));
+    console.log("Links.To server listening on port " + app.get('port'));
 });

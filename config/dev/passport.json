@@ -2,7 +2,7 @@
   "passport":{
     "passport_after":{
       "successRedirect":"/auth-after-success",
-      "failureRedirect":"/",
+      "failureRedirect":"/auth-failed",
       "logoutRedirect":null,
       "userHasEmail":"/coll/mine",
       "afterEmailPing":"/coll/mine?emailPinged",
