@@ -3,14 +3,11 @@ var express = require('express')
     , app = express()
     , path = require('path')
     ,  _ = require('underscore')
+    , emitter = require('eventflow')
 
-    , cc = require('config-chain')
-    , opts = require('optimist').argv
-    , env = opts.env || process.env.YOUR_APP_ENV || 'dev'
     , bootstrapPath = path.join(__dirname, 'node_modules', 'bootstrap')
     , config = require('./config.js').init( __dirname, bootstrapPath )
-    , routes = require('./routes').init( config.store )
-    , passports  = require('./passports.js').init( app, config.store.passport )
+    , routes = require('./routes').init( app, config, emitter )
     , user = require('./routes/user')
     , http = require('http')
     , cons = require('consolidate')
@@ -36,31 +33,32 @@ var express = require('express')
             maxLength: 2048           // Truncate output if longer
     })
 
-    , db = require('./db.js').init( config.store.db )
+    , db = require('./db.js').init( config.db, emitter )
+    , passports  = require('./passports.js').init( app, config.passport, emitter )
 
     ;
 
 app.configure(function () {
     app.engine('html', cons.swig );
     app.set('view engine', 'html');
-    app.set('views',  config.store.views );
-    swig.init( config.store.swig );
+    app.set('views',  config.views );
+    swig.init( config.swig );
 
-    app.set('port', config.get('port') );
+    app.set('port', config.port );
     app.use(express.favicon());
     app.use(express.logger('dev'));
     app.use(express.bodyParser());
     app.use(express.methodOverride());
     app.use(express.cookieParser('your secret here'));
     app.use(express.session({
-        secret: config.store.common.sessionSecret
+        secret: config.common.sessionSecret
         , cookie: {maxAge: 60000 * 15}
         , store: db.mongoStore
     }));
 
     app.use(app.router);
     app.use('/img', express['static'](path.join(bootstrapPath, 'img')));
-    app.use(require('less-middleware')( config.store.less ));
+    app.use(require('less-middleware')( config.less ));
     app.use(express.static(path.join(__dirname, 'public')));
 });
 

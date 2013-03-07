@@ -7,7 +7,7 @@
  */
 
 var ShortId  = require('shortid').seed(96715)
-    , async = require('async')
+//    , async = require('async')
     , mongo = require('mongodb')
     , connectMongoDb = require('connect-mongodb')
     , _ = require('underscore')
@@ -15,16 +15,13 @@ var ShortId  = require('shortid').seed(96715)
     , db
     , connection
     , settings
+    , emitter
     ;
 
 
-
-function ShorterID(){
-    return  ShortId.generate().substr(0, settings.db.short_id_length);
-}
-
-exports.init = function( configDB ){
+exports.init = function( configDB, Emitter ){
     settings = configDB;
+    emitter  = Emitter;
 
     this.objectID = mongo.ObjectID;
     this.connection = connection = new mongo.Db(
@@ -54,5 +51,6 @@ exports.init = function( configDB ){
         db.open(callback);
     };
 
+    emitter(this);
     return this;
-}
+};

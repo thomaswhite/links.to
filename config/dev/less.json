@@ -1,5 +1,4 @@
 {
-  "less":{
     "src":"/public",
     "dest" : "public",
     "paths": ["."],
@@ -8,5 +7,4 @@
     "debug":true,
     "compress":"auto",
     "optimization": 2
-  }
 }

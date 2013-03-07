@@ -52,7 +52,7 @@ module.exports = {
      */
     pick : function ( org, pickArr ){
     var result = {};
-    for(var i=0; i < pickArr.length; i++){
+    for(var i=0; org && i < pickArr.length; i++){
         var key = pickArr[i],
             value = org[key],
             delimPos = key.indexOf(':'),

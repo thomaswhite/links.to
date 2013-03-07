@@ -1,5 +1,5 @@
 {
-  "passport":{
+
     "passport_after":{
       "successRedirect":"/auth-after-success",
       "failureRedirect":"/auth-failed",
@@ -79,7 +79,8 @@
           "profileImageURL_https:_json.profile_image_url_https"]
       },
       "facebook":{
-        "arity":4,
+        "type":"oauth2",
+        "arity":5,
         "icon":"facebook",
         "require":"passport-facebook",
         "clientID":"329962043758691",
@@ -160,5 +161,5 @@
       }
 
     }
-  }
+
 }

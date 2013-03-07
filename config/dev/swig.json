@@ -1,5 +1,5 @@
 {
-  "swig":{
+
     "allowErrors":true,
     "autoescape":true,
     "cache":false,
@@ -8,5 +8,5 @@
     "tags": {},
     "extensions": {},
     "tzOffset": 0
-  }
+
 }
