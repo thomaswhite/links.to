@@ -91,8 +91,8 @@ module.exports = {
                 "time_zone:_json.time_zone",
                 "lang:_json.lang",
                 "profileURL:url",
-                "profileImageURL:_json.profile_image_url",
-                "profileImageURL_https:_json.profile_image_url_https"
+                "gravatarURL:_json.profile_image_url",
+                "gravatarURL_https:_json.profile_image_url_https"
             ]
       },
       facebook:{
@@ -115,10 +115,10 @@ module.exports = {
               "timezone:_json.timezone",
               "locale:_json.locale",
               "profileURL:profileUrl",
-              "profileImageURL:http:\/\/graph.facebook.com\/#id#\/picture",
-              "profileImageURL_https:https:\/\/graph.facebook.com\/#id#\/picture",
-              "profileImageURL96:http:\/\/graph.facebook.com\/#id#\/picture",
-              "profileImageURL96_https:https:\/\/graph.facebook.com\/#id#\/picture"
+              "gravatarURL:http:\/\/graph.facebook.com\/#id#\/picture",
+              "gravatarURL_https:https:\/\/graph.facebook.com\/#id#\/picture",
+              "gravatarURL96:http:\/\/graph.facebook.com\/#id#\/picture",
+              "gravatarURL96_https:https:\/\/graph.facebook.com\/#id#\/picture"
           ]
 /*
 { provider: 'facebook',
@@ -199,7 +199,7 @@ module.exports = {
               "identity:id",
               "id",
               "screen_name:displayName",
-              "profileImageURL:_json.results.0.photo.thumb_link",
+              "gravatarURL:_json.results.0.photo.thumb_link",
               "country:_json.results.0.country",
               "other_services:_json.results.0.other_services",
               "lon:_json.results.lon",

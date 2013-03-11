@@ -21,10 +21,12 @@
     "optimist": "~0.3.5",
     "string": "~1.2.1",
     "connect-mongodb": "~1.1.5",
+    "connect-mongo": "~0.3.2",
     "mongodb": "~1.2.13",
     "underscore": "~1.4.4",
-    "passport": "~0.1.16",
+    "lodash": "~1.0.1",
     "gravatar": "~1.0.6",
+    "passport": "~0.1.16",
     "passport-yahoo": "~0.3.0",
     "passport-google": "~0.3.0",
     "passport-dropbox": "~0.1.2",
@@ -37,7 +39,8 @@
     "shortid": "~1.0.9",
     "eyes": "~0.1.8",
     "etc": "~0.2.0",
-    "eventflow": "0.0.11"
+    "eventflow": "0.0.11",
+    "colors": "~0.6.0-1"
   },
   "devDependencies": {
     "nodelint": "~0.6",

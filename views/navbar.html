@@ -37,7 +37,7 @@
                     </li>
                 </ul>
                 <form class="navbar-search pull-left" action="">
-                 <input type="text" class="search-query span2" placeholder="Search">
+                 <input type="text" class="search-query span2" placeholder="Search" name="search">
                </form>
 
 
@@ -48,8 +48,8 @@
                       {% set provider = settings.passport[user.provider] %}
                       {% set title = user.user_name || user.email %}
                         <a href="#" class="dropdown-toggle logged-user"  data-toggle="dropdown" >
-                          {% if  user.profileImageURL  %}
-                              <img class="user-img27"  src="{{ user.profileImageURL }}" height="27" width="27" title="{{ title }}">
+                          {% if  user.gravatarURL  %}
+                              <img class="user-img27"  src="{{ user.gravatarURL }}" height="27" width="27" title="{{ title }}">
                           {% else %}
                               <div class="missing-user27"></div>
                           {%  endif  %}

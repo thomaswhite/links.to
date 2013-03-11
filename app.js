@@ -2,19 +2,22 @@
 var express = require('express')
     , app = express()
     , path = require('path')
-    ,  _ = require('underscore')
-    , emitter = require('eventflow')
+    ,  _ = require('lodash')
+    , EventFlow = require('eventflow')
+    , http = require('http')
+    , cons = require('consolidate')
+    , swig = require('swig')
+    , mongoStore = require('connect-mongo')(express)
+
+    , caterpillar = require ("caterpillar")
+    , logger = new caterpillar.Logger()
+    , colors = require('colors')
 
     , bootstrapPath = path.join(__dirname, 'node_modules', 'bootstrap')
     , config = require('./config.js').init( __dirname, bootstrapPath )
     , routes = require('./routes').init( app, config, emitter )
     , user = require('./routes/user')
-    , http = require('http')
-    , cons = require('consolidate')
-    , swig = require('swig')
 
-    , caterpillar = require ("caterpillar")
-    , logger = new caterpillar.Logger()
     , inspect = require('eyes').inspector({
         styles: {                 // Styles applied to stdout
             all:     'cyan',      // Overall style applied to everything
@@ -33,42 +36,55 @@ var express = require('express')
             maxLength: 2048           // Truncate output if longer
     })
 
-    , db = require('./db.js').init( config.db, emitter )
-    , passports  = require('./passports.js').init( app, config.passport, emitter )
-
+    , emitter = EventFlow()
+    , db = require('./db.js').init( config.db, config.common, emitter )
+    , passports = null
     ;
+    db.open(function(err){
+        if( err ){
+            throw err;
+        }
 
-app.configure(function () {
-    app.engine('html', cons.swig );
-    app.set('view engine', 'html');
-    app.set('views',  config.views );
-    swig.init( config.swig );
 
-    app.set('port', config.port );
-    app.use(express.favicon());
-    app.use(express.logger('dev'));
-    app.use(express.bodyParser());
-    app.use(express.methodOverride());
-    app.use(express.cookieParser('your secret here'));
-    app.use(express.session({
-        secret: config.common.sessionSecret
-        , cookie: {maxAge: 60000 * 15}
-        , store: db.mongoStore
-    }));
+        app.configure(function () {
+            app.engine('html', cons.swig );
+            app.set('view engine', 'html');
+            app.set('views',  config.views );
+            swig.init( config.swig );
 
-    app.use(app.router);
-    app.use('/img', express['static'](path.join(bootstrapPath, 'img')));
-    app.use(require('less-middleware')( config.less ));
-    app.use(express.static(path.join(__dirname, 'public')));
-});
+            app.set('port', config.port );
+            app.use(express.favicon());
+            app.use(express.logger('dev'));
+            app.use(express.bodyParser());
+            app.use(express.methodOverride());
+            app.use(express.cookieParser('your secret here'));
+            app.use(express.session({
+                secret: config.common.session.secret
+                , cookie: { maxAge: 1000 * config.common.session.maxAgeSeconds}
+                , store: new mongoStore({db:db.db, collection:config.db.connect_mongodb.collection })
+            }));
 
-app.configure('development', function () {
-    app.use(express.errorHandler());
-});
+            passports  = require('./passports.js').init( app, config.passport, emitter );
 
-app.get('/', routes.test );
-app.get('/users', user.list);
+            app.use(app.router);
+            app.use('/img', express['static'](path.join(bootstrapPath, 'img')));
+            app.use(require('less-middleware')( config.less ));
+            app.use(express.static(path.join(__dirname, 'public')));
+        });
 
-http.createServer(app).listen(app.get('port'), function () {
-    console.log("Links.To server listening on port " + app.get('port'));
-});
+        app.configure('development', function () {
+            app.use(express.errorHandler());
+        });
+
+        app.get('/', routes.test );
+        app.get('/users', user.list);
+
+        http.createServer(app).listen(app.get('port'), function () {
+            console.log("=======================================================".blue );
+            console.log("Links.To".rainbow + " server listening on port ".blue + ('' + app.get('port')).red  );
+            console.log("=======================================================".blue );
+        });
+
+    });
+
+

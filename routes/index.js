@@ -14,6 +14,5 @@ exports.init = function( app, Config, Emitter ){
         res.render('layout', { title: 'Express' });
     };
 
-    emitter(this);
     return this;
 };

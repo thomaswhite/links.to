@@ -26,17 +26,17 @@ function addUserImageURL( profile ){
     if( profile && profile.email ){
         var email =  profile.email || 'noemail@nodomain.com';
 
-        if(!profile.profileImageURL  ){
-            profile.profileImageURL =  gravatar.url( email, settings );
+        if(!profile.gravatarURL  ){
+            profile.gravatarURL =  gravatar.url( email, settings );
         }
-        if(!profile.profileImageURL96  ){
-            profile.profileImageURL96 =  gravatar.url(  email, settings96 );
+        if(!profile.gravatarURL96  ){
+            profile.gravatarURL96 =  gravatar.url(  email, settings96 );
         }
-        if(!profile.profileImageURL_https  ){
-            profile.profileImageURL_https =  gravatar.url(  email, settings, true );
+        if(!profile.gravatarURL_https  ){
+            profile.gravatarURL_https =  gravatar.url(  email, settings, true );
         }
-        if( !profile.profileImageURL96_https ){
-            profile.profileImageURL96_https =  gravatar.url(  email, settings96, true );
+        if( !profile.gravatarURL96_https ){
+            profile.gravatarURL96_https =  gravatar.url(  email, settings96, true );
         }
     }
     return profile;
