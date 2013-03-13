@@ -74,7 +74,36 @@ exports.init = function( configDB, commonConfig, Emitter ){
         db.collection(name).update( criteria, {$set: oToSet }, callback );
     };
 
-
+    emitter.on('db.find', function( name, query, limit, callback){
+        dbCode.find(name, query, limit, callback);
+    });
+    emitter.on('db.findOne', function( name, query, limit, callback){
+        dbCode.findOne(name, query, callback);
+    });
+    emitter.on('db.insert', function(name, items, param, callback) {
+        dbCode.insert( name, items, param, callback );
+    });
+    emitter.on('db.insertOne', function(name, item,  param, callback) {
+        dbCode.insertOne(name, item,  param, callback);
+    });
+    emitter.on('db.set',  function(name, criteria, oToSet, callback) {
+        dbCode.set(name, criteria, oToSet, callback);
+    });
+    emitter.on('openID.authenticated.off', function( oOpenID, callback ){
+        oOpenID.type = 'openID';
+        oOpenID.owner = '';
+        emitter.emit('db.findOne', {"provider":oOpenID.provider, "id":oOpenID.id }, function(err, foundOpenID) {
+            if (err ){
+                callback(err);
+            }else if ( foundOpenID ){
+                callback(err, {openID:foundOpenID});
+            }else{
+                emitter.emit('db.insertOne',  'openID', oOpenID,  { safe: true }, function(err, savedOpenID) {
+                    callback(err, {originalProfile: oOpenID, openID: savedOpenID } );
+                });
+            }
+        });
+    });
 // ================ openID =============================
     // called as waterfall
     emitter.on('openID.authenticated', function( oOpenID, callback ){
@@ -166,33 +195,10 @@ exports.init = function( configDB, commonConfig, Emitter ){
             openIDs:[ OpenID._id ],
             active_openID : OpenID._id,
             active_provider : OpenID.provider,
-            created : new Date(),
-            gravatarURL:OpenID.gravatarURL || null,
-            gravatarURL_https:OpenID.gravatarURL_https || null,
-            gravatarURL96:OpenID.gravatarURL96 || null,
-            gravatarURL96_https:OpenID.gravatarURL96_https || null
+            created : new Date()
         };
     };
 
-    this.userGravatar = function ( User, Email, replace ){
-        var settings = common_config.gravatar;
-        var settings96 = _.defaults({s:96}, settings );
-        var email = User.email || Email || 'noemail@nodomain.com';
-
-        if( replace || null === User.gravatarURL  ){
-            User.gravatarURL =  gravatar.url( email, settings );
-        }
-        if( replace || null === User.gravatarURL96  ){
-            User.gravatarURL96 =  gravatar.url(  email, settings96 );
-        }
-        if( replace || null === User.gravatarURL_https  ){
-            User.gravatarURL_https =  gravatar.url(  email, settings, true );
-        }
-        if( replace || null === User.gravatarURL96_https ){
-            User.gravatarURL96_https =  gravatar.url(  email, settings96, true );
-        }
-        return User;
-    };
 
     emitter.on('email.pinged' , function(email, userID, openID, provider, callback ){
         dbCode.set('users', {_id: dbCode.ObjectID(userID) },{
@@ -214,7 +220,7 @@ exports.init = function( configDB, commonConfig, Emitter ){
                 waterfall.user = found_User;
                 callback(err, waterfall );
             }else{
-                dbCode.insertOne( 'users', dbCode.userGravatar( dbCode.newUser( waterfall.openID ), '', false) ,  { safe: true },function(err, new_User ) {
+                dbCode.insertOne( 'users',  dbCode.newUser( waterfall.openID ),  { safe: true },function(err, new_User ) {
                     waterfall.user = new_User;
                     dbCode.set('openID',
                         {_id: waterfall.openID._id },

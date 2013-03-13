@@ -35,6 +35,27 @@ var _ = require('lodash')
     ;
 
 
+function userGravatar ( User, Email, replace ){
+    var settings = app.locals.config.common.gravatar;
+    var settings96 = _.defaults({s:96}, settings );
+    var email = User.email || Email || 'noemail@nodomain.com';
+
+    if( replace || null === User.gravatarURL  ){
+        User.gravatarURL =  gravatar.url( email, settings );
+    }
+    if( replace || null === User.gravatarURL96  ){
+        User.gravatarURL96 =  gravatar.url(  email, settings96 );
+    }
+    if( replace || null === User.gravatarURL_https  ){
+        User.gravatarURL_https =  gravatar.url(  email, settings, true );
+    }
+    if( replace || null === User.gravatarURL96_https ){
+        User.gravatarURL96_https =  gravatar.url(  email, settings96, true );
+    }
+    return User;
+}
+
+
 
 
 function setPassport( settings, name, allPassports ){
@@ -122,15 +143,14 @@ exports.init = passports = function( App, Config, Emitter ){
         app.use(passport.session());
     });
 
-    app.get('/authenticate', function(req, res, next ){
+    _.each( config.passports, setPassport);
+
+    this.authenticate = function(req, res, next ){
         emitter.paralel('openID.beforeAuth', req, function (err, result) {
             next();
         })
-    });
-
-    _.each( config.passports, setPassport);
-
-    app.get('/logout', function(req, res){
+    };
+    this.logout = function(req, res){
         var referer = req.headers.referer;
         req.logOut();
         delete app.locals.user;
@@ -139,14 +159,15 @@ exports.init = passports = function( App, Config, Emitter ){
         }else{
             res.redirect( referer );
         }
-    });
-    app.get('/auth-after-success', function(req, res){
-        console.log('\n/auth-after-success', '\nUSER:', req.user );
+    };
+    this.auth_after_success = function(req, res){
+        // console.log('\n/auth-after-success', '\nUSER:', req.user );
 
         if( 1 || req.user && ( req.user.email || req.user.emailPinged )){
-            app.locals.user = req.user;
+            app.locals.user = userGravatar( req.user );
             res.redirect( 'http://localhost:3000/#auth-after-success'  ); // config.passport_after.userHasEmail
         }else{
+            delete app.locals.user;
 //            res.render('layout', { title: 'Express' });
             context.Page2(req, res, 'user_request-email', {
                 user:User,
@@ -158,8 +179,8 @@ exports.init = passports = function( App, Config, Emitter ){
                 }
             });
         }
-    });
-    app.post('/secret/ping-email', function( req, res){
+    };
+    this.ping_email = function( req, res){
         if( req.user && req.body.email){
             context.db.emails.ping(req.body.email, req.user._id, req.user.active_openID,  req.user.provider, function(err, email ){
                 if( err ){
@@ -187,8 +208,8 @@ exports.init = passports = function( App, Config, Emitter ){
         }else{
             context.notFound(res);
         }
-    });
-    app.get('/confirm/alabala/:emailID', function( req, res){
+    };
+    this.confirm_email = function( req, res){
 //        emitter.on('email.verified'
         context.db.emails.activate(req.params.emailID, function(err, Email){
             console.log(Email);
@@ -198,7 +219,7 @@ exports.init = passports = function( App, Config, Emitter ){
             });
             // res.redirect(context.settings.passport_after.afterEmailcallback);
         });
-    });
+    };
 
     return this;
 };

@@ -40,6 +40,9 @@ var express = require('express')
     , db = require('./db.js').init( config.db, config.common, emitter )
     , passports = null
     ;
+
+    app.locals.config = config;
+
     db.open(function(err){
         if( err ){
             throw err;
@@ -75,6 +78,12 @@ var express = require('express')
         app.configure('development', function () {
             app.use(express.errorHandler());
         });
+
+        app.get('/authenticate',       passports.authenticate );
+        app.get('/logout',             passports.logout );
+        app.get('/auth-after-success', passports.auth_after_success);
+        app.post('/secret/ping-email', passports.ping_email);
+        app.get('/confirm/alabala/:emailID', passports.confirm_email);
 
         app.get('/', routes.test );
         app.get('/users', user.list);
