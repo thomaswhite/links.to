@@ -233,7 +233,128 @@ exports.init = function( configDB, commonConfig, Emitter ){
         });
     });
 
-// ===================================
+// ==================  collections =================
+
+
+    this.newCollection = function(param){
+        return {
+            owner: param.owner,
+            title: param.collectionName.trim(),
+            description: param.description || 'Description...',
+            linksCount:0,
+            links:[]
+        }
+    };
+
+    emitter.on('collection.add', function(waterfall, callback){
+        dbCode.insertOne( 'collections',  dbCode.newCollection( waterfall ),  { safe: true },function(err, new_Collection ) {
+            waterfall.collection = new_Collection;
+            callback(err, waterfall );
+        });
+    });
+
+    emitter.on('collection.delete', function(waterfall, callback){
+    });
+
+    emitter.on('collection.get', function( coll_id, callback){
+    });
+
+    emitter.on('collection.update', function(waterfall, callback){
+    });
+
+    emitter.on('collection.eip', function(id, field, value, callback){
+    });
+
+    emitter.on('collection.get_page', function(page, page_size, callback){
+    });
+
+    emitter.on('link.add', function(waterfall, callback){
+    });
+    emitter.on('link.remove', function(waterfall, callback){
+    });
+    emitter.on('link.tag.updated', function(waterfall, callback){
+    });
+
+    this.collections ={
+        all: function( userID, sort, page, pageSize, callback ){
+            filter = userID ? {userID: userID } : null;
+            sort = sort || {title: 1};
+            page = page || 1;
+            pageSize = pageSize || 20;
+            collections_collection.find( filter ).sort( sort ).toArray( callback );
+        },
+        addOne: function( userID, newCollection, callback ){
+            newCollection.created = newCollection.updated = new Date();
+            newCollection.shortID = ShorterID();
+            collections_collection.insert( newCollection,  { safe: true },  function(err, collection) {
+                callback(err, err ? null : collection[0] );
+            });
+        },
+        update: function( collectionID, updated, callback ){
+            collections_collection.update( {_id: ObjectID(collectionID) }, updated,  function(err, collection) {
+                callback(err, err ? null : collection[0] );
+            });
+        },
+
+        removeOne: function( collectionID, callback ){
+            // TODO: Only if all links are members of other collections then delete this collction.
+            collections_collection.remove( {_id: ObjectID( collectionID ) }, function(err){
+                callback(err);
+            });
+        },
+        findOne: function(collectionID , callback) {
+            collections_collection.findOne({_id: ObjectID( collectionID ) }, callback);
+        },
+        addLink: function( coll_id, LinkObjectID, callback ){
+            collections_collection.update(
+                { _id: ObjectID(coll_id), "links" :{ $ne : LinkObjectID }},
+                {  $push: {  "links" : LinkObjectID } }
+            );
+            if( typeof callback === 'function') {
+                callback();
+            }
+        },
+        removeLink:      function( collectionID, link_id, callback ){
+            collections_collection.update( { _id: ObjectID(collectionID)}, {  $pull: {  "links" : ObjectID(link_id) } }, callback );
+        },
+        eip: function( collectionID, field_name, new_value ){
+            var updated = {$set:{ updated : new Date()}};
+            updated.$set[ field_name ] = new_value;
+            collections_collection.update( {_id: ObjectID(collectionID) }, updated );
+        },
+
+        remove2: function( collectionShortID, callback ){
+            // TODO: Only if all links are members of other collections then delete this collction.
+            collections_collection.remove( { shortID: collectionShortID }, callback);
+        },
+        update2: function( collectionShortID, updated, callback ){
+            collections_collection.update( { shortID: collectionShortID }, updated,  function(err, collection) {
+                callback(err, err ? null : collection[0] );
+            });
+        },
+        find2: function( collectionShortID, callback) {
+            collections_collection.findOne({shortID: collectionShortID  }, callback);
+        },
+        linkAdd: function( collectionShortID, LinkObjectID, callback ){
+            collections_collection.update(
+                { shortID: collectionShortID, "links" :{ $ne : LinkObjectID }},
+                { $push: {  "links" : LinkObjectID } },
+                callback
+            );
+        },
+        linkRemove:  function( collectionShortID, LinkObjectID, callback ){
+            collections_collection.update( { shortID: collectionShortID }, {  $pull: {  "links" : LinkObjectID } }, callback );
+        },
+        eip2: function( collectionShortID, field_name, new_value ){
+            var updated = {$set:{ updated : new Date()}};
+            updated.$set[ field_name ] = new_value;
+            collections_collection.update( { shortID: collectionShortID  }, updated );
+        }
+    };
+
+
+
+
 
     return this;
 };
