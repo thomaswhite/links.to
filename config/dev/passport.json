@@ -42,6 +42,7 @@
       },
 
       "dropbox":{
+        "type":"oauth2",
         "arity":4,
         "icon":"dropbox",
         "require":"passport-dropbox",
@@ -58,6 +59,7 @@
       },
 
       "twitter":{
+        "type":"oauth2",
         "arity":4,
         "icon":"twitter",
         "require":"passport-twitter",
@@ -99,10 +101,10 @@
           "timezone:_json.timezone",
           "locale:_json.locale",
           "profileURL:profileUrl",
-          "gravatarURL:http:\/\/graph.facebook.com\/#id#\/picture",
-          "gravatarURL_https:https:\/\/graph.facebook.com\/#id#\/picture",
-          "gravatarURL96:http:\/\/graph.facebook.com\/#id#\/picture",
-          "gravatarURL96_https:https:\/\/graph.facebook.com\/#id#\/picture"]
+          "gravatarURL:http:\/\/graph.facebook.com\/#id#\/picture?size=32",
+          "gravatarURL_https:https:\/\/graph.facebook.com\/#id#\/picture?size=32",
+          "gravatarURL96:http:\/\/graph.facebook.com\/#id#\/picture?size=96",
+          "gravatarURL96_https:https:\/\/graph.facebook.com\/#id#\/picture?size=96"]
       },
       "windowslive":{
         "inactive":true,
@@ -146,6 +148,7 @@
           "city:_json.results.city"]
       },
       "linkedin":{
+        "type":"oauth2",
         "arity":4,
         "icon":"linkedin",
         "require":"passport-linkedin",

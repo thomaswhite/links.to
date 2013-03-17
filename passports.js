@@ -5,6 +5,8 @@
  * Time: 00:13
  * To change this template use File | Settings | File Templates.
  */
+var debug = require('debug')('linksTo:passports');
+debug("loading" );
 
 var _ = require('lodash')
     , passport = require('passport')
@@ -34,29 +36,37 @@ var _ = require('lodash')
     , emitter
     ;
 
+passport.serializeUser(function(user, done) {
+    done(null, JSON.stringify(user));
+});
+passport.deserializeUser(function(json, done) {
+    var user = JSON.parse(json);
+    if (user){
+        done(null, user);
+    }else{
+        done(new Error("Bad JSON string in session"), null);
+    }
+});
 
 function userGravatar ( User, Email, replace ){
     var settings = app.locals.config.common.gravatar;
     var settings96 = _.defaults({s:96}, settings );
     var email = User.email || Email || 'noemail@nodomain.com';
 
-    if( replace || null === User.gravatarURL  ){
+    if( replace || !User.gravatarURL  ){
         User.gravatarURL =  gravatar.url( email, settings );
     }
-    if( replace || null === User.gravatarURL96  ){
+    if( replace || !User.gravatarURL96  ){
         User.gravatarURL96 =  gravatar.url(  email, settings96 );
     }
-    if( replace || null === User.gravatarURL_https  ){
+    if( replace || !User.gravatarURL_https  ){
         User.gravatarURL_https =  gravatar.url(  email, settings, true );
     }
-    if( replace || null === User.gravatarURL96_https ){
+    if( replace || !User.gravatarURL96_https ){
         User.gravatarURL96_https =  gravatar.url(  email, settings96, true );
     }
     return User;
 }
-
-
-
 
 function setPassport( settings, name, allPassports ){
     var strategy = require(settings.require).Strategy,
@@ -65,23 +75,29 @@ function setPassport( settings, name, allPassports ){
     function save_Picked_data( originalProfile, Profile, callback ){
         Profile.provider = name;
         Profile.type="openID";
-        emitter.waterfall('openID.authenticated', Profile, function(err, result){
-            if( err ){
-                callback(err);
-            }else{
-               callback( null, result.user );
-            }
+        Profile.raw = originalProfile;
+        process.nextTick(function(){
+            emitter.waterfall('openID.authenticated', {rawOpenID:originalProfile, picked_openID: Profile }, function(err, result){
+                if( err ){
+                    callback(err);
+                }else{
+                   callback( null, result.user );
+                }
+            });
         });
     }
     function handleConnection_oauth2( accessToken, refreshToken, params, profile, callback ){
-          if( arguments.length == 4 ){
+        if( arguments.length == 4 ){
               callback = profile;
               profile = params;
           }
         var picked  = utils.pick( profile, pick );
         picked.token = accessToken;
-        save_Picked_data( profile, picked, callback );
+        process.nextTick(function(){
+            save_Picked_data( profile, picked, callback );
+        });
     }
+
     function handleConnection( token, profile, pape, oath, callback ){
          switch( arguments.length ){
             case 5: break;
@@ -101,6 +117,7 @@ function setPassport( settings, name, allPassports ){
     passport.use(new strategy( settings, settings.type === 'oauth2' ? handleConnection_oauth2 : handleConnection));
     app.get('/authenticate/'+ name,         passport.authenticate(name));
     app.get('/auth/' + name + '/callback',  passport.authenticate(name,  config.passport_after));
+    debug("openID:%s ready", name );
 }
 
 exports.init = passports = function( App, Config, Emitter ){
@@ -108,42 +125,30 @@ exports.init = passports = function( App, Config, Emitter ){
     config = Config;
     emitter = Emitter;
 
+    app.use(passport.initialize());
+    app.use(passport.session());
+
+    _.each( config.passports, setPassport);
+
+
     emitter.on('openID.authenticated.disabled', function( Profile, callback  )  {
         console.log('openID.authenticated, profile:',  inspect(Profile) );
         callback( null, {type:'dummy'});
     });
     emitter.on('openID.beforeAuth', function(req, callback){
         console.log('openID.beforeAuth, req:',  inspect(req) );
-       // save the page we are coming from so after authentication we can go back to the same page
+        // save the page we are coming from so after authentication we can go back to the same page
         callback(null, 0);
     });
-/*
-    this.getUserForOpenID = function ( err, openID_found, callback ){
-        if( err ){
-            callback(err);
-        }else{
-            context.db.users.findUserForOpenID( openID_found, callback );
-        }
-    };
-*/
-    passport.serializeUser(function(user, done) {
-        done(null, JSON.stringify(user));
-    });
-    passport.deserializeUser(function(json, done) {
-        var user = JSON.parse(json);
-        if (user){
-            done(null, user);
-        }else{
-            done(new Error("Bad JSON string in session"), null);
-        }
-    });
-
-    app.configure(function () {
-        app.use(passport.initialize());
-        app.use(passport.session());
-    });
-
-    _.each( config.passports, setPassport);
+    /*
+     this.getUserForOpenID = function ( err, openID_found, callback ){
+     if( err ){
+     callback(err);
+     }else{
+     context.db.users.findUserForOpenID( openID_found, callback );
+     }
+     };
+     */
 
     this.authenticate = function(req, res, next ){
         emitter.paralel('openID.beforeAuth', req, function (err, result) {
@@ -165,7 +170,8 @@ exports.init = passports = function( App, Config, Emitter ){
 
         if( 1 || req.user && ( req.user.email || req.user.emailPinged )){
             app.locals.user = userGravatar( req.user );
-            res.redirect( 'http://localhost:3000/#auth-after-success'  ); // config.passport_after.userHasEmail
+            // debug( "authenticated user: \n", app.locals.user);
+            res.redirect( 'http://127.0.0.1:3000/#auth-after-success'  ); // config.passport_after.userHasEmail
         }else{
             delete app.locals.user;
 //            res.render('layout', { title: 'Express' });
@@ -186,7 +192,7 @@ exports.init = passports = function( App, Config, Emitter ){
                 if( err ){
                     console.log(err);
                 }else{
-                    var host = 'localhost' ; // req.host;
+                    var host = '127.0.0.1' ; // req.host;
                     var link = req.protocol + '://' + host + ':' + context.settings.http.port + '/confirm/alabala/' + email._id;
 
                     context.db.users.update( req.user._id, { emailPinged:true });

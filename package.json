@@ -25,6 +25,7 @@
     "mongodb": "~1.2.13",
     "underscore": "~1.4.4",
     "lodash": "~1.0.1",
+
     "gravatar": "~1.0.6",
     "passport": "~0.1.16",
     "passport-yahoo": "~0.3.0",

@@ -5,10 +5,12 @@
  * Time: 23:25
  * To change this template use File | Settings | File Templates.
  */
+var debug = require('debug')('linksTo:db');
+debug("Loading" );
 
 var ShortId  = require('shortid').seed(96715)
-//    , async = require('async')
     , mongo = require('mongodb')
+    , monk  = require('monk')
     , gravatar = require('gravatar')
     , _ = require('lodash')
 
@@ -17,8 +19,17 @@ var ShortId  = require('shortid').seed(96715)
     , common_config
     , emitter
     , dbCode
+    , monk
 
-    coll = {
+    , OpenIDs
+    , Users
+    , Emails
+    , Collections
+    , Links
+    , Tags
+
+
+    , coll = {
         openID:'openUD',
         collections:'collections',
         links: 'links',
@@ -33,9 +44,21 @@ exports.init = function( configDB, commonConfig, Emitter ){
     emitter  = Emitter;
     dbCode = this;
 
+    this.monk = monk = monk(settings.host + ':' + settings.port + '/' + settings.db + '?auto_reconnect=true&poolSize=8');
+    monk.get(configDB.collection).index({expires: 1}, { expireAfterSeconds: common_config.session.maxAgeSeconds });
+
+    OpenIDs = monk.get('openID');
+    Users   = monk.get('users');
+    Emails  = monk.get('emails');
+    Collections = monk.get('collections');
+    Links   = monk.get('links');
+    Tags    = monk.get('tags');
+
+
     this.objectID = mongo.ObjectID;
+
     this.db = db = new mongo.Db(
-        settings.name,
+        settings.db,
         new mongo.Server( settings.host, settings.port, {auto_reconnect: false, poolSize: 8}),
         {native_parser:false, w:0} //'majority'
     );
@@ -45,9 +68,6 @@ exports.init = function( configDB, commonConfig, Emitter ){
             if( err) {
                 callback( err );
             }else {
-//                this.mongoStore     = new connectMongoDb({ db: db, collection:configDB.connect_mongodb.collection });
-                db.collection(configDB.connect_mongodb.collection).ensureIndex( {expires: 1},
-                    { expireAfterSeconds: common_config.session.maxAgeSeconds }, noop );
                 callback(err, this );
             }
         });
@@ -73,7 +93,7 @@ exports.init = function( configDB, commonConfig, Emitter ){
     this.set =  function(name, criteria, oToSet, callback) {
         db.collection(name).update( criteria, {$set: oToSet }, callback );
     };
-
+/*
     emitter.on('db.find', function( name, query, limit, callback){
         dbCode.find(name, query, limit, callback);
     });
@@ -89,39 +109,27 @@ exports.init = function( configDB, commonConfig, Emitter ){
     emitter.on('db.set',  function(name, criteria, oToSet, callback) {
         dbCode.set(name, criteria, oToSet, callback);
     });
-    emitter.on('openID.authenticated.off', function( oOpenID, callback ){
-        oOpenID.type = 'openID';
-        oOpenID.owner = '';
-        emitter.emit('db.findOne', {"provider":oOpenID.provider, "id":oOpenID.id }, function(err, foundOpenID) {
-            if (err ){
-                callback(err);
-            }else if ( foundOpenID ){
-                callback(err, {openID:foundOpenID});
-            }else{
-                emitter.emit('db.insertOne',  'openID', oOpenID,  { safe: true }, function(err, savedOpenID) {
-                    callback(err, {originalProfile: oOpenID, openID: savedOpenID } );
-                });
-            }
-        });
-    });
+*/
+
 // ================ openID =============================
     // called as waterfall
-    emitter.on('openID.authenticated', function( oOpenID, callback ){
-        oOpenID.type = 'openID';
-        oOpenID.owner = '';
-        db.collection('openID').findOne( {"provider":oOpenID.provider, "id":oOpenID.id }, function(err, foundOpenID) {
+    emitter.on('openID.authenticated', function( waterfall, callback ){
+        var oOpenID = _.extend( {type:'openID', owner:''} ,waterfall.picked_openID);
+        OpenIDs.findOne( {"provider":oOpenID.provider, "id":oOpenID.id }, function(err, foundOpenID) {
             if (err ){
                 callback(err);
             }else if ( foundOpenID ){
                 callback(err, {openID:foundOpenID});
             }else{
-                dbCode.insertOne( 'openID', oOpenID,  { safe: true }, function(err, savedOpenID) {
-                    callback(err, {originalProfile: oOpenID, openID: savedOpenID } );
+                OpenIDs.insert( oOpenID,  { safe: true }, function(err, savedOpenID) {
+                    savedOpenID.justAdded = true;
+                    waterfall.openID = savedOpenID;
+                    callback(err, waterfall );
                 })
             }
         });
     });
-    emitter.on('email.verified', function( oEmail, callback){
+    emitter.on('not-in-use.email.verified', function( oEmail, callback){
         dbCode.set('openID',
              {_id: dbCode.ObjectID(oEmail.openID) },
              {
@@ -146,7 +154,7 @@ exports.init = function( configDB, commonConfig, Emitter ){
             provider : provider
         }
     };
-    emitter.on('email.pinged' , function(email, userID, openID, provider, callback ){
+    emitter.on('not-in-use.email.pinged' , function(email, userID, openID, provider, callback ){
         dbCode.findOne('emails', { email:email, userID:userID  }, function(err, Email ) {
             if (err){
                 callback(err);
@@ -167,7 +175,7 @@ exports.init = function( configDB, commonConfig, Emitter ){
         });
 
     });
-    emitter.on('email.confirmed', function(emailID, callback){
+    emitter.on('not-in-use.email.confirmed', function(emailID, callback){
          dbCode.findOne('emails', {"_id": dbCode.ObjectID(emailID) }, function(err, Email ) {
                 if (err){
                     callback(err);
@@ -189,7 +197,7 @@ exports.init = function( configDB, commonConfig, Emitter ){
     //    addOpenID:function(userID, openID_id, callback){},
     //    removeOpenID:function(userID, openID_id, callback){}
     this.newUser = function ( OpenID ){
-        return  {  // _.extend( {}, OpenID,
+        var user =  {  // _.extend( {}, OpenID,
             type:'user',
             email: OpenID.email || '',
             openIDs:[ OpenID._id ],
@@ -197,76 +205,86 @@ exports.init = function( configDB, commonConfig, Emitter ){
             active_provider : OpenID.provider,
             created : new Date()
         };
+        if( OpenID.gravatarURL ){
+            user.gravatarURL   = OpenID.gravatarURL;
+            user.gravatarURL96 = OpenID.gravatarURL;
+        }
+        if( OpenID.gravatarURL_https ){
+            user.gravatarURL_https   = OpenID.gravatarURL_https;
+            user.gravatarURL96_https = OpenID.gravatarURL_https;
+        }
+        return user;
     };
 
-
-    emitter.on('email.pinged' , function(email, userID, openID, provider, callback ){
-        dbCode.set('users', {_id: dbCode.ObjectID(userID) },{
-            email:email,
-            emailPinged: new Date()
-        });
-    });
-    emitter.on('email.verified' , function(oEmail, callback ){
-        // TODO save emails as an array to allow more then one active email at a time
-        dbCode.set('users', {_id: dbCode.ObjectID(oEmail.userID) },{
-            email:oEmail.email,
-            emailVerified:new Date()
-        }, callback);
-    });
     emitter.on('openID.authenticated', function( waterfall, callback ){
         var criterion = waterfall.openID.justAdded ? {"openIDs": waterfall.openID._id } : {"_id":  waterfall.openID.owner };
-        dbCode.findOne('users', criterion, function(err, found_User ) {
+        Users.findOne( criterion, function(err, found_User ) {
             if (err || found_User){
                 waterfall.user = found_User;
                 callback(err, waterfall );
             }else{
-                dbCode.insertOne( 'users',  dbCode.newUser( waterfall.openID ),  { safe: true },function(err, new_User ) {
+                Users.insert(  dbCode.newUser( waterfall.openID ),  { safe: true }, function(err, new_User ) {
+                    new_User.justAdded = true;
                     waterfall.user = new_User;
-                    dbCode.set('openID',
-                        {_id: waterfall.openID._id },
-                        { owner:new_User._id },
-                        noop
-                    );
+                    OpenIDs.updateById( waterfall.openID._id,  {$set: { owner:new_User._id }} );
                     callback(err, waterfall );
                 });
             }
         });
     });
 
+    emitter.on('not-in-use.email.pinged' , function(email, userID, openID, provider, callback ){
+        dbCode.set('users', {_id: dbCode.ObjectID(userID) },{
+            email:email,
+            emailPinged: new Date()
+        });
+    });
+    emitter.on('not-in-use.email.verified' , function(oEmail, callback ){
+        // TODO save emails as an array to allow more then one active email at a time
+        dbCode.set('users', {_id: dbCode.ObjectID(oEmail.userID) },{
+            email:oEmail.email,
+            emailVerified:new Date()
+        }, callback);
+    });
+
+
 // ==================  collections =================
 
-
-    this.newCollection = function(param){
+    this.newCollection = function(oColl){
         return {
-            owner: param.owner,
-            title: param.collectionName.trim(),
-            description: param.description || 'Description...',
+            type:'collection',
+            owner: oColl.owner,
+            title: oColl.collectionName.trim(),
+            description: oColl.description || 'Description...',
             linksCount:0,
             links:[]
         }
     };
 
-    emitter.on('collection.add', function(waterfall, callback){
-        dbCode.insertOne( 'collections',  dbCode.newCollection( waterfall ),  { safe: true },function(err, new_Collection ) {
-            waterfall.collection = new_Collection;
-            callback(err, waterfall );
-        });
-    });
-
-    emitter.on('collection.delete', function(waterfall, callback){
+    emitter.on('collection.add', function( oColl, callback){
+        Collections.insert( dbCode.newCollection( oColl ),  { safe: true }, callback);
     });
 
     emitter.on('collection.get', function( coll_id, callback){
+        Collections.findById(coll_id, callback );
     });
 
-    emitter.on('collection.update', function(waterfall, callback){
+    emitter.on('collection.delete', function(coll_id, callback){
+        Collections.removeById( coll_id, callback );
+    });
+
+
+    emitter.on('collection.update', function(coll_id, toUpdate, callback){
+        Collections.updateById( coll_id, {$set: toUpdate }, callback );
     });
 
     emitter.on('collection.eip', function(id, field, value, callback){
+        var o = {};
+        o[field] = value;
+        Collections.updateById( coll_id, {$set: o }, callback );
     });
 
-    emitter.on('collection.get_page', function(page, page_size, callback){
-    });
+
 
     emitter.on('link.add', function(waterfall, callback){
     });
@@ -352,9 +370,12 @@ exports.init = function( configDB, commonConfig, Emitter ){
         }
     };
 
+// ========================  links ======================
+    emitter.on('collection.get', function( coll_id, callback){
+        Collections.findById(coll_id, callback );
+        //return links for the collection
+    });
 
-
-
-
+    debug("ready" );
     return this;
 };

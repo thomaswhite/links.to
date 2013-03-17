@@ -1,9 +1,8 @@
 {
     "host": "127.0.0.1",
     "port":  27017,
-    "name": "LinksTo",
+    "db": "LinksTo",
     "short_id_length":6,
-    "connect_mongodb":{
-        "collection":"sessions"
-    }
+    "auto_reconnect":true,
+    "collection":"sessions"
 }
