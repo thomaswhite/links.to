@@ -284,7 +284,15 @@ exports.init = function( configDB, commonConfig, Emitter ){
         Collections.updateById( coll_id, {$set: o }, callback );
     });
 
-
+    emitter.on('collections.list', function( filter, limit, sort, callback){
+        Collections.find( filter || {}, {limit:limit || 64, sort:sort || []}, function(err, result){
+            // .toArray()
+            if( result ){
+                result.type = 'collections-list';
+            }
+            callback(err, result);
+        });
+    });
 
     emitter.on('link.add', function(waterfall, callback){
     });

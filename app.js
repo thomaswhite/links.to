@@ -6,7 +6,7 @@ var  express = require('express')
     , app = express()
     , path = require('path')
     ,  _ = require('lodash')
-    , EventFlow = require('eventflow')
+    , emitter = require('eventflow')()
     , http = require('http')
     , cons = require('consolidate')
     , swig = require('swig')
@@ -39,7 +39,6 @@ var  express = require('express')
             maxLength: 2048           // Truncate output if longer
     })
 
-    , emitter = EventFlow()
     , db = require('./db.js').init( config.db, config.common, emitter )
     , passports = null
     ;
@@ -82,7 +81,9 @@ var  express = require('express')
     app.post('/secret/ping-email', passports.ping_email);
     app.get('/confirm/alabala/:emailID', passports.confirm_email);
 
-    app.get('/', routes.test );
+    app.get('/', routes.top );
+    app.get('/coll', routes.collections);
+//    app.get('/coll/mine', routes.collections_mine);
     app.get('/users', user.list);
 
     http.createServer(app).listen(config.port, function () {
