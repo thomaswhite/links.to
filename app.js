@@ -44,6 +44,7 @@ var  express = require('express')
     ;
 
     app.locals.config = config;
+    app.locals.inspect = inspect;
 
     app.configure(function () {
         app.engine('html', cons.swig );
@@ -82,7 +83,9 @@ var  express = require('express')
     app.get('/confirm/alabala/:emailID', passports.confirm_email);
 
     app.get('/', routes.top );
-    app.get('/coll', routes.collections);
+    app.get('/coll', routes.collections.all);
+    app.post('/coll/new', routes.collections.newColl);
+
 //    app.get('/coll/mine', routes.collections_mine);
     app.get('/users', user.list);
 

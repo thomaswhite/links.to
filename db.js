@@ -38,6 +38,11 @@ var ShortId  = require('shortid').seed(96715)
 
 function noop(){}
 
+function ShorterID(){
+    return  ShortId.generate().substr(0, settings.db.short_id_length);
+};
+
+
 exports.init = function( configDB, commonConfig, Emitter ){
     settings = configDB;
     common_config = commonConfig;
@@ -72,9 +77,7 @@ exports.init = function( configDB, commonConfig, Emitter ){
             }
         });
     };
-    this.shorterID =  function ShorterID(){
-        return  ShortId.generate().substr(0, settings.db.short_id_length);
-    };
+
     this.find = function(name, query, limit, callback) {
         db.collection(name).find(query).sort({_id: -1}).limit(limit).toArray(callback);
     };
@@ -203,6 +206,7 @@ exports.init = function( configDB, commonConfig, Emitter ){
             openIDs:[ OpenID._id ],
             active_openID : OpenID._id,
             active_provider : OpenID.provider,
+            shortID : ShorterID(),
             created : new Date()
         };
         if( OpenID.gravatarURL ){
@@ -250,19 +254,8 @@ exports.init = function( configDB, commonConfig, Emitter ){
 
 // ==================  collections =================
 
-    this.newCollection = function(oColl){
-        return {
-            type:'collection',
-            owner: oColl.owner,
-            title: oColl.collectionName.trim(),
-            description: oColl.description || 'Description...',
-            linksCount:0,
-            links:[]
-        }
-    };
-
     emitter.on('collection.add', function( oColl, callback){
-        Collections.insert( dbCode.newCollection( oColl ),  { safe: true }, callback);
+        Collections.insert( oColl,  { safe: true }, callback);
     });
 
     emitter.on('collection.get', function( coll_id, callback){

@@ -11,6 +11,9 @@ import 'responsive';
 }
 
 */
+body {
+  margin-top: 45px;
+}
 .noWrap {
   white-space: nowrap;
 }

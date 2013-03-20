@@ -2,28 +2,33 @@
 
 {% block pageTitle %}My collections in Links.to{% endblock %}
 {% block title %}<h1>{{ title2 }}</h1>{% endblock %}
+{% block error %}{{ error }}{% endblock %}
 
 {% block content %}
-  <div class="row table-header">
-    <div class="span5 table-header">Collection Name</div>
-    <div class="span1 coll-e">Links</div>
-    <div class="span2 coll-e">Last updated</div>
-    <div class="span2 coll-e">Created</div>
-  </div>
 
   {% for coll in grid %}
+      {% if loop.first %}
+        <div class="row table-header">
+          <div class="span5 table-header">Collection Name</div>
+          <div class="span1 coll-e">Links</div>
+          <div class="span2 coll-e">Last updated</div>
+        </div>
+      {% endif %}
       <div class="row">
           <div class="span5 coll-title">
             <a href="/coll/{{ coll._id }}" title="{{ coll.description }}" >{{ coll.title }}
-              {% if user && coll.userID == user._id %}
+              {% if user && coll.owner == user._id %}
                  <span class="icon-user" title="This collection is mine"></span>
               {% endif %}
             </a>
             <span>{{ coll.desciption  }}</span>
           </div>
-          <div class="span1 coll-e">{{ coll.links.length|default(0)  }}</div>
-          <div class="span2 coll-e">{{ coll.updated|date('Y-m-d H:i') }}</div>
-          <div class="span2 coll-e">{{ coll.created|date('Y-m-d H:i') }}</div>
+          <div class="span1 coll-e">{% if coll.links.length %}{{ coll.links.length|default(0)  }}{% endif %}</div>
+          <div class="span2 coll-e">{% if coll.updated %}{{ coll.updated|date('Y-m-d H:i') }}{% endif %}</div>
+      </div>
+  {% else %}
+      <div class="row">
+        <div class="span8">No collections available yet.</div>
       </div>
   {% endfor %}
 {% endblock %}
