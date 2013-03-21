@@ -258,12 +258,15 @@ exports.init = function( configDB, commonConfig, Emitter ){
         Collections.insert( oColl,  { safe: true }, callback);
     });
 
-    emitter.on('collection.get', function( coll_id, callback){
-        Collections.findById(coll_id, callback );
+    emitter.on('collection.get', function( waterfall, callback){
+        Collections.findById(waterfall.coll_id, function(err, found_coll ){
+           waterfall.collection  = found_coll;
+           callback(err, waterfall);
+        });
     });
 
     emitter.on('collection.delete', function(coll_id, callback){
-        Collections.removeById( coll_id, callback );
+        Collections.remove( coll_id, callback );
     });
 
 
@@ -372,9 +375,17 @@ exports.init = function( configDB, commonConfig, Emitter ){
     };
 
 // ========================  links ======================
-    emitter.on('collection.get', function( coll_id, callback){
-        Collections.findById(coll_id, callback );
-        //return links for the collection
+    emitter.on('collection.get', function( waterfall, callback){
+        if( waterfall.collection && waterfall.collection.links.length ){
+            Links.findById(  waterfall.collection.links, function(err, found_links) {
+                found_links.type = 'links-list';
+                waterfall.links = found_links;
+                callback( err, waterfall );
+            });
+        }else{
+            waterfall.links = [];
+            callback( null, waterfall );
+        }
     });
 
     debug("ready" );

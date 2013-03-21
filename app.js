@@ -82,12 +82,16 @@ var  express = require('express')
     app.post('/secret/ping-email', passports.ping_email);
     app.get('/confirm/alabala/:emailID', passports.confirm_email);
 
-    app.get('/', routes.top );
-    app.get('/coll', routes.collections.all);
-    app.post('/coll/new', routes.collections.newColl);
+    app.get('/',                routes.top );
+    app.get('/coll',            routes.collections.all);
+    app.post('/coll/new',       routes.collections.add);
+    app.get('/coll/:id',        routes.collections.get);
+
+    app.get('/coll/:id/delete', routes.collections.delete);
+
 
 //    app.get('/coll/mine', routes.collections_mine);
-    app.get('/users', user.list);
+
 
     http.createServer(app).listen(config.port, function () {
         debug("Links.To".rainbow + " server listening on port ".white + ('' + app.get('port')).red  );

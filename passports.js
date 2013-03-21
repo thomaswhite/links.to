@@ -171,7 +171,7 @@ exports.init = passports = function( App, Config, Emitter ){
         if( 1 || req.user && ( req.user.email || req.user.emailPinged )){
             app.locals.user = userGravatar( req.user );
             // debug( "authenticated user: \n", app.locals.user);
-            res.redirect( 'http://127.0.0.1:3000/#auth-after-success'  ); // config.passport_after.userHasEmail
+            res.redirect( 'http://127.0.0.1:3000/coll#auth-after-success'  ); // config.passport_after.userHasEmail
         }else{
             delete app.locals.user;
 //            res.render('layout', { title: 'Express' });

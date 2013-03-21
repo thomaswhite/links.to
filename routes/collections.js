@@ -57,7 +57,6 @@ exports.init = function( App, Config, Emitter ){
                 user: app.locals.user,
                 canEdit:true,
                 crumbs : breadcrumbs.make(req, { owner:true }),
-                grid: collections,
                 addButton:{
                     link: '/coll/new',
                     name: 'collectionName',
@@ -69,7 +68,7 @@ exports.init = function( App, Config, Emitter ){
         });
     };
 
-    this.newColl = function(req, res) {
+    this.add = function(req, res) {
         var referer = req.headers.referer;
         if( !req.user ){
             context.Page2(req, res, 'add-button', {
@@ -89,37 +88,46 @@ exports.init = function( App, Config, Emitter ){
         }
     };
 
-    this.oneColl = function(req, res) {
+    this.delete = function(req, res) {
+        var referer = req.headers.referer;
+        emitter.parallel('collection.delete', function(coll_id, callback){
+            res.redirect( req.query.back );
+        });
+        // todo: get the id of current collection to return back after deletion
+    };
+
+
+    this.get = function(req, res) {
         var referer = req.headers.referer,
             collID = req.params.id;
 
-        emitter.parallel( 'collection.get', collID, function( err, results ){
+        emitter.waterfall( 'collection.get', {coll_id: collID}, function( err, waterfall ){
                 if ( err ){
                     context.notFound(res);
                 }else{
-                    var owner = req.user && req.user._id ==  results[0].userID;
-
+                    var collection =  waterfall.collection || {}; //_.first(result, function(element, pos, all){ return element.type == 'collection';  })[0] || {};
+                    var links      =  waterfall.links || []; //_.first(result, function(element, pos, all){ return element.type == 'links-list';  })[0] || [];
+                    var owner      =  true ; //req.user && req.user._id ==  collection.owner;
+/*
                     for(var i=0; results[1] &&  i < results[1].length; i++ ){
                         if( !results[1][i].imagePos ){
                             results[1][i].imagePos = 0;
                         }
                     }
-
-                    // res.render('collections-list', { });
-
-                    // console.log( '\napp.get(/coll/:id)', results );
-                    context.Page2(req, res, 'collection', {
+*/
+                    debug( "Collection: \n", app.locals.inspect( collection ));
+                    res.render('collection', {
+                        title: 'Collection "' + (collection && collection.title ? collection.title : ' not found' ) + '"',
                         user: req.user,
-                        linkUnderEdit :  req.query.editLink,
-                        title: 'Collection "' + (results.length ? results[0].title : 'Missing' ) + '"',
-                        collection: results[0] || [],
-                        grid: results[1] || [],
+                        grid: links,
                         canEdit: owner,
                         canDelete: owner,
+                        linkUnderEdit :  req.query.editLink,
+                        collection: collection || {},
                         referer: referer,
                         crumbs : breadcrumbs.make(req, {
                             owner:owner,
-                            coll:{id:results[0]._id, title:results[0].title }
+                            coll:{id:collection._id, title:collection.title }
                         }),
                         addButton:{
                             link: '/link/new/' + collID,
@@ -131,10 +139,12 @@ exports.init = function( App, Config, Emitter ){
                                 {name:"add2coll", value : collID }
                             ]
                         }
+
                     });
+
+
                 }
-            }
-        );
+            });
     };
 
 
