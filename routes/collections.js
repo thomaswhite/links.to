@@ -70,12 +70,13 @@ exports.init = function( App, Config, Emitter ){
 
     this.add = function(req, res) {
         var referer = req.headers.referer;
+        var coll_name = req.body.collectionName || 'New collection';
         if( !req.user ){
             context.Page2(req, res, 'add-button', {
                 add_link: '/coll/new'
             });
         }else{
-            var coll = newCollection(req.user._id, req.body.collectionName.trim());
+            var coll = newCollection(req.user._id, coll_name.trim());
             emitter.emit('collection.add', coll, function(err, collection ) {
                 if (err) {
                     context.notFound(res, 'db error while creating new collection.');
@@ -90,6 +91,7 @@ exports.init = function( App, Config, Emitter ){
 
     this.delete = function(req, res) {
         var referer = req.headers.referer;
+        var coll_id = req.params.id;
         emitter.parallel('collection.delete', function(coll_id, callback){
             res.redirect( req.query.back );
         });

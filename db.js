@@ -266,7 +266,11 @@ exports.init = function( configDB, commonConfig, Emitter ){
     });
 
     emitter.on('collection.delete', function(coll_id, callback){
-        Collections.remove( coll_id, callback );
+        if( !coll_id ){
+            throw "Collection ID expected!";
+        }else{
+            Collections.remove( coll_id, callback );
+        }
     });
 
 
