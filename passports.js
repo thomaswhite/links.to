@@ -10,6 +10,7 @@ debug("loading" );
 
 var _ = require('lodash')
     , passport = require('passport')
+    , async = require('async')
 //    , logger = require('nlogger').logger(module)
     , utils = require('./tw-utils.js')
     , gravatar = require('gravatar')
@@ -34,7 +35,9 @@ var _ = require('lodash')
     , app
     , passports
     , emitter
-    ;
+
+
+    , that;
 
 passport.serializeUser(function(user, done) {
     done(null, JSON.stringify(user));
@@ -121,14 +124,15 @@ function setPassport( settings, name, allPassports ){
 }
 
 exports.init = passports = function( App, Config, Emitter ){
+
+    that = this;
+
     app = App;
     config = Config;
     emitter = Emitter;
 
     app.use(passport.initialize());
     app.use(passport.session());
-
-    _.each( config.passports, setPassport);
 
 
     emitter.on('openID.authenticated.disabled', function( Profile, callback  )  {
@@ -162,7 +166,7 @@ exports.init = passports = function( App, Config, Emitter ){
         if(  config.passport_after.logoutRedirect ){
             res.redirect(config.passport_after.logoutRedirect);
         }else{
-            res.redirect( referer );
+            res.redirect( '/coll' );
         }
     };
     this.auth_after_success = function(req, res){
@@ -226,6 +230,10 @@ exports.init = passports = function( App, Config, Emitter ){
             // res.redirect(context.settings.passport_after.afterEmailcallback);
         });
     };
+
+    _.each( config.passports, setPassport);
+    debug('all passport have been loaded');
+
 
     return this;
 };

@@ -21,6 +21,7 @@ exports.init = function( App, Config, Emitter ){
     };
 
     this.collections = require('./collections.js').init(App, Config, Emitter);
+    this.links       = require('./links.js').init(App, Config, Emitter);
 
     return this;
 };

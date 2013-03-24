@@ -4,16 +4,21 @@ debug("Loading" );
 
 var  express = require('express')
     , app = express()
-    , path = require('path')
-    ,  _ = require('lodash')
     , emitter = require('eventflow')()
+
     , http = require('http')
     , cons = require('consolidate')
     , swig = require('swig')
-    , mongoStore = require('connect-mongo')(express)
+    , path = require('path')
+    ,  _ = require('lodash')
+    , async = require('async')
 
-    , caterpillar = require ("caterpillar")
-    , logger = new caterpillar.Logger()
+, dummy1 = debug("before mongo store" )
+    , mongoStore = require('connect-mongo')(express)
+, dummy2 = debug("after mongo store" )
+
+ //   , caterpillar = require ("caterpillar")
+ //   , logger = new caterpillar.Logger()
     , colors = require('colors')
 
     , bootstrapPath = path.join(__dirname, 'node_modules', 'bootstrap')
@@ -39,6 +44,7 @@ var  express = require('express')
             maxLength: 2048           // Truncate output if longer
     })
 
+    , dummy = debug("lodules loaded" )
     , db = require('./db.js').init( config.db, config.common, emitter )
     , passports = null
     ;
@@ -83,11 +89,12 @@ var  express = require('express')
     app.get('/confirm/alabala/:emailID', passports.confirm_email);
 
     app.get('/',                routes.top );
+    app.get('/coll/mine',       routes.collections.mine);
     app.get('/coll',            routes.collections.all);
     app.post('/coll/new',       routes.collections.add);
     app.get('/coll/:id',        routes.collections.get);
-
     app.get('/coll/:id/delete', routes.collections.delete);
+    app.post('/link/new/:coll?', routes.links.add);
 
 
 //    app.get('/coll/mine', routes.collections_mine);

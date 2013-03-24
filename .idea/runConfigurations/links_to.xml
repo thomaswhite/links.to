@@ -2,7 +2,7 @@
   <configuration default="false" name="links.to" type="NodeJSConfigurationType" factoryName="Node.js" singleton="true" path-to-node="C:/Program Files/nodejs/node" path-to-js-file="app.js" working-dir="$PROJECT_DIR$">
     <envs>
       <env name="DEBUG_COLORS" value="1" />
-      <env name="DEBUG" value="monk:*, linksTo:*, linksTo:app, linskTo:db, linskTo:passports" />
+      <env name="DEBUG" value="monk:*,  linksTo:app, linskTo:db, linksTo:view.collections, linksTo:*" />
     </envs>
     <RunnerSettings RunnerId="NodeJS.debug" />
     <RunnerSettings RunnerId="NodeJS.run" />

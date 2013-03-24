@@ -4,7 +4,7 @@
     "paths": ["."],
     "prefix" : ["/stylesheets", "/less"],
     "once":false,
-    "debug":true,
+    "debug":false,
     "compress":"auto",
     "optimization": 2
 }

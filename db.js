@@ -6,7 +6,6 @@
  * To change this template use File | Settings | File Templates.
  */
 var debug = require('debug')('linksTo:db');
-debug("Loading" );
 
 var ShortId  = require('shortid').seed(96715)
     , mongo = require('mongodb')
@@ -28,13 +27,7 @@ var ShortId  = require('shortid').seed(96715)
     , Links
     , Tags
 
-
-    , coll = {
-        openID:'openUD',
-        collections:'collections',
-        links: 'links',
-        users:'users'
-    };
+    ;
 
 function noop(){}
 
@@ -49,7 +42,9 @@ exports.init = function( configDB, commonConfig, Emitter ){
     emitter  = Emitter;
     dbCode = this;
 
+    debug("init started" );
     this.monk = monk = monk(settings.host + ':' + settings.port + '/' + settings.db + '?auto_reconnect=true&poolSize=8');
+    debug("monk loaded" );
     monk.get(configDB.collection).index({expires: 1}, { expireAfterSeconds: common_config.session.maxAgeSeconds });
 
     OpenIDs = monk.get('openID');
@@ -59,7 +54,7 @@ exports.init = function( configDB, commonConfig, Emitter ){
     Links   = monk.get('links');
     Tags    = monk.get('tags');
 
-
+    /*
     this.objectID = mongo.ObjectID;
 
     this.db = db = new mongo.Db(
@@ -96,7 +91,7 @@ exports.init = function( configDB, commonConfig, Emitter ){
     this.set =  function(name, criteria, oToSet, callback) {
         db.collection(name).update( criteria, {$set: oToSet }, callback );
     };
-/*
+
     emitter.on('db.find', function( name, query, limit, callback){
         dbCode.find(name, query, limit, callback);
     });
@@ -117,12 +112,14 @@ exports.init = function( configDB, commonConfig, Emitter ){
 // ================ openID =============================
     // called as waterfall
     emitter.on('openID.authenticated', function( waterfall, callback ){
-        var oOpenID = _.extend( {type:'openID', owner:''} ,waterfall.picked_openID);
+        var oOpenID = _.extend( { owner:''} ,waterfall.picked_openID);
         OpenIDs.findOne( {"provider":oOpenID.provider, "id":oOpenID.id }, function(err, foundOpenID) {
             if (err ){
                 callback(err);
             }else if ( foundOpenID ){
-                callback(err, {openID:foundOpenID});
+                foundOpenID.type = 'openID';
+                waterfall.openID = foundOpenID;
+                callback(err, waterfall );
             }else{
                 OpenIDs.insert( oOpenID,  { safe: true }, function(err, savedOpenID) {
                     savedOpenID.justAdded = true;
@@ -201,7 +198,6 @@ exports.init = function( configDB, commonConfig, Emitter ){
     //    removeOpenID:function(userID, openID_id, callback){}
     this.newUser = function ( OpenID ){
         var user =  {  // _.extend( {}, OpenID,
-            type:'user',
             email: OpenID.email || '',
             openIDs:[ OpenID._id ],
             active_openID : OpenID._id,
@@ -224,10 +220,12 @@ exports.init = function( configDB, commonConfig, Emitter ){
         var criterion = waterfall.openID.justAdded ? {"openIDs": waterfall.openID._id } : {"_id":  waterfall.openID.owner };
         Users.findOne( criterion, function(err, found_User ) {
             if (err || found_User){
-                waterfall.user = found_User;
+                    found_User.type = 'user';
+                    waterfall.user = found_User;
                 callback(err, waterfall );
             }else{
                 Users.insert(  dbCode.newUser( waterfall.openID ),  { safe: true }, function(err, new_User ) {
+                    new_User.type = 'user';
                     new_User.justAdded = true;
                     waterfall.user = new_User;
                     OpenIDs.updateById( waterfall.openID._id,  {$set: { owner:new_User._id }} );
@@ -260,7 +258,10 @@ exports.init = function( configDB, commonConfig, Emitter ){
 
     emitter.on('collection.get', function( waterfall, callback){
         Collections.findById(waterfall.coll_id, function(err, found_coll ){
-           waterfall.collection  = found_coll;
+            if( found_coll) {
+                found_coll.type = "collection";
+            }
+            waterfall.collection  = found_coll;
            callback(err, waterfall);
         });
     });
@@ -269,7 +270,7 @@ exports.init = function( configDB, commonConfig, Emitter ){
         if( !coll_id ){
             throw "Collection ID expected!";
         }else{
-            Collections.remove( coll_id, callback );
+            Collections.remove( {_id: coll_id }, callback );
         }
     });
 
@@ -301,7 +302,7 @@ exports.init = function( configDB, commonConfig, Emitter ){
     emitter.on('link.tag.updated', function(waterfall, callback){
     });
 
-    this.collections ={
+    this.not_in_use_collections ={
         all: function( userID, sort, page, pageSize, callback ){
             filter = userID ? {userID: userID } : null;
             sort = sort || {title: 1};
@@ -379,18 +380,40 @@ exports.init = function( configDB, commonConfig, Emitter ){
     };
 
 // ========================  links ======================
+    /**
+     * Returns an array of the links for a collection
+     */
     emitter.on('collection.get', function( waterfall, callback){
-        if( waterfall.collection && waterfall.collection.links.length ){
-            Links.findById(  waterfall.collection.links, function(err, found_links) {
-                found_links.type = 'links-list';
+        if( waterfall.collection && waterfall.collection.links && waterfall.collection.links.length ){
+            Links.find( { _id :  { $in : waterfall.collection.links} } , function(err, found_links) {
+                if( found_links ){
+                    found_links.type = 'links-list';
+                }
                 waterfall.links = found_links;
                 callback( err, waterfall );
             });
         }else{
             waterfall.links = [];
+            waterfall.links.type = 'links-list';
             callback( null, waterfall );
         }
     });
+
+    emitter.on('link.add', function( oLink, collection_id, callback){
+        Links.insert( oLink,  { safe: true }, function( err, newLink ){
+            // add the link to the collection.links array
+
+            Collections.update(
+                { _id: collection_id, "links" :{ $ne : newLink._id }},
+                {  $push: {  "links" : newLink._id } }
+            );
+
+
+            callback(err, callback);
+        });
+    });
+
+
 
     debug("ready" );
     return this;

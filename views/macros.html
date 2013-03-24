@@ -23,7 +23,7 @@
       </div>
     </div>
     <div class="row">
-    {% if link.img.length %}
+    {% if link.images  %}
         <div class="span2 iddCont" >
           <ul class="imgDropdown eipURL" data-url="/link/{{ link._id }}/eip" >
               <li>
@@ -31,8 +31,8 @@
                 <img src="{{ link.img[link.imagePos].src }}">
                </a>
              </li>
-       {% if canEdit && link.img.length > 1 %}
-          {% for img in link.img %}
+       {% if canEdit && link.images && link.images.length > 1 %}
+          {% for img in link.images %}
              {%if loop.index0 != (link.imagePos || 0) %}
               <li>
               <a href="#" class="thumbnail inactive" data-imagePos="{{ loop.index0 }}"><img src="{{ img.src }}"></a>
@@ -44,12 +44,14 @@
           </ul>
       </div>
     {% endif %}
-      <div class="span{{ link.img.length ?  6 :8}}">
+      <!--  link.images && link.images.length ?  6 :8  -->
+      <div class="span">
          <p title ="summary" class="summary {% if canEdit %}eip{% endif %} ta">{% if link.h1  -%}<span class="minititle">{{ link.h1 }}</span>.{%- endif %}
           {{ link.summary }}
         </p>
       </div>
     </div>
+
     <div class="row">
       <div class="span8">
         <p></p>
