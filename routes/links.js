@@ -75,7 +75,7 @@ exports.init = function( App, Config, Emitter ){
                 var Link = newLink( req.user._id, req.body.add2coll, req.user.screen_name, Results );
                 emitter.emit('link.add', Link, req.body.add2coll, function(err, addedLink ) {
                     if (err) {
-                        context.notFound(res, 'db error while creating new link.');
+                        throw err;
                     }else {
                         emitter.parallel('link.added',  addedLink, function(err, result){
                             res.redirect( referer  );

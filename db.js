@@ -403,13 +403,15 @@ exports.init = function( configDB, commonConfig, Emitter ){
         Links.insert( oLink,  { safe: true }, function( err, newLink ){
             // add the link to the collection.links array
 
-            Collections.update(
-                { _id: collection_id, "links" :{ $ne : newLink._id }},
-                {  $push: {  "links" : newLink._id } }
-            );
+            if( !err ){
+                Collections.update(
+                    { _id: collection_id, "links" :{ $ne : newLink._id }},
+                    {  $push: {  "links" : newLink._id } }
+                );
+            }
 
 
-            callback(err, callback);
+            callback(err, newLink);
         });
     });
 
