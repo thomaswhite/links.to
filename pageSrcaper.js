@@ -268,8 +268,8 @@ exports.init = function ( requestOptions, mainEmitter ) {
     emitter.on( 'pageScrape.process', scrape_head );
     emitter.on( 'pageScrape.process', scrape_images  );
     emitter.on( 'pageScrape.process', scrape_body );
-    emitter.on( 'pageScrape.process', scrape_tokens  );
     emitter.on( 'pageScrape.process', scrape_metatags_open_graph  );
+    emitter.on( 'pageScrape.process', scrape_tokens  );
 
     return emitter;
 };
