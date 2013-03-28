@@ -47,7 +47,8 @@ function newLink (owner, coll_id, user_screen_name, data ){
     var link =  {
         shortID : ShorterID(),
         owner: owner,
-        created : new Date(),
+        imagePos:0,
+        updated : new Date(),
         collection: coll_id,
         owner_screen_name: user_screen_name
     };

@@ -73,7 +73,7 @@ function scrape_body( token, $, uri,  callback ){
 function scrape_images( token, $, uri,  callback ){
     var images = [],
         oURL = URL.parse(uri),
-        baseURL = URL.format(_.pick(oURL, 'protocol', 'host', 'port'));
+        baseURL = uri; //URL.format(_.pick(oURL, 'protocol', 'host', 'port'));
 
     images.type = 'images';
     $('img').each(function(i, elem) {
@@ -248,7 +248,7 @@ exports.init = function ( requestOptions, mainEmitter ) {
                         if( err ){
                             throw err;
                         }else{
-                            var Results = {}, type, part;
+                            var Results = {url: request_options.uri }, type, part;
                             for( var i = 0; i<pageParts.length; i++){
                                 if( !(part = pageParts[i])  ) continue;
                                 type = part.type;

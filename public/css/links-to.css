@@ -201,3 +201,6 @@ form.form-add-by-name {
   border-bottom: 1px solid gray;
   background-color: #ffffff;
 }
+.minititle {
+  font-weight: bold;
+}

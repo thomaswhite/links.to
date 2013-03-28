@@ -13,12 +13,13 @@
           <a class="btn btn-danger btn-mini"  href="/link/delete/{{ link._id  }}/{{ collection._id }}" title="Delete"><i class="icon-trash" ></i></a>
           {%- endif %}
           <a class="link-title wrap {% if canEdit %}eip{% endif %}" href="{{ link.url }}?linked-from=www.links.to/w/c/{{ collection._id }}" target="_blank">{{ link.title }}</a>
+        </h4>
           <span title="description" class="description wrap {% if canEdit %}eip{% endif %} ta">{{ link.description }}
             {% if  link.author -%}
             Author:<span class="author">{{ link.author }}</span>
             {%- endif %}
           </span>
-        </h4>
+
 
       </div>
     </div>
@@ -56,15 +57,17 @@
       <div class="span8">
         <p></p>
         <p>
-          <i class="icon-calendar"></i>{{ link.updated|date('Y-m-d') }}
+          <i class="icon-calendar"></i>{% if link.updated %}{{ link.updated|date('Y-m-d') }}{% endif %}
         | <i class="icon-user"></i> <a href="#">{{ link.user_screen_name }}</a>
        {% if  link.tags.length  -%}
           | <i class="icon-tags"></i>&nbsp; {%- for tag in link.tags -%}
+               {% if loop.index0 < 5 %}
                <span class="label label-info"> {{ tag.word }} {% if canEdit %}<a href="#"><i class="icon-remove"></i></a>{% endif %}  </span>&nbsp;
+               {% endif %}
             {%- else -%}
             {%- endfor -%}
             {%- if canEdit -%}
-            <button class="btn btn-mini"><i class="icon-plus"></i></button>
+                 <button class="btn btn-mini"><i class="icon-plus"></i></button>
             {%- endif %}
        {% endif %}
         </p>
