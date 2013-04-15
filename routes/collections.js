@@ -39,8 +39,26 @@ function newCollection  (owner, name, description){
     }
 };
 
-function collectionList( collections ){
-
+function collectionList( req, res, next, filter ){
+    filter = filter || {};
+    emitter.parallel('collections.list', filter, 0, [], function( err, result ){
+        var collections =  _.first(result, function(element, pos, all){ return element.type == 'collections-list';  })[0];
+        debug( "Collections list: \n", app.locals.inspect( result ));
+//            debug( "user: \n", app.locals.inspect( app.locals.user ));
+        res.render('collections-list', {
+            title: 'All collection',
+            grid: collections,
+            user: app.locals.user,
+            canEdit:true,
+            crumbs : breadcrumbs.make(req, {  }),
+            addButton:{
+                link: '/coll/new',
+                name: 'collectionName',
+                placeholder:'New collection name',
+                buttonText:'Add'
+            }
+        });
+    });
 };
 
 
@@ -50,51 +68,26 @@ exports.init = function( App, Config, Emitter ){
     config = Config;
     emitter = Emitter;
 
-    this.all = function(req, res ){
-        var filter = app.locals.user ? {owner: app.locals.user._id} : {};
-        emitter.parallel('collections.list', {}, 0, [], function( err, result ){
-            var collections =  _.first(result, function(element, pos, all){ return element.type == 'collections-list';  })[0];
-            debug( "Collections list: \n", app.locals.inspect( collections ));
-            debug( "user: \n", app.locals.inspect( app.locals.user ));
-            res.render('collections-list', {
-                title: 'All collection',
-                grid: collections,
-                user: app.locals.user,
-                canEdit:true,
-                crumbs : breadcrumbs.make(req, {  }),
-                addButton:{
-                    link: '/coll/new',
-                    name: 'collectionName',
-                    placeholder:'New collection name',
-                    buttonText:'Add'
-                }
-            });
-
-        });
-    };
-    this.mine = function(req, res, next ){
+    this.favorite  = function(req, res, next ){
         if( !app.locals.user || app.locals.user._id ){
             next();
+        }else{
+            next();
         }
-        emitter.parallel('collections.list', {owner: app.locals.user._id}, 0, [], function( err, result ){
-            var collections =  _.first(result, function(element, pos, all){ return element.type == 'collections-list';  })[0];
-            debug( "Collections list: \n", app.locals.inspect( collections ));
-            debug( "user: \n", app.locals.inspect( app.locals.user ));
-            res.render('collections-list', {
-                title: 'All collection',
-                grid: collections,
-                user: app.locals.user,
-                canEdit:true,
-                crumbs : breadcrumbs.make(req, { owner:true }),
-                addButton:{
-                    link: '/coll/new',
-                    name: 'collectionName',
-                    placeholder:'New collection name',
-                    buttonText:'Add'
-                }
-            });
-        });
     };
+
+    this.mine = function(req, res, next ){
+        if( !app.locals.user || !app.locals.user._id ){
+            next();
+        }else{
+            collectionList(  req, res, next, {owner: '' + app.locals.user._id || 0});
+        }
+    };
+
+    this.all = function( req, res, next  ){
+        collectionList(  req, res, next );
+    };
+
 
     this.add = function(req, res) {
         var referer = req.headers.referer;
@@ -135,9 +128,16 @@ exports.init = function( App, Config, Emitter ){
                 if ( err ){
                     context.notFound(res);
                 }else{
+
+                    if( !waterfall.collection ){
+                        res.redirect( '/coll' );
+                    }
+
                     var collection =  waterfall.collection || {}; //_.first(result, function(element, pos, all){ return element.type == 'collection';  })[0] || {};
                     var links      =  waterfall.links || []; //_.first(result, function(element, pos, all){ return element.type == 'links-list';  })[0] || [];
                     var owner      =  req.user && req.user._id ==  collection.owner;
+
+
 /*
                     for(var i=0; results[1] &&  i < results[1].length; i++ ){
                         if( !results[1][i].imagePos ){
@@ -145,7 +145,8 @@ exports.init = function( App, Config, Emitter ){
                         }
                     }
 */
-                    debug( "waterfall: \n", app.locals.inspect( waterfall ));
+                    //debug( "waterfall: \n",  app.locals.inspect(waterfall) );
+                    debug( "user: \n", app.locals.inspect( app.locals.user ));
                     res.render('collection', {
                         title: 'Collection "' + (collection && collection.title ? collection.title : ' not found' ) + '"',
                         user: req.user,

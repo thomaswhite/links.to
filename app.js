@@ -13,9 +13,7 @@ var  express = require('express')
     ,  _ = require('lodash')
     , async = require('async')
 
-, dummy1 = debug("before mongo store" )
     , mongoStore = require('connect-mongo')(express)
-, dummy2 = debug("after mongo store" )
 
  //   , caterpillar = require ("caterpillar")
  //   , logger = new caterpillar.Logger()
@@ -39,13 +37,13 @@ var  express = require('express')
             regexp:  'green'      // /\d+/
         },
         pretty: true,             // Indent object literals
-            hideFunctions: false,     // Don't output functions at all
-            stream: process.stdout,   // Stream to write to, or null
-            maxLength: 2048           // Truncate output if longer
+        hideFunctions: true,     // Don't output functions at all
+        stream: process.stdout,   // Stream to write to, or null
+        maxLength: 8192           // Truncate output if longer
     })
 
     , dummy = debug("lodules loaded" )
-    , db = require('./db.js').init( config.db, config.common, emitter )
+    , db = require('./db.js').init( app, config.db, config.common, emitter )
     , passports = null
     ;
 
@@ -82,22 +80,24 @@ var  express = require('express')
         app.use(express.errorHandler());
     });
 
-    app.get('/authenticate',       passports.authenticate );
-    app.get('/logout',             passports.logout );
-    app.get('/auth-after-success', passports.auth_after_success);
-    app.post('/secret/ping-email', passports.ping_email);
-    app.get('/confirm/alabala/:emailID', passports.confirm_email);
 
     app.get('/',                routes.top );
     app.get('/coll/mine',       routes.collections.mine);
     app.get('/coll',            routes.collections.all);
     app.post('/coll/new',       routes.collections.add);
+
     app.get('/coll/:id',        routes.collections.get);
+    app.get('/w/c/:id',         routes.collections.get);
     app.get('/coll/:id/delete', routes.collections.delete);
-    app.post('/link/new/:coll?', routes.links.add);
 
+    app.post('/link/new/:coll?',        routes.links.add);
+    app.get('/link/:id/delete/:coll?',  routes.links.delete);
 
-//    app.get('/coll/mine', routes.collections_mine);
+//    app.get('/favorites',        routes.collections.favorites);
+//    app.get('/favorites/mine',   routes.collections.favorites_mine);
+
+//    app.get('/tags',        routes.collections.tags);
+//    app.get('/tags/mine',   routes.collections.tags_mine);
 
 
     http.createServer(app).listen(config.port, function () {

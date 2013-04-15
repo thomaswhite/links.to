@@ -250,7 +250,7 @@ module.exports = {
                     if( err ){
                         console.log(err);
                     }else{
-                        var host = 'localhost' ; // req.host;
+                        var host = req.host;
                         var link = req.protocol + '://' + host + ':' + context.settings.http.port + '/confirm/alabala/' + email._id;
 
                         context.db.users.update( req.user._id, { emailPinged:true });

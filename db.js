@@ -12,7 +12,9 @@ var ShortId  = require('shortid').seed(96715)
     , monk  = require('monk')
     , gravatar = require('gravatar')
     , _ = require('lodash')
+    , async = require('async')
 
+    , app
     , db
     , settings
     , common_config
@@ -26,6 +28,9 @@ var ShortId  = require('shortid').seed(96715)
     , Collections
     , Links
     , Tags
+    , Pages
+    , AuthTemp
+    , Dummy
 
     ;
 
@@ -36,7 +41,8 @@ function ShorterID(){
 };
 
 
-exports.init = function( configDB, commonConfig, Emitter ){
+exports.init = function( App, configDB, commonConfig, Emitter ){
+    app = App;
     settings = configDB;
     common_config = commonConfig;
     emitter  = Emitter;
@@ -45,72 +51,28 @@ exports.init = function( configDB, commonConfig, Emitter ){
     debug("init started" );
     this.monk = monk = monk(settings.host + ':' + settings.port + '/' + settings.db + '?auto_reconnect=true&poolSize=8');
     debug("monk loaded" );
-    monk.get(configDB.collection).index({expires: 1}, { expireAfterSeconds: common_config.session.maxAgeSeconds });
-
+    var session = monk.get(configDB.collection);
+    AuthTemp   = monk.get('auth_temp');
     OpenIDs = monk.get('openID');
     Users   = monk.get('users');
     Emails  = monk.get('emails');
     Collections = monk.get('collections');
     Links   = monk.get('links');
     Tags    = monk.get('tags');
+    Pages   = monk.get('pages');
+    Dummy   = monk.get('dummy');
 
-    /*
-    this.objectID = mongo.ObjectID;
+    session.index({expires: 1}, { expireAfterSeconds: common_config.session.maxAgeSeconds });
+    session.options.safe = false;
 
-    this.db = db = new mongo.Db(
-        settings.db,
-        new mongo.Server( settings.host, settings.port, {auto_reconnect: false, poolSize: 8}),
-        {native_parser:false, w:0} //'majority'
-    );
+    AuthTemp.index({expires: 1}, { expireAfterSeconds: 60 });
+    AuthTemp.options.safe = false;
 
-    this.open = function(callback) {
-        db.open(function(err){
-            if( err) {
-                callback( err );
-            }else {
-                callback(err, this );
-            }
-        });
-    };
 
-    this.find = function(name, query, limit, callback) {
-        db.collection(name).find(query).sort({_id: -1}).limit(limit).toArray(callback);
-    };
-    this.findOne = function(name, query, callback) {
-        db.collection(name).findOne(query, callback);
-    };
-    this.insert = function(name, items, param, callback) {
-        db.collection(name).insert(items, param || {}, callback);
-    };
-    this.insertOne = function(name, item,  param, callback) {
-        dbCode.insert(name, item, function(err, items) {
-            items[0].justAdded = true;
-            callback(err, items[0]);
-        });
-    };
-    this.set =  function(name, criteria, oToSet, callback) {
-        db.collection(name).update( criteria, {$set: oToSet }, callback );
-    };
-
-    emitter.on('db.find', function( name, query, limit, callback){
-        dbCode.find(name, query, limit, callback);
-    });
-    emitter.on('db.findOne', function( name, query, limit, callback){
-        dbCode.findOne(name, query, callback);
-    });
-    emitter.on('db.insert', function(name, items, param, callback) {
-        dbCode.insert( name, items, param, callback );
-    });
-    emitter.on('db.insertOne', function(name, item,  param, callback) {
-        dbCode.insertOne(name, item,  param, callback);
-    });
-    emitter.on('db.set',  function(name, criteria, oToSet, callback) {
-        dbCode.set(name, criteria, oToSet, callback);
-    });
-*/
 
 // ================ openID =============================
     // called as waterfall
+
     emitter.on('openID.authenticated', function( waterfall, callback ){
         var oOpenID = _.extend( { owner:''} ,waterfall.picked_openID);
         OpenIDs.findOne( {"provider":oOpenID.provider, "id":oOpenID.id }, function(err, foundOpenID) {
@@ -234,7 +196,6 @@ exports.init = function( configDB, commonConfig, Emitter ){
             }
         });
     });
-
     emitter.on('not-in-use.email.pinged' , function(email, userID, openID, provider, callback ){
         dbCode.set('users', {_id: dbCode.ObjectID(userID) },{
             email:email,
@@ -270,6 +231,7 @@ exports.init = function( configDB, commonConfig, Emitter ){
         if( !coll_id ){
             throw "Collection ID expected!";
         }else{
+            // TODO move existing links into _unassigned_links collection that every user has
             Collections.remove( {_id: coll_id }, callback );
         }
     });
@@ -287,7 +249,6 @@ exports.init = function( configDB, commonConfig, Emitter ){
 
     emitter.on('collections.list', function( filter, limit, sort, callback){
         Collections.find( filter || {}, {limit:limit || 64, sort:sort || []}, function(err, result){
-            // .toArray()
             if( result ){
                 result.type = 'collections-list';
             }
@@ -295,82 +256,37 @@ exports.init = function( configDB, commonConfig, Emitter ){
         });
     });
 
-    emitter.on('link.add', function(waterfall, callback){
+    emitter.on('link.added', function( newLink, callback){
+        var link_id =  newLink._id;
+        Collections.update(
+            { _id: newLink.collection, "links" :{ $ne : link_id }},
+            {  $push: {  "links" : link_id } },
+            callback
+        );
     });
-    emitter.on('link.remove', function(waterfall, callback){
+    emitter.on('link.delete', function(link_id, coll_id, callback){
+        Collections.updateById(
+            coll_id,
+            {  $pull: {  "links" : Collections.id(link_id) } },
+            callback
+        );
     });
-    emitter.on('link.tag.updated', function(waterfall, callback){
+    emitter.on('link.tag.updated', function( Tag, link_id, callback){
+
     });
 
     this.not_in_use_collections ={
-        all: function( userID, sort, page, pageSize, callback ){
-            filter = userID ? {userID: userID } : null;
-            sort = sort || {title: 1};
-            page = page || 1;
-            pageSize = pageSize || 20;
-            collections_collection.find( filter ).sort( sort ).toArray( callback );
-        },
-        addOne: function( userID, newCollection, callback ){
-            newCollection.created = newCollection.updated = new Date();
-            newCollection.shortID = ShorterID();
-            collections_collection.insert( newCollection,  { safe: true },  function(err, collection) {
-                callback(err, err ? null : collection[0] );
-            });
-        },
+
         update: function( collectionID, updated, callback ){
             collections_collection.update( {_id: ObjectID(collectionID) }, updated,  function(err, collection) {
                 callback(err, err ? null : collection[0] );
             });
         },
 
-        removeOne: function( collectionID, callback ){
-            // TODO: Only if all links are members of other collections then delete this collction.
-            collections_collection.remove( {_id: ObjectID( collectionID ) }, function(err){
-                callback(err);
-            });
-        },
-        findOne: function(collectionID , callback) {
-            collections_collection.findOne({_id: ObjectID( collectionID ) }, callback);
-        },
-        addLink: function( coll_id, LinkObjectID, callback ){
-            collections_collection.update(
-                { _id: ObjectID(coll_id), "links" :{ $ne : LinkObjectID }},
-                {  $push: {  "links" : LinkObjectID } }
-            );
-            if( typeof callback === 'function') {
-                callback();
-            }
-        },
-        removeLink:      function( collectionID, link_id, callback ){
-            collections_collection.update( { _id: ObjectID(collectionID)}, {  $pull: {  "links" : ObjectID(link_id) } }, callback );
-        },
         eip: function( collectionID, field_name, new_value ){
             var updated = {$set:{ updated : new Date()}};
             updated.$set[ field_name ] = new_value;
             collections_collection.update( {_id: ObjectID(collectionID) }, updated );
-        },
-
-        remove2: function( collectionShortID, callback ){
-            // TODO: Only if all links are members of other collections then delete this collction.
-            collections_collection.remove( { shortID: collectionShortID }, callback);
-        },
-        update2: function( collectionShortID, updated, callback ){
-            collections_collection.update( { shortID: collectionShortID }, updated,  function(err, collection) {
-                callback(err, err ? null : collection[0] );
-            });
-        },
-        find2: function( collectionShortID, callback) {
-            collections_collection.findOne({shortID: collectionShortID  }, callback);
-        },
-        linkAdd: function( collectionShortID, LinkObjectID, callback ){
-            collections_collection.update(
-                { shortID: collectionShortID, "links" :{ $ne : LinkObjectID }},
-                { $push: {  "links" : LinkObjectID } },
-                callback
-            );
-        },
-        linkRemove:  function( collectionShortID, LinkObjectID, callback ){
-            collections_collection.update( { shortID: collectionShortID }, {  $pull: {  "links" : LinkObjectID } }, callback );
         },
         eip2: function( collectionShortID, field_name, new_value ){
             var updated = {$set:{ updated : new Date()}};
@@ -385,7 +301,8 @@ exports.init = function( configDB, commonConfig, Emitter ){
      */
     emitter.on('collection.get', function( waterfall, callback){
         if( waterfall.collection && waterfall.collection.links && waterfall.collection.links.length ){
-            Links.find( { _id :  { $in : waterfall.collection.links} } , function(err, found_links) {
+            var options = waterfall.options || { sort:[['updated', -1]]};
+            Links.find( { _id :  { $in : waterfall.collection.links} }, options , function(err, found_links) {
                 if( found_links ){
                     found_links.type = 'links-list';
                 }
@@ -400,23 +317,98 @@ exports.init = function( configDB, commonConfig, Emitter ){
     });
 
     emitter.on('link.add', function( oLink, collection_id, callback){
-        Links.insert( oLink,  { safe: true }, function( err, newLink ){
-            // add the link to the collection.links array
+        oLink.collection = collection_id; //[ Links.id( collection_id ) ];
+        Links.insert( oLink,  { safe: true }, callback );
+    });
 
-            if( !err ){
-                Collections.update(
-                    { _id: collection_id, "links" :{ $ne : newLink._id }},
-                    {  $push: {  "links" : newLink._id } }
-                );
-            }
-
-
-            callback(err, newLink);
-        });
+    emitter.on('link.delete', function(link_id, coll_id, callback){
+        if( !link_id ){
+            throw "Link ID expected!";
+        }else{
+            Links.remove( {_id: link_id }, callback );
+        }
     });
 
 
+// ===============  tags ====================
+
+    emitter.on('link.added', function( newLink, callback){
+        var link_id =  newLink._id,
+            newTags = [];
+
+        if( newLink.tags ){
+            async.forEach(newLink.tags, function(tag, cb){
+                    Tags.insert(
+                        {
+                           tag: tag.word,
+                           link_ID: newLink._id,
+                           coll_ID: Dummy.id(newLink.collection),
+                           count: tag.count,
+                          url:   newLink.url
+                        },
+                        function(err, newTag ){
+                            //debug("Tag added:\n", app.locals.inspect(newTag) );
+                            newTags.push( newTag );
+                            cb(null);
+                        }
+                    );
+                },
+                function(err){
+                    emitter.parallel('tags.added',  newTags, function(err, result){
+                        callback(null);
+                    });
+                }
+            );
+        }else{
+            callback(null, []);
+        }
+    });
+
+    emitter.on('link.delete', function(link_id, coll_id, callback){
+        if( !link_id ){
+            throw "Link ID expected!";
+        }else{
+            Tags.remove( { link_ID: Dummy.id(link_id) }, callback );
+        }
+    });
+
+
+// === pages ====
+    emitter.on('page.save', function( sBody, uri, callback){
+        Pages.insert(  {
+                body : sBody,
+                uri: uri,
+                updated : new Date(),
+                state:'none'
+            },
+            callback
+        );
+    });
+
+// ====  openID ========================
+
+    emitter.on('openID.beforeAuth', function(req, callback){
+        AuthTemp.findAndModify(
+            {"session":req.session.id },
+            {
+                created : new Date(),
+                session: req.session.id,
+                referer: req.headers.referer
+            },
+            {upsert:1},
+            callback
+         );
+    });
+
+    emitter.on('openID.afterAuth', function(req, callback){
+        if( req && req.session && req.session.id  ){
+            AuthTemp.findOne( {"session":req.session.id }, callback );
+        }else{
+            callback( null, null );
+        }
+    });
 
     debug("ready" );
     return this;
 };
+

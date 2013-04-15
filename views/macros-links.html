@@ -1,0 +1,126 @@
+{# import 'macro.form.html' as form #}
+
+{% macro link_under_edit link canEdit canDelete collection %}
+  <div class="row  link-title {% if !link.images || !link.images.length  %}noImg{% endif %}">
+      <div class="span8 link-content underEdit">
+        {% if link.images  && link.images.length > 1 %}
+        <ul class="iddCont imgDropdown eipURL" data-url="/link/{{ link._id }}/eip" >
+          <li>
+            <a href="#" class="thumbnail" data-imagePos="{{ link.imagePos|default(0) }}">
+              <img src="{{ link.images[link.imagePos].src }}">
+            </a>
+          </li>
+          {% if canEdit && link.images && link.images.length > 1 %}
+            {% for img in link.images -%}
+              {%if loop.index0 != (link.imagePos || 0) -%}
+                <li>
+                  <a href="#" class="thumbnail inactive" data-imagePos="{{ loop.index0 }}"><img src="{{ img.src }}"></a>
+                </li>
+              {%- endif %}
+            {%- endfor %}
+            <a href="#" class="iddDrop closed"></a>
+          {% endif %}
+        </ul>
+        <br/>
+        {% endif %}
+
+        <div>Title</div>
+        <input class="autoGrow w95" id="title" value="{{ link.title|default(link.url)  }}"></input>
+
+        <div> Page author</div>
+        <input class="autoGrow w95" id="author" value="{{ link.author }}"></input>
+
+        <div >Page description (provided by the page author )</div>
+        <textarea class="autoGrow w95 description" name="description" id="description">{{ link.description }}</textarea>
+
+        <div >Summary - what is remarkable</div>
+        <textarea class="autoGrow w95 summary" name="summary" id="summary" >{{ link.summary }}</textarea>
+      </div>
+  </div>
+{% endmacro %}
+
+{% macro link_content link canEdit canDelete collection %}
+<div class="row link-title {% if !link.images || !link.images.length  %}noImg{% endif %}">
+  <div class="span8 link-content">
+    {% if link.images  && link.images.length > 1 %}
+    <ul class="iddCont imgDropdown eipURL" data-url="/link/{{ link._id }}/eip" >
+      <li>
+        <a href="#" class="thumbnail" data-imagePos="{{ link.imagePos|default(0) }}">
+          <img src="{{ link.images[link.imagePos].src }}">
+        </a>
+      </li>
+      {% if canEdit && link.images && link.images.length > 1 %}
+      {% for img in link.images -%}
+        {%- if loop.index0 != (link.imagePos || 0) -%}
+        <li>
+          <a href="#" class="thumbnail inactive" data-imagePos="{{ loop.index0 }}"><img src="{{ img.src }}"></a>
+        </li>
+        {%- endif -%}
+      {%- endfor %}
+      <a href="#" class="iddDrop closed"></a>
+      {% endif %}
+    </ul>
+    {% endif %}
+
+    <h5>
+      {% if 0 && link.favicon %}<img class="favicon" src="{{ link.favicon }}" >{% endif %}
+      <a class="link-title wrap {% if canEdit %}eip{% endif %}" href="{{ link.url }}?linked-from=www.links.to/w/c/{{ collection._id }}" target="_blank">{{ link.title|default(link.url) }}</a>
+    </h5>
+    {% if  link.author -%}
+    <span class="author">Author:<span class="author_name">{{ link.author }}</span></span>
+    {%- endif -%}
+    {%- if link.description -%}
+    <span title="description" class="description wrap ta">{{ link.description }}</span>
+    {%- else -%}
+    <span title="Summary" class="description wrap ta summary">{{ link.summary }}</span>
+    {%- endif %}
+  </div>
+</div>
+{% endmacro %}
+
+{% macro link_tag_row link canEdit canDelete collection %}
+<div class="row">
+  <div class="span8 tag-row">
+    <span>{# <i class="icon-calendar"></i> #}{% if link.updated %}{{ link.updated|date('Y-m-d') }}{% endif %}</span>
+    {%- if canEdit -%} <a class="btn btn-warning btn-mini floatR"  href="#" >Edit</a> {%- endif -%}
+    {% if canDelete -%}<a class="btn btn-danger btn-mini floatR"  href="/link/{{ link._id  }}/delete/{{ collection._id }}" >Delete</a>{%- endif -%}
+    {# <a class="btn btn-warning btn-mini edit-btn" href="/link/refresh/{{ link._id }}" title="refresh"><i class="icon-refresh"></i></a> #}
+
+    {%- if  link.tags.length  -%}
+    {%- for tag in link.tags -%}
+    {% if loop.index0 < 5 -%}
+      <span class="tag-label" title="Found {{ tag.count }} times">
+         <span class="tag-name">{{ tag.word }}</span>
+         <span class="tag-number">{{ tag.count }}</span>
+      </span>
+    {%- endif -%}
+    {%- else -%}
+    {%- endfor -%}
+    {%- if canEdit -%}
+    {#  <button class="btn btn-mini"><i class="icon-plus"></i></button>   #}
+    {%- endif %}
+    {% endif %}
+  </div>
+</div>
+{% endmacro %}
+
+
+{% macro linkMiniIcons link user %}
+<div class="row">
+    <div class="span8">
+        <p></p>
+        <p>
+            <i class="icon-calendar"></i>{{ link.updated|date('Y-m-d') }}
+            | <i class="icon-user"></i> by <a href="#">Mark</a>
+            | <i class="icon-comment"></i> <a href="#">3 Comments</a>
+            | <i class="icon-share"></i> <a href="#">39 Shares</a>
+            | <i class="icon-tags"></i> Tags : <a href="#"><span class="label label-info">Snipp</span></a>
+            <a href="#"><span class="label label-info">Bootstrap</span></a>
+            <a href="#"><span class="label label-info">UI</span></a>
+            <a href="#"><span class="label label-info">growth</span></a>
+        </p>
+    </div>
+</div>
+{% endmacro %}
+
+{% macro eip canEdit %}{% if canEdit %}eip{% endif %}{% endmacro %}

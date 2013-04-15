@@ -22,7 +22,7 @@ exports.init = function( mainDir, bootstrapPath ){
         .pkg()
         .add({
             views: path.join(mainDir, 'views'),
-            host:'localhost',
+            host:'127.0.0.1',
             port:3000,
             swig:{
                 root: path.join(mainDir, 'views')

@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% import 'macros-links.html' as macros %}
 
 {% block pageTitle -%}Collection {{ collection.title }}{%- endblock %}
 {% block title -%}<h1 class="{{ macros.eip( canEdit)}}" id="title">{{ collection.title }}
@@ -6,18 +7,30 @@
 {% if canDelete && !grid.length %}
 <a class="btn btn-danger btn-mini"  href="/coll/{{ collection._id }}/delete?back=/coll/mine"><i class="icon-trash icon-white"></i> Delete</a>
 {% endif %}
-
 {%- endblock %}
 
 {% block content %}
   <div class="row">
-    <div class="span8 {%if canEdit %}eip{% endif %} ta wrap" id="description" >{{ collection.description }}</div>
+    <div class="span8 {%if canEdit %}eip{% endif %} ta wrap coll_description" >{{ collection.description }}</div>
   </div>
 <div class="row">
-  <div class="span3 ">
+  <div class="span8 ">
+        <span class="btn-toolbar">
+          <span class="btn-group">
+            <a href="#" class="btn btn-primary" title="Like"><i class="icon-white  icon-thumbs-up"></i></a>
+            <a href="#" class="btn btn-primary" title="Add to favorites"><i class="icon-white icon-heart"></i></a>
+            <a href="#" class="btn btn-primary" title="Share"><i class="icon-white icon-share-alt"></i></a>
+           </span>
+        {% if canDelete -%}
+          <span class="btn-group">
+            <a class="btn btn-danger btn-mini"  href="/link/{{ link._id  }}/delete/{{ collection._id }}" title="Delete"><i class="icon-white icon-trash"></i></a>
+          </span>
+        {%- endif %}
+        </span>
     <!-- span class="coll-e">Updated {{ collection.updated|date('Y-m-d H:i') }}</span -->
   </div>
 </div>
+
 <br/>
 <div class="row">
   <div class="span12 button">
@@ -27,11 +40,11 @@
 
 <div id="grid">
 {% for link in grid %}
-  {{ macros.blocked_link( link, canEdit, canDelete, collection, user) }}
-
-
-
-
+  <div class="blocked-link">
+    {{ macros.link_content( link, canEdit, canDelete, collection) }}
+    {{ macros.link_under_edit( link, canEdit, canDelete, collection) }}
+    {{ macros.link_tag_row( link, canEdit, canDelete, collection) }}
+  </div>
   {% else %}
   <div class="row">
     <div class="span6">No links in this collection yet.</div>
@@ -46,10 +59,10 @@
 {% block pageBottom %}
    {% parent %}
     <div class="eipBase" data-url="/coll/{{ collection._id }}/eip"><br/></div>
-    <script type="text/javascript" src="/static/js/jquery.editinplace.js"></script>
-    <script type="text/javascript" src="/static/js/jquery.autosize.js"></script>
-    <script type="text/javascript" src="/static/js/edit-in-place.js"></script>
-    <script type="text/javascript" src="/static/js/autoGrowInput.js"></script>
-
-     <script type="text/javascript" src="/static/js/collection-link-edit.js"></script>
+    <script type="text/javascript" src="/js/jquery.editinplace.js"></script>
+    <!-- script type="text/javascript" src="/js/jquery.autosize.js"></script -->
+    <!-- script type="text/javascript" src="/js/edit-in-place.js"></script -->
+    <script type="text/javascript" src="/js/tw-textarea-autoGrow.js"></script>
+    <script type="text/javascript" src="/js/autoGrowInput.js"></script>
+    <script type="text/javascript" src="/js/collection-link-edit.js"></script>
 {% endblock %}

@@ -1,6 +1,10 @@
+
+
 /*
+
 import 'bootstrap';
 import 'responsive';
+
 
 @bodyBackground: #FAF7EC;
 @navbarBrandColor: #989CAE;
@@ -14,10 +18,14 @@ import 'responsive';
 
 body {
   margin-top: 45px;
+  background: #efefef url(/images/gray_jean.png);
 }
-@import 'wrap-nowrap';
-@import 'auth-icons';
-@import 'user';
+
+@import '../less/wrap-nowrap';
+@import '../less/auth-icons';
+@import '../less/user';
+@import '../less/shadow-border-gradient';
+
 
 .dropdown-menu li * { vertical-align: middle; }
 
@@ -27,9 +35,7 @@ body {
 }
 
 .navbar .nav > li > a:hover {	color: yellow;}
-.logout {
-  margin-right: 0;
-}
+.logout {  margin-right: 0;}
 
 form.form-add-by-name{	margin-top: 1em;}
 
@@ -40,4 +46,190 @@ form.form-add-by-name{	margin-top: 1em;}
 }
 
 .minititle{ font-weight: bold }
-.description{}
+
+
+/*   --- to be sorted out */
+#description{   margin-bottom: 1em; }
+.summary, .description{
+  font-weight: normal !important;
+  font-size: 100%;
+  line-height: initial !important;
+}
+#grid >div.row.descr { margin-bottom:1.8em;}
+
+
+.link-title{ font-size: 130%; margin-top:.8em }
+.link-summary, .link-descr{ padding-left: 0.5em; }
+.link-updated{ font-size: 100%; }
+.blocked-link { margin-bottom: .8em;}
+.link-top{ margin-top:1.5em}
+
+.underEdit, .link-content {
+  background-color: white;
+  padding: 4px;
+  margin-bottom: 4px;
+}
+
+.underEdit {
+  background-color: lightblue;
+
+}
+
+
+
+.thumbnail > img{
+  background-color: #eee;
+  max-height:72px !important;
+  max-width: 72px !important;
+}
+
+ul.imgDropdown{
+  list-style: none;
+  float:left;
+  margin: 0 5px 5px 0;
+
+}
+
+.iddCont{	position: relative; }
+
+.iddCont li{
+  float:left;
+  margin-right:1px;
+  margin-bottom: 1px;
+}
+
+a.iddDrop{
+  border:1px solid transparent;
+  .border-radius(3px);
+  position:absolute;
+  left:1px;
+  top:1px;
+  height: 15px;
+  width: 15px;
+
+  &.closed{  background: url(../images/icons/11/11x11-arrow-blue-down.gif) no-repeat center;  }
+  &.opened{  background: url(../images/icons/11/11x11-arrow-blue-up.gif) no-repeat center;  }
+  &:hover{
+    border:1px solid gray;
+    background-color: #888;
+  }
+
+}
+
+ul.opened {
+  width:50%;
+  a.thumbnail {
+    background-color: #0088cc;
+  };
+  a.thumbnail.inactive {
+    background-color: white;
+  };
+}
+
+.inactive{ display: none }
+.inactive.on{ display: block }
+
+
+.eip input {
+  margin-top:0;
+  margin-bottom: 0;
+}
+
+NOT.eipBtn{
+  height: 22px;
+  padding-left:20px;
+  &.btnEdit{
+    background: transparent url(../images/icons/16/edit3.gif) no-repeat 0 50%;
+  }
+  &.btnDelete{
+    background: transparent url(../images/icons/16/action_delete.gif) no-repeat 0 50%;
+  }
+
+}
+
+
+
+.dropdown-toggle{   white-space: nowrap;}
+.logged-user b.caret{    margin-top: 14px;}
+
+.summary{ margin-bottom:0}
+.w100 {width:100% !important}
+.w95 {width:95% !important}
+.hovered{ 	border:1px solid blue; background-color: red; }
+.floatR{ float: right}
+
+
+.author {
+  font-style: italic;
+  font-size: 80%;
+}
+
+.favicon{
+  width:16px;
+  height:16px;
+  vertical-align:baseline;
+  background-color: #eee;
+}
+
+.row.link-title{ margin-bottom:.2em; position: relative; }
+
+.edit-label{
+  padding: 4px 5px 4px 20px;
+  margin-left: 10px;
+  border:1px solid transparent;
+}
+
+.active .edit-label{
+  background-color:#DDD;
+  border: solid 1px #aaa;
+  border-left:none;
+  padding-left: 21px;
+}
+
+form.inplace_form * { 	float: left; }
+form.inplace_form textarea { 	width:85% }
+form.inplace_form button { 	width:5em; margin-left:.4em }
+.eip_hover{ background: #ffffbb url(../images/icons/16/edit3.gif) no-repeat right 1px;}
+.eip { padding-right: 18px }
+form .row input{	margin-bottom:2px }
+form .row .title{
+  font-size: 1.5em;
+  height: 1em;
+}
+
+/* .form-inline input{ height: 28px}  */
+
+h3,h4, h5{
+  float:left;
+  margin-right:.5em;
+}
+.link-title .btn { vertical-align: baseline }
+
+.tag-label{
+  margin-left: 5px;
+  paddin-left:6px;
+  float:right;
+/*  border:1px solid #444; */
+  font-weight: normal;
+  background-color: #468847;
+  color: white;
+  .border-radiuses(0,0, 5px, 5px);
+  &  * {   vertical-align: baseline ; }
+  & .tag-name{
+    margin-right:0;
+    padding:0px 2px 3px 6px;
+  }
+
+  & .tag-number{
+    margin-left: 0;
+    color: white;
+    background-color: #333;
+    padding:1px 4px;
+    min-width: 1em;
+  }
+}
+
+
+
+
+.tag-row *{ vertical-align: top; }

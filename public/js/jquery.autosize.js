@@ -74,7 +74,7 @@
 
 				// Using mainly bare JS in this function because it is going
 				// to fire very often while typing, and needs to very efficient.
-				function adjust() {
+				function adjust(event) {
 					var height, overflow;
 					// the active flag keeps IE from tripping all over itself.  Otherwise
 					// actions in the adjust function will cause IE to call adjust again.
@@ -128,20 +128,24 @@
 
 
                 if( 'onchange' in ta ){
-                    ta.onchange = adjust;
+                    //ta.onchange = adjust;
+                    $ta.on('change', adjust);
                 } else if (onpropertychange in ta) {
 					if (oninput in ta) {
 						// Detects IE9.  IE9 does not fire onpropertychange or oninput for deletions,
 						// so binding to onkeyup to catch most of those occassions.  There is no way that I
 						// know of to detect something like 'cut' in IE9.
-						ta[oninput] = ta.onkeyup = adjust;
+						//ta[oninput] = ta.onkeyup = adjust;
+                        $ta.on('keyup input', adjust);
 					} else {
 						// IE7 / IE8
-						ta[onpropertychange] = adjust;
+                        $ta.on('propertychange', adjust);
+                        //ta[onpropertychange] = adjust;
 					}
 				} else {
 					// Modern Browsers
-					ta[oninput] = adjust;
+					// ta[oninput] = adjust;
+                    $ta.on('input', adjust);
 				}
 
 				$(window).resize(adjust);

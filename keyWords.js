@@ -151,9 +151,8 @@ for( var locale in StopWords){
 
 
 module.exports = {
-     makeList : function ( s, keys, limit, threshold, locale  ){
+     makeList : function ( s, keys, threshold, locale  ){
        keys = keys || {};
-       limit = limit || 10;
        threshold = threshold || 3;
        locale = 'en'; // locale || 'en';
        var stopWords = stop_words[locale],
@@ -186,7 +185,7 @@ module.exports = {
       Words.sort(function(a, b) {
         if (a.count < b.count) { return 1; }
         if (a.count > b.count) { return -1; }
-        return a.word - b.word;
+        return a.word > b.word;
       });
 
 
@@ -217,7 +216,7 @@ module.exports = {
  //     }
 
       return {
-          tags: Words.slice(0, limit),
+          locale:locale,
           words: Words,
           text: s
       };

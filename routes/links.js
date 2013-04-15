@@ -18,19 +18,6 @@ var  _ = require('lodash')
     ;
 
 
-var cherioParam = {
-    ignoreWhitespace: false,
-    xmlMode: true,
-    lowerCaseTags: false
-};
-
-var requestDefaults = {
-    'uri': null
-    , 'headers': {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.22 (KHTML, like Gecko) Chrome/25.0.1364.172 Safari/537.22'
-    }
-};
-
 function ShorterID(){
     return  ShortId.generate().substr(0, config.db.short_id_length);
 };
@@ -43,13 +30,12 @@ function ShorterID(){
  * @param description
  * @returns {{type: string, shortID: *, owner: *, title: *, description: (*|string), linksCount: number, links: Array}}
  */
-function newLink (owner, coll_id, user_screen_name, data ){
+function newLink (owner, user_screen_name, data ){
     var link =  {
         shortID : ShorterID(),
         owner: owner,
         imagePos:0,
         updated : new Date(),
-        collection: coll_id,
         owner_screen_name: user_screen_name
     };
     _.merge( link, data);
@@ -71,9 +57,22 @@ exports.init = function( App, Config, Emitter ){
         //post.body = sanitize(post.body).xss().trim();
         var urls = post.replace(/\r/g,'').split(/\n/); // http://beckism.com/2010/09/splitting-lines-javascript/
         var token =  ShorterID();
+
+        pageScraper.on( 'pageScrape.error', function(err, resultToken ){
+            if( resultToken == token ){
+                console.error( err );
+            }
+        });
+        pageScraper.on( 'pageScrape.notOK', function(err, resultToken, response ){
+            if( resultToken == token ){
+                console.error( err );
+            }
+            //response.statusCode;
+        });
+
         pageScraper.on( 'pageScrape.ready', function( resultToken, Results ){
             if( resultToken == token ){
-                var Link = newLink( req.user._id, req.body.add2coll, req.user.screen_name, Results );
+                var Link = newLink( req.user._id, req.user.screen_name, Results );
                 emitter.emit('link.add', Link, req.body.add2coll, function(err, addedLink ) {
                     if (err) {
                         throw err;
@@ -86,55 +85,19 @@ exports.init = function( App, Config, Emitter ){
             }
         });
 
-        pageScraper.on( 'pageScrape.error', function(err, token ){
-            if( resultToken == token ){
-               console.error( err );
-            }
-        });
-        pageScraper.on( 'pageScrape.notOK', function(err, token, response ){
-            if( resultToken == token ){
-                console.error( err );
-            }
-            //response.statusCode;
-        });
-
         pageScraper.emit( 'pageScrape', urls[0], token, function(err){
 
         });
     };
 
-
-
-    this.all = function(req, res ){
-        var filter = app.locals.user ? {owner: app.locals.user._id} : {};
-        emitter.parallel('collections.list', {}, 0, [], function( err, result ){
-            var collections =  _.first(result, function(element, pos, all){ return element.type == 'collections-list';  })[0];
-            debug( "Collections list: \n", app.locals.inspect( collections ));
-            debug( "user: \n", app.locals.inspect( app.locals.user ));
-            res.render('collections-list', {
-                title: 'All collection',
-                grid: collections,
-                user: app.locals.user,
-                canEdit:true,
-                crumbs : breadcrumbs.make(req, {  }),
-                addButton:{
-                    link: '/coll/new',
-                    name: 'collectionName',
-                    placeholder:'New collection name',
-                    buttonText:'Add'
-                }
-            });
-
-        });
-    };
     this.mine = function(req, res, next ){
         if( !app.locals.user ){
             next();
         }
         emitter.parallel('collections.list', {owner: app.locals.user._id}, 0, [], function( err, result ){
             var collections =  _.first(result, function(element, pos, all){ return element.type == 'collections-list';  })[0];
-            debug( "Collections list: \n", app.locals.inspect( collections ));
-            debug( "user: \n", app.locals.inspect( app.locals.user ));
+//            debug( "Collections list: \n", app.locals.inspect( collections ));
+//            debug( "user: \n", app.locals.inspect( app.locals.user ));
             res.render('collections-list', {
                 title: 'All collection',
                 grid: collections,
@@ -154,9 +117,14 @@ exports.init = function( App, Config, Emitter ){
 
     this.delete = function(req, res) {
         var referer = req.headers.referer;
-        var coll_id = req.params.id;
-        emitter.parallel('collection.delete', coll_id, function(err, aResult){
-            res.redirect( req.query.back );
+        var link_id = req.params.id;
+        var coll_id = req.params.coll;
+        emitter.parallel('link.delete', link_id, coll_id, function(err, aResult){
+            if( err ){
+                throw err;
+            }else{
+                res.redirect( req.query.back || ('/coll/' + coll_id ) );
+            }
         });
         // todo: get the id of current collection to return back after deletion
     };

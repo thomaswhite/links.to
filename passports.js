@@ -84,7 +84,7 @@ function setPassport( settings, name, allPassports ){
                 if( err ){
                     callback(err);
                 }else{
-                   callback( null, result.user );
+                   callback( null, userGravatar( result.user ) );
                 }
             });
         });
@@ -134,13 +134,8 @@ exports.init = passports = function( App, Config, Emitter ){
     app.use(passport.initialize());
     app.use(passport.session());
 
-
-    emitter.on('openID.authenticated.disabled', function( Profile, callback  )  {
-        console.log('openID.authenticated, profile:',  inspect(Profile) );
-        callback( null, {type:'dummy'});
-    });
     emitter.on('openID.beforeAuth', function(req, callback){
-        console.log('openID.beforeAuth, req:',  inspect(req) );
+       debug('openID.beforeAuth, referer:',   req.headers.referer );
         // save the page we are coming from so after authentication we can go back to the same page
         callback(null, 0);
     });
@@ -155,7 +150,7 @@ exports.init = passports = function( App, Config, Emitter ){
      */
 
     this.authenticate = function(req, res, next ){
-        emitter.paralel('openID.beforeAuth', req, function (err, result) {
+        emitter.parallel('openID.beforeAuth', req, function (err, result) {
             next();
         })
     };
@@ -163,6 +158,8 @@ exports.init = passports = function( App, Config, Emitter ){
         var referer = req.headers.referer;
         req.logOut();
         delete app.locals.user;
+        res.redirect(referer);
+        return;
         if(  config.passport_after.logoutRedirect ){
             res.redirect(config.passport_after.logoutRedirect);
         }else{
@@ -172,23 +169,26 @@ exports.init = passports = function( App, Config, Emitter ){
     this.auth_after_success = function(req, res){
         // console.log('\n/auth-after-success', '\nUSER:', req.user );
 
-        if( 1 || req.user && ( req.user.email || req.user.emailPinged )){
-            app.locals.user = userGravatar( req.user );
-            // debug( "authenticated user: \n", app.locals.user);
-            res.redirect( 'http://127.0.0.1:3000/coll#auth-after-success'  ); // config.passport_after.userHasEmail
-        }else{
-            delete app.locals.user;
-//            res.render('layout', { title: 'Express' });
-            context.Page2(req, res, 'user_request-email', {
-                user:User,
-                formURL:'/secret/ping-email',
-                slots:{
-                    title2:'User registration',
-                    crumbs : 'No breadcrumbs'
+        emitter.invoke('openID.afterAuth', req, function(err, Saved){
+            var referer = !err && Saved ? Saved.referer : '';
+            if( 1 || req.user && ( req.user.email || req.user.emailPinged )){
+                app.locals.user = req.user ;
+                // debug( "authenticated user: \n", app.locals.user);
+                res.redirect( referer || 'http://127.0.0.1:3000/coll'  ); // config.passport_after.userHasEmail
+            }else{
+                delete app.locals.user;
+    //            res.render('layout', { title: 'Express' });
+                context.Page2(req, res, 'user_request-email', {
+                    user:User,
+                    formURL:'/secret/ping-email',
+                    slots:{
+                        title2:'User registration',
+                        crumbs : 'No breadcrumbs'
 
-                }
-            });
-        }
+                    }
+                });
+            }
+        })
     };
     this.ping_email = function( req, res){
         if( req.user && req.body.email){
@@ -230,6 +230,13 @@ exports.init = passports = function( App, Config, Emitter ){
             // res.redirect(context.settings.passport_after.afterEmailcallback);
         });
     };
+
+
+    app.get('/authenticate/:provider',       this.authenticate );
+    app.get('/logout',             this.logout );
+    app.get('/auth-after-success', this.auth_after_success);
+    app.post('/secret/ping-email', this.ping_email);
+    app.get('/confirm/alabala/:emailID', this.confirm_email);
 
     _.each( config.passports, setPassport);
     debug('all passport have been loaded');

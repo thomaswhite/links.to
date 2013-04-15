@@ -10,10 +10,13 @@
 
      {% if  buttonType == 'textarea' %}
        <textarea class="input-xxlarge autoGrow" name="{{ addButton.name }}" placeholder="{{ placeholder }}" title="{{ placeholder }}" rows="1"></textarea>
+       <button type="submit" class="btn btn-primary btn-mall" href=""><i class="icon-plus icon-white"></i> {{ addButton.buttonText}}</button>
      {% else %}
-       <input type="text" class="input-large autoGrow" name="{{ addButton.name }}" id="{{ addButton.name }}" placeholder="{{ placeholder }}" title="{{ placeholder }}"/>
+     <div class="input-append">
+       <input type="text" class=" input-xxlarge" name="{{ addButton.name }}" id="{{ addButton.name }}" placeholder="{{ placeholder }}" title="{{ placeholder }}"/>
+       <button class="btn btn-primary" type="submit" ><i class="icon-plus icon-white"></i> Link</button>
+     </div>
      {% endif %}
-     <button type="submit" class="btn btn-primary btn-mall" href=""><i class="icon-plus icon-white"></i> {{ addButton.buttonText}}</button>
    </form>
 {% else %}
     <span class="loginPlease">{{ addButton.loginPlease }}</span>

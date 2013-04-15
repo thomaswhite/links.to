@@ -5,7 +5,7 @@
 
 var  _ = require('lodash')
    , URL = require('url')
-   , debug = require('debug')('linksTo:view.links')
+   , debug = require('debug')('linksTo:pageScraper')
    , async = require('async')
    , request = require('request')
    , cheerio = require('cheerio')
@@ -14,7 +14,27 @@ var  _ = require('lodash')
    , Emitter = require('eventflow')
 // var sanitize = require('validator').sanitize;
 
-   , emitter
+    , inspect = require('eyes').inspector({
+        styles: {                 // Styles applied to stdout
+            all:     'cyan',      // Overall style applied to everything
+            label:   'underline', // Inspection labels, like 'array' in `array: [1, 2, 3]`
+            other:   'inverted',  // Objects which don't have a literal representation, such as functions
+            key:     'bold',      // The keys in object literals, like 'a' in `{a: 1}`
+            special: 'grey',      // null, undefined...
+            string:  'green',
+            number:  'magenta',
+            bool:    'blue',      // true false
+            regexp:  'green'      // /\d+/
+        },
+        pretty: true,             // Indent object literals
+        hideFunctions: true,     // Don't output functions at all
+        stream: process.stdout,   // Stream to write to, or null
+        maxLength: 8192           // Truncate output if longer
+    })
+
+
+
+    , emitter
    ;
 
 
@@ -37,17 +57,21 @@ var requestDefaults = {
 
 
 function scrape_tokens( token, $, uri,  callback ){
-    var Tags = keyWords.makeList( $('body').find('p, ul, h1, h2, h3').text(), null, 8, 4, 'en' );
+    var Tags = keyWords.makeList( $('body').find('p, ul, h1, h2, h3').text(), null, 4, 'en'),
+        result = Tags.words.slice(0, 10);
+
+    result.local = Tags.locale;
     callback( null,{
-        tags: Tags.tags,
+        tags: result,
         type:'tags'
     });
 }
 
 function scrape_body( token, $, uri,  callback ){
     var i,
-        content = { type:'content', h1:[]  },
-        aH1 = $('h1').toArray()
+        content = { type:'content', h1:[], h2:[] },
+        aH1 = $('h1').toArray(),
+        aH2 = $('h2').toArray(),
         buffer = '',
         Ps = $('body').find('p'),
         aP = Ps.toArray();;
@@ -55,6 +79,10 @@ function scrape_body( token, $, uri,  callback ){
     for( i=0; i< aH1.length; i++ ){
         content.h1.push( $( aH1[i]).text().replace(/(\n+|\t+|\s\s+)/g, ' ').trim() );
     }
+    for( i=0; i< aH2.length; i++ ){
+        content.h2.push( $( aH2[i]).text().replace(/(\n+|\t+|\s\s+)/g, ' ').trim() );
+    }
+
     //        tip.summary = $('p').text().substr(0,750).replace(/(\s)+/,' ').trim();
     //        tip.summary = tip.summary.substr(0, tip.summary.lastIndexOf('.')+1);
 
@@ -84,7 +112,8 @@ function scrape_images( token, $, uri,  callback ){
 
         src = typeof src === 'string' ? URL.resolve( baseURL, src): null;
 
-        if( h > 31 && src && !_.find(images, function(oImg){return oImg.src === src; })  ){
+
+        if( h > 31 && src && !_.find(images, function(oImg){return oImg.src === src; }) && src.indexOf('captcha') == -1 ){
             elem.attribs.src = src;
             delete elem.attribs.id;
             delete elem.attribs.style;
@@ -104,7 +133,7 @@ function scrape_images( token, $, uri,  callback ){
 
 function scrape_head( token, $, uri,  callback ){
     var $head = $('head'),
-        head = {type:'head', meta:{}, keyword:{}},
+        head = {type:'head', meta:{} },
         aURL =  _.pick(URL.parse(uri), 'protocol', 'host', 'port'),
         baseURL = URL.format(aURL);
 
@@ -125,10 +154,8 @@ function scrape_head( token, $, uri,  callback ){
                     break;
 
                 case 'keywords':
-                    var tags = unescape(elem.attribs.content.trim()).split(',');
-                    for(  i=0; i < tags.length; i++){
-                        head.keyword[tags[i].trim()] = 0;
-                    }
+                    head.keywords = unescape(elem.attribs.content.trim()).split(',');
+                    break;
 
                 case 'author':
                 case 'description':
@@ -216,6 +243,14 @@ function scrape_metatags_open_graph( token, $, uri,  callback ){
     callback( null, {og:og, fb:fb, type:'og'});
 }
 
+function  page_save (token, $, uri,  callback ){
+   emitter.invoke('page.save',  $('body').html(), uri, function(err, Page){
+       if( !err ){
+           Page.type = 'saved-page';
+       }
+       callback(err, Page);
+   });
+}
 
 exports.init = function ( requestOptions, mainEmitter ) {
     emitter = mainEmitter || Emitter(this);
@@ -234,6 +269,7 @@ exports.init = function ( requestOptions, mainEmitter ) {
         }else{
             request(request_options, function (err, response, body) {
                 body = body.replace(/<(\/?)script/g, '<$1nobreakage');
+
                 if (err) {
                     emitter.emit( 'pageScrape.error', err, token);
                 } else if ( !response || response.statusCode !== 200 ) {
@@ -256,6 +292,7 @@ exports.init = function ( requestOptions, mainEmitter ) {
                                 delete part.token;
                                 _.merge( Results, part );
                             }
+                            debug( inspect( Results ) );
                             emitter.emit('pageScrape.ready', token, Results );
                         }
                     });
@@ -265,11 +302,12 @@ exports.init = function ( requestOptions, mainEmitter ) {
         }
     });
 
+
+    emitter.on( 'pageScrape.process', page_save );
     emitter.on( 'pageScrape.process', scrape_head );
     emitter.on( 'pageScrape.process', scrape_images  );
     emitter.on( 'pageScrape.process', scrape_body );
     emitter.on( 'pageScrape.process', scrape_metatags_open_graph  );
     emitter.on( 'pageScrape.process', scrape_tokens  );
-
     return emitter;
 };
