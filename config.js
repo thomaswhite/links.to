@@ -18,6 +18,7 @@ exports.init = function( mainDir, bootstrapPath ){
     etc
         .argv()
         .env('links_')
+        .env('HTTP_')   // HTTP_PROXY
         .etc()
         .pkg()
         .add({
