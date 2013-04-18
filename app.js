@@ -2,16 +2,34 @@
 var debug = require('debug')('linksTo:app');
 debug("Loading" );
 
-var  express = require('express')
-    , app = express()
-    , emitter = require('eventflow')()
+var that = require('that')
+    , async = require('async');
 
+that.on('error', console.error);
+
+
+
+// bootstrap
+/*
+require('./plugins/utils');
+require('./plugins/server');
+require('./plugins/middleware');
+require('./plugins/static');
+require('./plugins/view');
+require('./plugins/controller');
+*/
+
+
+
+var  emitter = require('eventflow')()
+
+    , express = require('express')
+    , app = express()
     , http = require('http')
     , cons = require('consolidate')
     , swig = require('swig')
     , path = require('path')
     ,  _ = require('lodash')
-    , async = require('async')
 
     , mongoStore = require('connect-mongo')(express)
 
@@ -46,6 +64,8 @@ var  express = require('express')
     , db = require('./db.js').init( app, config.db, config.common, emitter )
     , passports = null
     ;
+
+
 
     app.locals.config = config;
     app.locals.inspect = inspect;
