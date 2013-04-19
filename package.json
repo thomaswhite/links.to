@@ -48,7 +48,8 @@
     "request": ">=2.16.0",
     "cheerio": ">=0.10.8",
     "that": "~1.0.3",
-    "middler": "~0.6.1"
+    "middler": "~0.6.1",
+    "glob": "~3.1.21"
   },
   "devDependencies": {
     "nodelint": "~0.6",

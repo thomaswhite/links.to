@@ -35,12 +35,15 @@ async.series(tasks, function (err) {
  */
 
 var  box = require('./box');
-require('./plugins/utils');
-require('./plugins/middleware');
+
+// bootstrap
+    require('./plugins/utils');
+    require('./plugins/db');
+    require('./plugins/middleware');
+
 
 // dummy entry
 box.on('listen', function(cb){ cb(null, 'dummy listen'); });
-
 
 var color = require('colors')
 
@@ -57,7 +60,7 @@ var color = require('colors')
     , config = require('./config').init(  'dev' )
 
     , routes = require('./routes').init( app, config, box )
-    , db = require('./db').init( app, config  )
+    //, db = require('./db').init( app, config  )
     , passports = null
     ;
 

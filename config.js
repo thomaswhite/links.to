@@ -34,6 +34,9 @@ exports.init = function(  env ){
                 src  :  path.join(mainDir, 'public'),
                 dest :  path.join(mainDir, 'public'),
                 prefix:  ['/stylesheets', '/less']
+            },
+            db:{
+                dbModules: path.join(mainDir, 'db', '*.js'),
             }
         })
         .folder(configDir)

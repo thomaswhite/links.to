@@ -36,6 +36,7 @@ var box = require('./box.js')
 
     ;
 
+
 passport.serializeUser(function(user, done) {
     done(null, JSON.stringify(user));
 });
@@ -67,7 +68,6 @@ function userGravatar ( User, Email, replace ){
     }
     return User;
 }
-
 function setPassport( settings, name, allPassports ){
     var strategy = require(settings.require).Strategy,
         pick = settings.pick;
@@ -119,7 +119,6 @@ function setPassport( settings, name, allPassports ){
     app.get('/auth/' + name + '/callback',  passport.authenticate(name,  config.passport_after));
     debug("openID:%s ready", name );
 }
-
 function ping_email ( req, res){
     if( req.user && req.body.email){
         context.db.emails.ping(req.body.email, req.user._id, req.user.active_openID,  req.user.provider, function(err, email ){
@@ -160,7 +159,6 @@ function confirm_email ( req, res){
         // res.redirect(context.settings.passport_after.afterEmailcallback);
     });
 };
-
 function auth_after_success (req, res){
     // console.log('\n/auth-after-success', '\nUSER:', req.user );
 
@@ -185,6 +183,23 @@ function auth_after_success (req, res){
         }
     })
 };
+function authenticate (req, res, next ){
+    box.parallel('openID.beforeAuth', req, function (err, result) {
+        next();
+    })
+};
+function logout (req, res){
+    var referer = req.headers.referer;
+    req.logOut();
+    delete app.locals.user;
+    res.redirect(referer);
+    return;
+    if(  config.passport_after.logoutRedirect ){
+        res.redirect(config.passport_after.logoutRedirect);
+    }else{
+        res.redirect( '/coll' );
+    }
+};
 
 
 box.on('init', function (App, Config, done) {
@@ -194,18 +209,20 @@ box.on('init', function (App, Config, done) {
 });
 
 
-exports.init = passports = function( App, Config ){
+exports.init = passports = function( App, Config, initDone ){
     app = App;
     config = Config;   // Config.passport
 
     app.use(passport.initialize());
     app.use(passport.session());
 
+/*
     box.on('openID.beforeAuth', function(req, callback){
        debug('openID.beforeAuth, referer:',   req.headers.referer );
         // save the page we are coming from so after authentication we can go back to the same page
         callback(null, 0);
     });
+*/
     /*
      this.getUserForOpenID = function ( err, openID_found, callback ){
      if( err ){
@@ -216,24 +233,8 @@ exports.init = passports = function( App, Config ){
      };
      */
 
-    this.authenticate = function(req, res, next ){
-        box.parallel('openID.beforeAuth', req, function (err, result) {
-            next();
-        })
-    };
-    this.logout = function(req, res){
-        var referer = req.headers.referer;
-        req.logOut();
-        delete app.locals.user;
-        res.redirect(referer);
-        return;
-        if(  config.passport_after.logoutRedirect ){
-            res.redirect(config.passport_after.logoutRedirect);
-        }else{
-            res.redirect( '/coll' );
-        }
-    };
-
+    this.authenticate = authenticate;
+    this.logout = logout;
     this.auth_after_success = auth_after_success;
     this.ping_email = ping_email;
     this.confirm_email = confirm_email;

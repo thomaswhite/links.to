@@ -41,12 +41,6 @@ function ShorterID(){
 
 function noop(){}
 
-box.on('init', function (App, conf, done) {
-    var dummy = 1;
-    done(null, 'db.js ready');
-});
-
-
 
 exports.init = function( App, Config ){
     app = App;
@@ -54,7 +48,11 @@ exports.init = function( App, Config ){
     common_config = Config.common;
     dbCode = this;
 
-    this.monk = monk = Monk(settings.host + ':' + settings.port + '/' + settings.db + '?auto_reconnect=true&poolSize=8');
+    this.monk = monk = Monk(settings.host + ':' + settings.port + '/' + settings.db + '?auto_reconnect=true&poolSize=8') ;
+
+    box.db = {
+        monk :  monk
+    }
 
     AuthTemp   = monk.get('auth_temp');
     OpenIDs = monk.get('openID');

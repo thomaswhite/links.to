@@ -4,5 +4,6 @@
     "db": "LinksTo",
     "short_id_length":6,
     "auto_reconnect":true,
-    "collection":"sessions"
+    "collection":"sessions",
+    "dbModules":"db"
 }
