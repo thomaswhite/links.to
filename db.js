@@ -9,12 +9,12 @@ var debug = require('debug')('linksTo:db');
 
 var ShortId  = require('shortid').seed(96715)
     , mongo = require('mongodb')
-    , monk  = require('monk')
+    , Monk  = require('monk')
     , gravatar = require('gravatar')
     , _ = require('lodash')
     , async = require('async')
 
-    , emitter = require('./emitter.js')
+    , box = require('./box.js')
 
     , app
     , db
@@ -39,27 +39,23 @@ function ShorterID(){
     return  ShortId.generate().substr(0, settings.db.short_id_length);
 };
 
-emitter.on('init', function (App, conf, done) {
+function noop(){}
+
+box.on('init', function (App, conf, done) {
     var dummy = 1;
     done(null, 'db.js ready');
 });
 
-function noop(){}
 
 
-
-
-exports.init = function( App, configDB, commonConfig, Emitter ){
+exports.init = function( App, Config ){
     app = App;
-    settings = configDB;
-    common_config = commonConfig;
-//    emitter  = Emitter;
+    settings = Config.db;
+    common_config = Config.common;
     dbCode = this;
 
-    debug("init started" );
-    this.monk = monk = monk(settings.host + ':' + settings.port + '/' + settings.db + '?auto_reconnect=true&poolSize=8');
-    debug("monk loaded" );
-    var session = monk.get(configDB.collection);
+    this.monk = monk = Monk(settings.host + ':' + settings.port + '/' + settings.db + '?auto_reconnect=true&poolSize=8');
+
     AuthTemp   = monk.get('auth_temp');
     OpenIDs = monk.get('openID');
     Users   = monk.get('users');
@@ -70,6 +66,7 @@ exports.init = function( App, configDB, commonConfig, Emitter ){
     Pages   = monk.get('pages');
     Dummy   = monk.get('dummy');
 
+    var session = monk.get(settings.collection);
     session.index({expires: 1}, { expireAfterSeconds: common_config.session.maxAgeSeconds });
     session.options.safe = false;
 
@@ -79,7 +76,7 @@ exports.init = function( App, configDB, commonConfig, Emitter ){
 // ================ openID =============================
     // called as waterfall
 
-    emitter.on('openID.authenticated', function( waterfall, callback ){
+    box.on('openID.authenticated', function( waterfall, callback ){
         var oOpenID = _.extend( { owner:''} ,waterfall.picked_openID);
         OpenIDs.findOne( {"provider":oOpenID.provider, "id":oOpenID.id }, function(err, foundOpenID) {
             if (err ){
@@ -97,7 +94,7 @@ exports.init = function( App, configDB, commonConfig, Emitter ){
             }
         });
     });
-    emitter.on('not-in-use.email.verified', function( oEmail, callback){
+    box.on('not-in-use.email.verified', function( oEmail, callback){
         dbCode.set('openID',
              {_id: dbCode.ObjectID(oEmail.openID) },
              {
@@ -122,7 +119,7 @@ exports.init = function( App, configDB, commonConfig, Emitter ){
             provider : provider
         }
     };
-    emitter.on('not-in-use.email.pinged' , function(email, userID, openID, provider, callback ){
+    box.on('not-in-use.email.pinged' , function(email, userID, openID, provider, callback ){
         dbCode.findOne('emails', { email:email, userID:userID  }, function(err, Email ) {
             if (err){
                 callback(err);
@@ -143,7 +140,7 @@ exports.init = function( App, configDB, commonConfig, Emitter ){
         });
 
     });
-    emitter.on('not-in-use.email.confirmed', function(emailID, callback){
+    box.on('not-in-use.email.confirmed', function(emailID, callback){
          dbCode.findOne('emails', {"_id": dbCode.ObjectID(emailID) }, function(err, Email ) {
                 if (err){
                     callback(err);
@@ -151,7 +148,7 @@ exports.init = function( App, configDB, commonConfig, Emitter ){
                     callback('email NotFound');
                 }else{
                     dbCode.set('emails', { "_id": Email._id  }, {  verified:true }, function(err2, Email2){
-                        emitter.parallel( 'email.verified', Email2, function(err, result){
+                        box.parallel( 'email.verified', Email2, function(err, result){
                             results.unshift(Email2);
                             callback(err2, results );
                         });
@@ -184,7 +181,7 @@ exports.init = function( App, configDB, commonConfig, Emitter ){
         return user;
     };
 
-    emitter.on('openID.authenticated', function( waterfall, callback ){
+    box.on('openID.authenticated', function( waterfall, callback ){
         var criterion = waterfall.openID.justAdded ? {"openIDs": waterfall.openID._id } : {"_id":  waterfall.openID.owner };
         Users.findOne( criterion, function(err, found_User ) {
             if (err || found_User){
@@ -202,13 +199,13 @@ exports.init = function( App, configDB, commonConfig, Emitter ){
             }
         });
     });
-    emitter.on('not-in-use.email.pinged' , function(email, userID, openID, provider, callback ){
+    box.on('not-in-use.email.pinged' , function(email, userID, openID, provider, callback ){
         dbCode.set('users', {_id: dbCode.ObjectID(userID) },{
             email:email,
             emailPinged: new Date()
         });
     });
-    emitter.on('not-in-use.email.verified' , function(oEmail, callback ){
+    box.on('not-in-use.email.verified' , function(oEmail, callback ){
         // TODO save emails as an array to allow more then one active email at a time
         dbCode.set('users', {_id: dbCode.ObjectID(oEmail.userID) },{
             email:oEmail.email,
@@ -219,11 +216,11 @@ exports.init = function( App, configDB, commonConfig, Emitter ){
 
 // ==================  collections =================
 
-    emitter.on('collection.add', function( oColl, callback){
+    box.on('collection.add', function( oColl, callback){
         Collections.insert( oColl,  { safe: true }, callback);
     });
 
-    emitter.on('collection.get', function( waterfall, callback){
+    box.on('collection.get', function( waterfall, callback){
         Collections.findById(waterfall.coll_id, function(err, found_coll ){
             if( found_coll) {
                 found_coll.type = "collection";
@@ -233,7 +230,7 @@ exports.init = function( App, configDB, commonConfig, Emitter ){
         });
     });
 
-    emitter.on('collection.delete', function(coll_id, callback){
+    box.on('collection.delete', function(coll_id, callback){
         if( !coll_id ){
             throw "Collection ID expected!";
         }else{
@@ -243,17 +240,17 @@ exports.init = function( App, configDB, commonConfig, Emitter ){
     });
 
 
-    emitter.on('collection.update', function(coll_id, toUpdate, callback){
+    box.on('collection.update', function(coll_id, toUpdate, callback){
         Collections.updateById( coll_id, {$set: toUpdate }, callback );
     });
 
-    emitter.on('collection.eip', function(id, field, value, callback){
+    box.on('collection.eip', function(id, field, value, callback){
         var o = {};
         o[field] = value;
         Collections.updateById( coll_id, {$set: o }, callback );
     });
 
-    emitter.on('collections.list', function( filter, limit, sort, callback){
+    box.on('collections.list', function( filter, limit, sort, callback){
         Collections.find( filter || {}, {limit:limit || 64, sort:sort || []}, function(err, result){
             if( result ){
                 result.type = 'collections-list';
@@ -262,7 +259,7 @@ exports.init = function( App, configDB, commonConfig, Emitter ){
         });
     });
 
-    emitter.on('link.added', function( newLink, callback){
+    box.on('link.added', function( newLink, callback){
         var link_id =  newLink._id;
         Collections.update(
             { _id: newLink.collection, "links" :{ $ne : link_id }},
@@ -270,14 +267,14 @@ exports.init = function( App, configDB, commonConfig, Emitter ){
             callback
         );
     });
-    emitter.on('link.delete', function(link_id, coll_id, callback){
+    box.on('link.delete', function(link_id, coll_id, callback){
         Collections.updateById(
             coll_id,
             {  $pull: {  "links" : Collections.id(link_id) } },
             callback
         );
     });
-    emitter.on('link.tag.updated', function( Tag, link_id, callback){
+    box.on('link.tag.updated', function( Tag, link_id, callback){
 
     });
 
@@ -305,7 +302,7 @@ exports.init = function( App, configDB, commonConfig, Emitter ){
     /**
      * Returns an array of the links for a collection
      */
-    emitter.on('collection.get', function( waterfall, callback){
+    box.on('collection.get', function( waterfall, callback){
         if( waterfall.collection && waterfall.collection.links && waterfall.collection.links.length ){
             var options = waterfall.options || { sort:[['updated', -1]]};
             Links.find( { _id :  { $in : waterfall.collection.links} }, options , function(err, found_links) {
@@ -322,12 +319,12 @@ exports.init = function( App, configDB, commonConfig, Emitter ){
         }
     });
 
-    emitter.on('link.add', function( oLink, collection_id, callback){
+    box.on('link.add', function( oLink, collection_id, callback){
         oLink.collection = collection_id; //[ Links.id( collection_id ) ];
         Links.insert( oLink,  { safe: true }, callback );
     });
 
-    emitter.on('link.delete', function(link_id, coll_id, callback){
+    box.on('link.delete', function(link_id, coll_id, callback){
         if( !link_id ){
             throw "Link ID expected!";
         }else{
@@ -338,7 +335,7 @@ exports.init = function( App, configDB, commonConfig, Emitter ){
 
 // ===============  tags ====================
 
-    emitter.on('link.added', function( newLink, callback){
+    box.on('link.added', function( newLink, callback){
         var link_id =  newLink._id,
             newTags = [];
 
@@ -360,7 +357,7 @@ exports.init = function( App, configDB, commonConfig, Emitter ){
                     );
                 },
                 function(err){
-                    emitter.parallel('tags.added',  newTags, function(err, result){
+                    box.parallel('tags.added',  newTags, function(err, result){
                         callback(null);
                     });
                 }
@@ -370,7 +367,7 @@ exports.init = function( App, configDB, commonConfig, Emitter ){
         }
     });
 
-    emitter.on('link.delete', function(link_id, coll_id, callback){
+    box.on('link.delete', function(link_id, coll_id, callback){
         if( !link_id ){
             throw "Link ID expected!";
         }else{
@@ -380,7 +377,7 @@ exports.init = function( App, configDB, commonConfig, Emitter ){
 
 
 // === pages ====
-    emitter.on('page.save', function( sBody, uri, callback){
+    box.on('page.save', function( sBody, uri, callback){
         Pages.insert(  {
                 body : sBody,
                 uri: uri,
@@ -393,7 +390,7 @@ exports.init = function( App, configDB, commonConfig, Emitter ){
 
 // ====  openID ========================
 
-    emitter.on('openID.beforeAuth', function(req, callback){
+    box.on('openID.beforeAuth', function(req, callback){
         AuthTemp.findAndModify(
             {"session":req.session.id },
             {
@@ -406,7 +403,7 @@ exports.init = function( App, configDB, commonConfig, Emitter ){
          );
     });
 
-    emitter.on('openID.afterAuth', function(req, callback){
+    box.on('openID.afterAuth', function(req, callback){
         if( req && req.session && req.session.id  ){
             AuthTemp.findOne( {"session":req.session.id }, callback );
         }else{

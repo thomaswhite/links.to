@@ -3,7 +3,7 @@
  * GET home page.
  */
 
-var emitter = require('../emitter.js')
+var box = require('../box.js')
     , _ = require('lodash')
     , debug = require('debug')('linksTo:view.collections')
     , breadcrumbs = require('./breadcrumbs.js')
@@ -41,9 +41,9 @@ function newCollection  (owner, name, description){
 
 function collectionList( req, res, next, filter ){
     filter = filter || {};
-    emitter.parallel('collections.list', filter, 0, [], function( err, result ){
+    box.parallel('collections.list', filter, 0, [], function( err, result ){
         var collections =  _.first(result, function(element, pos, all){ return element.type == 'collections-list';  })[0];
-        debug( "Collections list: \n", app.locals.inspect( result ));
+        debug( "Collections list: \n", box.utils.inspect( result ));
 //            debug( "user: \n", app.locals.inspect( app.locals.user ));
         res.render('collections-list', {
             title: 'All collection',
@@ -63,10 +63,9 @@ function collectionList( req, res, next, filter ){
 
 
 
-exports.init = function( App, Config, Emitter ){
+exports.init = function( App, Config ){
     app = App;
     config = Config;
-//    emitter = Emitter;
 
     this.favorite  = function(req, res, next ){
         if( !app.locals.user || app.locals.user._id ){
@@ -98,11 +97,11 @@ exports.init = function( App, Config, Emitter ){
             });
         }else{
             var coll = newCollection(req.user._id, coll_name.trim());
-            emitter.emit('collection.add', coll, function(err, collection ) {
+            box.emit('collection.add', coll, function(err, collection ) {
                 if (err) {
                     context.notFound(res, 'db error while creating new collection.');
                 }else {
-                    emitter.parallel('collection.added',  collection, function(err, result){
+                    box.parallel('collection.added',  collection, function(err, result){
                         res.redirect( referer  );
                     });
                 }
@@ -113,7 +112,7 @@ exports.init = function( App, Config, Emitter ){
     this.delete = function(req, res) {
         var referer = req.headers.referer;
         var coll_id = req.params.id;
-        emitter.parallel('collection.delete', coll_id, function(err, aResult){
+        box.parallel('collection.delete', coll_id, function(err, aResult){
             res.redirect( req.query.back );
         });
         // todo: get the id of current collection to return back after deletion
@@ -124,7 +123,7 @@ exports.init = function( App, Config, Emitter ){
         var referer = req.headers.referer,
             collID = req.params.id;
 
-        emitter.waterfall( 'collection.get', {coll_id: collID}, function( err, waterfall ){
+        box.waterfall( 'collection.get', {coll_id: collID}, function( err, waterfall ){
                 if ( err ){
                     context.notFound(res);
                 }else{

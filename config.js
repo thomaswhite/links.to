@@ -6,14 +6,15 @@
  * To change this template use File | Settings | File Templates.
  */
 
-var config;
-
-exports.init = function( mainDir, bootstrapPath ){
-    var  etc = require('etc')()
-        , path = require('path')
-        , env = 'dev'
-        , configDir = path.join(mainDir, 'config', env)
+var config
+    , mainDir = __dirname
+    , etc = require('etc')()
+    , path = require('path')
     ;
+
+exports.init = function(  env ){
+    env = env || 'dev';
+    var configDir = path.join(mainDir, 'config', env);
 
     etc
         .argv()
@@ -29,7 +30,7 @@ exports.init = function( mainDir, bootstrapPath ){
                 root: path.join(mainDir, 'views')
             },
             less:{
-                paths:['.', path.join(bootstrapPath, 'less')],
+                paths:['.'],
                 src  :  path.join(mainDir, 'public'),
                 dest :  path.join(mainDir, 'public'),
                 prefix:  ['/stylesheets', '/less']

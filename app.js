@@ -13,7 +13,6 @@ that.on('error', console.error);
 
 // bootstrap
 
-require('./plugins/middleware');
 
 var tasks = that.listeners('init').map(function (listener) {
     return listener.bind(that, config);
@@ -35,9 +34,15 @@ async.series(tasks, function (err) {
  require('./plugins/controller');
  */
 
-var  emitter = require('./emitter.js') // require('eventflow')()
-//    , async = require('async')
-    , path = require('path')
+var  box = require('./box');
+require('./plugins/utils');
+require('./plugins/middleware');
+
+// dummy entry
+box.on('listen', function(cb){ cb(null, 'dummy listen'); });
+
+
+var color = require('colors')
 
     , express = require('express')
     , app = express()
@@ -45,23 +50,30 @@ var  emitter = require('./emitter.js') // require('eventflow')()
 
     , cons = require('consolidate')
     , swig = require('swig')
-
     , mongoStore = require('connect-mongo')(express)
 
+    , path = require('path')
     , bootstrapPath = path.join(__dirname, 'node_modules', 'bootstrap')
-    , config = require('./config.js').init( __dirname, bootstrapPath )
-    , routes = require('./routes').init( app, config, emitter )
-//    , user = require('./routes/user')
-    , db = require('./db.js').init( app, config.db, config.common, emitter )
+    , config = require('./config').init(  'dev' )
+
+    , routes = require('./routes').init( app, config, box )
+    , db = require('./db').init( app, config  )
     , passports = null
     ;
 
-require('./plugins/utils');
+config.less.paths.push ( path.join(bootstrapPath, 'less') );
 
-app.locals.config = config;
+app.locals.config = box.config = config;
 
-emitter.parallel('init', app, config, function(err, result){
-    var dummy = 1;
+box.parallel('init', app, config, function(err, result){
+
+    if (err) return box.emit('error', err);
+    debug(  'Init results:' +  box.utils.inspect(result) );
+
+    box.parallel('listen', function (err, result) {
+        console.log( box.utils.inspect(result ));
+        console.log('server listening on port ' + (box.server ? box.server.port : '???') );
+    });
 });
 
 
@@ -84,7 +96,7 @@ emitter.parallel('init', app, config, function(err, result){
             , store: new mongoStore(config.db)
         }));
 
-        passports  = require('./passports.js').init( app, config.passport, emitter );
+        passports  = require('./passports').init( app, config.passport, box );
 
         app.use(app.router);
         app.use('/img', express['static'](path.join(bootstrapPath, 'img')));
@@ -97,7 +109,6 @@ emitter.parallel('init', app, config, function(err, result){
     });
 
 
-    app.get('/',                routes.top );
     app.get('/coll/mine',       routes.collections.mine);
     app.get('/coll',            routes.collections.all);
     app.post('/coll/new',       routes.collections.add);

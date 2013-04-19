@@ -8,7 +8,8 @@
 var debug = require('debug')('linksTo:passports');
 debug("loading" );
 
-var _ = require('lodash')
+var box = require('./box.js')
+    , _ = require('lodash')
     , passport = require('passport')
     , utils = require('./tw-utils.js')
     , gravatar = require('gravatar')
@@ -32,10 +33,8 @@ var _ = require('lodash')
     , config
     , app
     , passports
-    , emitter = require('./emitter.js')
 
-
-    , that;
+    ;
 
 passport.serializeUser(function(user, done) {
     done(null, JSON.stringify(user));
@@ -78,7 +77,7 @@ function setPassport( settings, name, allPassports ){
         Profile.type="openID";
         Profile.raw = originalProfile;
         process.nextTick(function(){
-            emitter.waterfall('openID.authenticated', {rawOpenID:originalProfile, picked_openID: Profile }, function(err, result){
+            box.waterfall('openID.authenticated', {rawOpenID:originalProfile, picked_openID: Profile }, function(err, result){
                 if( err ){
                     callback(err);
                 }else{
@@ -121,25 +120,88 @@ function setPassport( settings, name, allPassports ){
     debug("openID:%s ready", name );
 }
 
+function ping_email ( req, res){
+    if( req.user && req.body.email){
+        context.db.emails.ping(req.body.email, req.user._id, req.user.active_openID,  req.user.provider, function(err, email ){
+            if( err ){
+                console.log(err);
+            }else{
+                var host = '127.0.0.1' ; // req.host;
+                var link = req.protocol + '://' + host + ':' + context.settings.http.port + '/confirm/alabala/' + email._id;
 
-emitter.on('init', function (App, Config, done) {
-    var dummy = 1;
+                context.db.users.update( req.user._id, { emailPinged:true });
+
+                context.mailer.send({
+                    from: "links.to.com@gmail.com",
+                    to: req.body.email,
+                    subject: "Confirm your registration",
+                    html: "<p>Please confirm your registration by clicking on <a href='" + link + "' >this link </a>.</p>"
+                });
+
+                context.Page2(req, res, 'user_request-email_sent', {
+                    email: req.body.email
+                });
+                //res.redirect(context.settings.passport_after.afterEmailPing);
+            }
+        });
+
+    }else{
+        context.notFound(res);
+    }
+};
+function confirm_email ( req, res){
+//  box.on('email.verified'
+    context.db.emails.activate(req.params.emailID, function(err, Email){
+        console.log(Email);
+        context.Page2(req, res, 'user_request-email_clicked', {
+            email:    Email.email,
+            provider: Email.provider
+        });
+        // res.redirect(context.settings.passport_after.afterEmailcallback);
+    });
+};
+
+function auth_after_success (req, res){
+    // console.log('\n/auth-after-success', '\nUSER:', req.user );
+
+    box.invoke('openID.afterAuth', req, function(err, Saved){
+        var referer = !err && Saved ? Saved.referer : '';
+        if( 1 || req.user && ( req.user.email || req.user.emailPinged )){
+            app.locals.user = req.user ;
+            // debug( "authenticated user: \n", app.locals.user);
+            res.redirect( referer || 'http://127.0.0.1:3000/coll'  ); // config.passport_after.userHasEmail
+        }else{
+            delete app.locals.user;
+            //            res.render('layout', { title: 'Express' });
+            context.Page2(req, res, 'user_request-email', {
+                user:User,
+                formURL:'/secret/ping-email',
+                slots:{
+                    title2:'User registration',
+                    crumbs : 'No breadcrumbs'
+
+                }
+            });
+        }
+    })
+};
+
+
+box.on('init', function (App, Config, done) {
+    config = Config.passport;
+
     done(null, 'passports ready');
 });
 
 
-exports.init = passports = function( App, Config, Emitter ){
-
-    that = this;
-
+exports.init = passports = function( App, Config ){
     app = App;
-    config = Config;
-//    emitter = Emitter;
+    config = Config;   // Config.passport
 
     app.use(passport.initialize());
     app.use(passport.session());
 
-    emitter.on('openID.beforeAuth', function(req, callback){
+    box.on('openID.beforeAuth', function(req, callback){
        debug('openID.beforeAuth, referer:',   req.headers.referer );
         // save the page we are coming from so after authentication we can go back to the same page
         callback(null, 0);
@@ -155,7 +217,7 @@ exports.init = passports = function( App, Config, Emitter ){
      */
 
     this.authenticate = function(req, res, next ){
-        emitter.parallel('openID.beforeAuth', req, function (err, result) {
+        box.parallel('openID.beforeAuth', req, function (err, result) {
             next();
         })
     };
@@ -171,70 +233,10 @@ exports.init = passports = function( App, Config, Emitter ){
             res.redirect( '/coll' );
         }
     };
-    this.auth_after_success = function(req, res){
-        // console.log('\n/auth-after-success', '\nUSER:', req.user );
 
-        emitter.invoke('openID.afterAuth', req, function(err, Saved){
-            var referer = !err && Saved ? Saved.referer : '';
-            if( 1 || req.user && ( req.user.email || req.user.emailPinged )){
-                app.locals.user = req.user ;
-                // debug( "authenticated user: \n", app.locals.user);
-                res.redirect( referer || 'http://127.0.0.1:3000/coll'  ); // config.passport_after.userHasEmail
-            }else{
-                delete app.locals.user;
-    //            res.render('layout', { title: 'Express' });
-                context.Page2(req, res, 'user_request-email', {
-                    user:User,
-                    formURL:'/secret/ping-email',
-                    slots:{
-                        title2:'User registration',
-                        crumbs : 'No breadcrumbs'
-
-                    }
-                });
-            }
-        })
-    };
-    this.ping_email = function( req, res){
-        if( req.user && req.body.email){
-            context.db.emails.ping(req.body.email, req.user._id, req.user.active_openID,  req.user.provider, function(err, email ){
-                if( err ){
-                    console.log(err);
-                }else{
-                    var host = '127.0.0.1' ; // req.host;
-                    var link = req.protocol + '://' + host + ':' + context.settings.http.port + '/confirm/alabala/' + email._id;
-
-                    context.db.users.update( req.user._id, { emailPinged:true });
-
-                    context.mailer.send({
-                        from: "links.to.com@gmail.com",
-                        to: req.body.email,
-                        subject: "Confirm your registration",
-                        html: "<p>Please confirm your registration by clicking on <a href='" + link + "' >this link </a>.</p>"
-                    });
-
-                    context.Page2(req, res, 'user_request-email_sent', {
-                        email: req.body.email
-                    });
-                    //res.redirect(context.settings.passport_after.afterEmailPing);
-                }
-            });
-
-        }else{
-            context.notFound(res);
-        }
-    };
-    this.confirm_email = function( req, res){
-//        emitter.on('email.verified'
-        context.db.emails.activate(req.params.emailID, function(err, Email){
-            console.log(Email);
-            context.Page2(req, res, 'user_request-email_clicked', {
-                email:    Email.email,
-                provider: Email.provider
-            });
-            // res.redirect(context.settings.passport_after.afterEmailcallback);
-        });
-    };
+    this.auth_after_success = auth_after_success;
+    this.ping_email = ping_email;
+    this.confirm_email = confirm_email;
 
     app.get('/authenticate/:provider',       this.authenticate );
     app.get('/logout',             this.logout );

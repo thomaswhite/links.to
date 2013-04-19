@@ -6,12 +6,12 @@
 
  */
 
-var emitter = require('../emitter.js')
+var box = require('../box.js')
 
     ;
 
-emitter.on('init', function (app, conf, done) {
-    emitter.utils = {
+box.on('init', function (app, conf, done) {
+    box.utils = {
          _ : require('lodash'),
          path : require('path'),
          fs : require('fs'),
