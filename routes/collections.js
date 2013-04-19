@@ -3,14 +3,14 @@
  * GET home page.
  */
 
-var  _ = require('lodash');
-var debug = require('debug')('linksTo:view.collections');
-var breadcrumbs = require('./breadcrumbs.js');
-var ShortId  = require('shortid').seed(96715);
+var emitter = require('../emitter.js')
+    , _ = require('lodash')
+    , debug = require('debug')('linksTo:view.collections')
+    , breadcrumbs = require('./breadcrumbs.js')
+    , ShortId  = require('shortid').seed(96715)
 
-var config,
-    emitter,
-    app
+    , config
+    , app
     ;
 
 
@@ -66,7 +66,7 @@ function collectionList( req, res, next, filter ){
 exports.init = function( App, Config, Emitter ){
     app = App;
     config = Config;
-    emitter = Emitter;
+//    emitter = Emitter;
 
     this.favorite  = function(req, res, next ){
         if( !app.locals.user || app.locals.user._id ){
@@ -145,8 +145,8 @@ exports.init = function( App, Config, Emitter ){
                         }
                     }
 */
-                    //debug( "waterfall: \n",  app.locals.inspect(waterfall) );
-                    debug( "user: \n", app.locals.inspect( app.locals.user ));
+                    debug( "waterfall: \n",  waterfall );
+  //                  debug( "user: \n", app.locals.inspect( app.locals.user ));
                     res.render('collection', {
                         title: 'Collection "' + (collection && collection.title ? collection.title : ' not found' ) + '"',
                         user: req.user,

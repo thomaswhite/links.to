@@ -51,10 +51,16 @@ var requestDefaults = {
     }
 };
 
-
-
-
-
+function prop_or_array( o, prop, value ){
+    if( !o[prop]){
+        o[prop] = value;
+    }else if( typeof o[prop] == 'array' ){
+        o[prop].push( value );
+    }else{
+        o[prop] = [ o[prop],value ];
+    }
+    return o;
+}
 
 function scrape_tokens( token, $, uri,  callback ){
     var Tags = keyWords.makeList( $('body').find('p, ul, h1, h2, h3').text(), null, 4, 'en'),
@@ -133,20 +139,39 @@ function scrape_images( token, $, uri,  callback ){
 
 function scrape_head( token, $, uri,  callback ){
     var $head = $('head'),
-        head = {type:'head', meta:{} },
+        head = {type:'head', meta:{  og : {},  fb : {} }, links:{} },
+        meta = head.meta,
+        og = meta.og,
+        fb = meta.fb,
         aURL =  _.pick(URL.parse(uri), 'protocol', 'host', 'port'),
         baseURL = URL.format(aURL);
 
     head.title = $($head.find('title')).text();  // $(body.find('h1').text())
 
-    $head.find( 'link[rel*="icon"]').each( function(i,elem){
-        head.favicon = URL.resolve( baseURL, elem.attribs.href );
+    $head.find( 'link[rel]').each( function(i,elem){
+        var rel = elem.attribs.rel;
+        if(rel == 'stylesheet' ){
+            return;
+        }
+        if( rel == 'shortcut icon' ){
+               rel = 'favicon';
+        }
+        if( elem.attribs.href ){
+            elem.attribs.href = URL.resolve( baseURL, elem.attribs.href );
+        }
+        delete elem.attribs.rel;
+        prop_or_array( head.links, rel, elem.attribs  );
+        //head.links.push( elem.attribs );
     });
+
 
     $head.find('meta[name]').each(function(i, elem) {
         var i, name = elem.attribs.name;
         if( name.indexOf('.') === -1 && elem.attribs && elem.attribs.content ){
-            switch( elem.attribs.name ){
+            var content = unescape(elem.attribs.content.trim()),
+                field = name,
+                names = name.split(':');
+            switch( name ){
                 case 'google-site-verification':
                 case 'robots':
                 case 'generator':
@@ -154,29 +179,31 @@ function scrape_head( token, $, uri,  callback ){
                     break;
 
                 case 'keywords':
-                    head.keywords = unescape(elem.attribs.content.trim()).split(',');
-                    break;
+                    content =  content.split(',');
 
                 case 'author':
                 case 'description':
-                    head[name] = unescape(elem.attribs.content.trim());
+
+                    head[name] =
+                    meta[ name] = content;
                     break;
 
                 default:
-                    head[name] = unescape(elem.attribs.content.trim());
+                    if( names.length > 1 ){
+                        var meta2 = meta[ names[0] ] || {};
+                        meta2[ names[1] ] = content;
+                        if( !meta[ names[0] ] ){
+                            meta[ names[0] ] = meta2;
+                        }
+                    }else{
+                        head[name] =
+                        meta[name] = content;
+                    }
             }
         }
     });
-    callback( null, head );
-}
 
-function scrape_metatags_open_graph( token, $, uri,  callback ){
-    var head = $('head'),
-        currentType = '',
-        og = {},
-        fb = {};
-
-    head.find('meta[property^=fb]').each(function(i, item ){
+    $head.find('meta[property^=fb]').each(function(i, item ){
         var value = item.attribs.content.trim(),
             aP = item.attribs.property.split(':'),
             dimmy = aP.shift(),
@@ -185,7 +212,7 @@ function scrape_metatags_open_graph( token, $, uri,  callback ){
         fb[ type ] = value;
     });
 
-    head.find('meta[property^="og:"]').each(function(i, item ){
+    $head.find('meta[property^="og:"]').each(function(i, item ){
         var value = item.attribs.content.trim(),
             aP = item.attribs.property.split(':'),
             dimmy = aP.shift(),
@@ -193,12 +220,12 @@ function scrape_metatags_open_graph( token, $, uri,  callback ){
             isMain = 0 === aP.length,
             sameMainPart = currentType === type,
             cenBeSequence =  type === 'image' ||
-                             type === 'video' ||
-                             type === 'audio' ||
-                             type === 'music' ||
-                             type === 'article' ||
-                             type === 'book' ||
-                             type === 'profile';
+                type === 'video' ||
+                type === 'audio' ||
+                type === 'music' ||
+                type === 'article' ||
+                type === 'book' ||
+                type === 'profile';
 
         if( type === 'keywords' ){
             value = value.split(',');
@@ -240,6 +267,16 @@ function scrape_metatags_open_graph( token, $, uri,  callback ){
             }
         }
     });
+    callback( null, head );
+}
+
+function scrape_metatags_open_graph( token, $, uri,  callback ){
+    var head = $('head'),
+        currentType = '',
+        og = {},
+        fb = {};
+
+
     callback( null, {og:og, fb:fb, type:'og'});
 }
 
@@ -307,7 +344,7 @@ exports.init = function ( requestOptions, mainEmitter ) {
     emitter.on( 'pageScrape.process', scrape_head );
     emitter.on( 'pageScrape.process', scrape_images  );
     emitter.on( 'pageScrape.process', scrape_body );
-    emitter.on( 'pageScrape.process', scrape_metatags_open_graph  );
+//    emitter.on( 'pageScrape.process', scrape_metatags_open_graph  );
     emitter.on( 'pageScrape.process', scrape_tokens  );
     return emitter;
 };

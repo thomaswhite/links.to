@@ -47,7 +47,8 @@
     "base62": "*",
     "request": ">=2.16.0",
     "cheerio": ">=0.10.8",
-    "that": "~1.0.3"
+    "that": "~1.0.3",
+    "middler": "~0.6.1"
   },
   "devDependencies": {
     "nodelint": "~0.6",

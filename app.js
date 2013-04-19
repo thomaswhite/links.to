@@ -1,74 +1,70 @@
-
-var debug = require('debug')('linksTo:app');
+var debug = require('debug')('linksTo:app.js');
 debug("Loading" );
 
+/*
 var that = require('that')
-    , async = require('async');
+    , async = require('async')
+    , path = require('path')
+    , bootstrapPath = path.join(__dirname, 'node_modules', 'bootstrap')
+    , config = require('./config.js').init( __dirname, bootstrapPath )
 
+    ;
 that.on('error', console.error);
 
-
-
 // bootstrap
-/*
-require('./plugins/utils');
-require('./plugins/server');
+
 require('./plugins/middleware');
-require('./plugins/static');
-require('./plugins/view');
-require('./plugins/controller');
+
+var tasks = that.listeners('init').map(function (listener) {
+    return listener.bind(that, config);
+});
+
+async.series(tasks, function (err) {
+    if (err) return that.emit('error', err);
+
+    that.emit('listen', function () {
+        console.log('server listening on port ' + that.server.port);
+    });
+});
 */
 
+/*
+ require('./plugins/server');
+ require('./plugins/static');
+ require('./plugins/view');
+ require('./plugins/controller');
+ */
 
-
-var  emitter = require('eventflow')()
+var  emitter = require('./emitter.js') // require('eventflow')()
+//    , async = require('async')
+    , path = require('path')
 
     , express = require('express')
     , app = express()
     , http = require('http')
+
     , cons = require('consolidate')
     , swig = require('swig')
-    , path = require('path')
-    ,  _ = require('lodash')
 
     , mongoStore = require('connect-mongo')(express)
-
- //   , caterpillar = require ("caterpillar")
- //   , logger = new caterpillar.Logger()
-    , colors = require('colors')
 
     , bootstrapPath = path.join(__dirname, 'node_modules', 'bootstrap')
     , config = require('./config.js').init( __dirname, bootstrapPath )
     , routes = require('./routes').init( app, config, emitter )
-    , user = require('./routes/user')
-
-    , inspect = require('eyes').inspector({
-        styles: {                 // Styles applied to stdout
-            all:     'cyan',      // Overall style applied to everything
-            label:   'underline', // Inspection labels, like 'array' in `array: [1, 2, 3]`
-            other:   'inverted',  // Objects which don't have a literal representation, such as functions
-            key:     'bold',      // The keys in object literals, like 'a' in `{a: 1}`
-            special: 'grey',      // null, undefined...
-            string:  'green',
-            number:  'magenta',
-            bool:    'blue',      // true false
-            regexp:  'green'      // /\d+/
-        },
-        pretty: true,             // Indent object literals
-        hideFunctions: true,     // Don't output functions at all
-        stream: process.stdout,   // Stream to write to, or null
-        maxLength: 8192           // Truncate output if longer
-    })
-
-    , dummy = debug("lodules loaded" )
+//    , user = require('./routes/user')
     , db = require('./db.js').init( app, config.db, config.common, emitter )
     , passports = null
     ;
 
+require('./plugins/utils');
+
+app.locals.config = config;
+
+emitter.parallel('init', app, config, function(err, result){
+    var dummy = 1;
+});
 
 
-    app.locals.config = config;
-    app.locals.inspect = inspect;
 
     app.configure(function () {
         app.engine('html', cons.swig );
@@ -121,7 +117,8 @@ var  emitter = require('eventflow')()
 
 
     http.createServer(app).listen(config.port, function () {
-        debug("Links.To".rainbow + " server listening on port ".white + ('' + app.get('port')).red  );
+        debug("Links.To" + " server listening on port " + ('' + app.get('port'))  );
+        console.log("Links.To" + " server listening on port " + ('' + app.get('port'))  );
     });
 
 

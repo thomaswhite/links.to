@@ -3,17 +3,25 @@
  * GET home page.
  */
 
-var  _ = require('lodash');
-var debug = require('debug')('linksTo:view');
-var breadcrumbs = require('./breadcrumbs.js');
+var emitter = require('../emitter.js')
+    , _ = require('lodash')
+    , debug = require('debug')('linksTo:view')
+    , breadcrumbs = require('./breadcrumbs.js')
+    , config
+    , app
 
-var config,
-    emitter,
-    app;
+    ;
+
+
+emitter.on('init', function (app, conf, done) {
+    var dummy = 1;
+    done(null, 'routers ready');
+});
+
 
 exports.init = function( App, Config, Emitter ){
     config = Config;
-    emitter = Emitter;
+    //emitter = Emitter;
     app = App;
 
     this.top = function( req, res ){

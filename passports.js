@@ -10,8 +10,6 @@ debug("loading" );
 
 var _ = require('lodash')
     , passport = require('passport')
-    , async = require('async')
-//    , logger = require('nlogger').logger(module)
     , utils = require('./tw-utils.js')
     , gravatar = require('gravatar')
     , inspect = require('eyes').inspector({
@@ -34,7 +32,7 @@ var _ = require('lodash')
     , config
     , app
     , passports
-    , emitter
+    , emitter = require('./emitter.js')
 
 
     , that;
@@ -123,13 +121,20 @@ function setPassport( settings, name, allPassports ){
     debug("openID:%s ready", name );
 }
 
+
+emitter.on('init', function (App, Config, done) {
+    var dummy = 1;
+    done(null, 'passports ready');
+});
+
+
 exports.init = passports = function( App, Config, Emitter ){
 
     that = this;
 
     app = App;
     config = Config;
-    emitter = Emitter;
+//    emitter = Emitter;
 
     app.use(passport.initialize());
     app.use(passport.session());
@@ -230,7 +235,6 @@ exports.init = passports = function( App, Config, Emitter ){
             // res.redirect(context.settings.passport_after.afterEmailcallback);
         });
     };
-
 
     app.get('/authenticate/:provider',       this.authenticate );
     app.get('/logout',             this.logout );

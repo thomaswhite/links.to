@@ -14,11 +14,12 @@ var ShortId  = require('shortid').seed(96715)
     , _ = require('lodash')
     , async = require('async')
 
+    , emitter = require('./emitter.js')
+
     , app
     , db
     , settings
     , common_config
-    , emitter
     , dbCode
     , monk
 
@@ -34,18 +35,25 @@ var ShortId  = require('shortid').seed(96715)
 
     ;
 
-function noop(){}
-
 function ShorterID(){
     return  ShortId.generate().substr(0, settings.db.short_id_length);
 };
+
+emitter.on('init', function (App, conf, done) {
+    var dummy = 1;
+    done(null, 'db.js ready');
+});
+
+function noop(){}
+
+
 
 
 exports.init = function( App, configDB, commonConfig, Emitter ){
     app = App;
     settings = configDB;
     common_config = commonConfig;
-    emitter  = Emitter;
+//    emitter  = Emitter;
     dbCode = this;
 
     debug("init started" );
@@ -67,8 +75,6 @@ exports.init = function( App, configDB, commonConfig, Emitter ){
 
     AuthTemp.index({expires: 1}, { expireAfterSeconds: 60 });
     AuthTemp.options.safe = false;
-
-
 
 // ================ openID =============================
     // called as waterfall

@@ -3,27 +3,6 @@
 {% macro link_under_edit link canEdit canDelete collection %}
   <div class="row  link-title {% if !link.images || !link.images.length  %}noImg{% endif %}">
       <div class="span8 link-content underEdit">
-        {% if link.images  && link.images.length > 1 %}
-        <ul class="iddCont imgDropdown eipURL" data-url="/link/{{ link._id }}/eip" >
-          <li>
-            <a href="#" class="thumbnail" data-imagePos="{{ link.imagePos|default(0) }}">
-              <img src="{{ link.images[link.imagePos].src }}">
-            </a>
-          </li>
-          {% if canEdit && link.images && link.images.length > 1 %}
-            {% for img in link.images -%}
-              {%if loop.index0 != (link.imagePos || 0) -%}
-                <li>
-                  <a href="#" class="thumbnail inactive" data-imagePos="{{ loop.index0 }}"><img src="{{ img.src }}"></a>
-                </li>
-              {%- endif %}
-            {%- endfor %}
-            <a href="#" class="iddDrop closed"></a>
-          {% endif %}
-        </ul>
-        <br/>
-        {% endif %}
-
         <div>Title</div>
         <input class="autoGrow w95" id="title" value="{{ link.title|default(link.url)  }}"></input>
 
@@ -35,6 +14,27 @@
 
         <div >Summary - what is remarkable</div>
         <textarea class="autoGrow w95 summary" name="summary" id="summary" >{{ link.summary }}</textarea>
+
+        {% if link.images  && link.images.length > 1 %}
+        <ul class="iddCont imgDropdown eipURL" data-url="/link/{{ link._id }}/eip" >
+          <li>
+            <a href="#" class="thumbnail" data-imagePos="{{ link.imagePos|default(0) }}">
+              <img src="{{ link.images[link.imagePos].src }}">
+            </a>
+          </li>
+          {% if canEdit && link.images && link.images.length > 1 %}
+          {% for img in link.images -%}
+          {%if loop.index0 != (link.imagePos || 0) -%}
+          <li>
+            <a href="#" class="thumbnail inactive" data-imagePos="{{ loop.index0 }}"><img src="{{ img.src }}"></a>
+          </li>
+          {%- endif %}
+          {%- endfor %}
+          <a href="#" class="iddDrop closed"></a>
+          {% endif %}
+        </ul>
+        <br/>
+        {% endif %}
       </div>
   </div>
 {% endmacro %}

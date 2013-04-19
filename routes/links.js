@@ -47,7 +47,7 @@ exports.init = function( App, Config, Emitter ){
     config = Config;
     emitter = Emitter;
 
-    var pageScraper = require('../pageSrcaper.js').init({proxy: config:PROXY}, Emitter);
+    var pageScraper = require('../pageSrcaper.js').init({proxy: config.PROXY}, Emitter);
 
 
     // app.post('/link/new/:coll?', function(req, res)
