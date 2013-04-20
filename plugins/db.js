@@ -56,13 +56,8 @@ box.on('init', function (App, Config, initDone) {
     });
     search.once('error', initDone );
     search.once('end', function () {
-/*
-        that.controllers.forEach(function (controller) {
-            that.middleware.add(controller.handler);
-        });
-*/
         box.parallel('db.init', monk, Config, function(err, result){
-            result.push( 'db.js ready' );
+            result.push( 'db.js initialised' );
             initDone(null, result );
         });
     });

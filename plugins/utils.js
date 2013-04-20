@@ -31,6 +31,7 @@ var box = require('../box.js')
         stream: process.stdout,   // Stream to write to, or null
         maxLength: 32000           // Truncate output if longer
     })
+    , async = require('async')
 
     ;
 
@@ -45,7 +46,8 @@ box.on('init', function (app, conf, done) {
         fs : fs,
         colors : colors,
         inspect : inspect,
-        shorterID: ShorterID
+        shorterID: ShorterID,
+        async : async
      };
-    done(null, 'utils ready');
+    done(null, 'utils initialised');
 });

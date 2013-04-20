@@ -144,7 +144,7 @@ exports.init = function( App, Config ){
                         }
                     }
 */
-                    debug( "waterfall: \n",  waterfall );
+ //                   debug( "waterfall: \n",  waterfall );
   //                  debug( "user: \n", app.locals.inspect( app.locals.user ));
                     res.render('collection', {
                         title: 'Collection "' + (collection && collection.title ? collection.title : ' not found' ) + '"',

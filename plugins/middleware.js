@@ -5,5 +5,5 @@ var box = require('../box.js')
 box.on('init', function (app, conf, done) {
   box.middler = middler;
   box.middleware = middler(box.server);
-  done(null, 'middleware ready');
+  done(null, 'middleware initialised');
 });

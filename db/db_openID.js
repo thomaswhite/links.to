@@ -15,10 +15,11 @@ box.on('db.init', function( monk, Config, done ){
     var   settings = Config.db
         , common_config = Config.common
         , OpenIDs = monk.get('openID')
+        , AuthTemp   = monk.get('auth_temp')
         ;
 
     box.on('openID.authenticated', function( waterfall, callback ){
-        var oOpenID = _.extend( { owner:''} ,waterfall.picked_openID);
+        var oOpenID = box.utils._.extend( { owner:''} ,waterfall.picked_openID);
         OpenIDs.findOne( {"provider":oOpenID.provider, "id":oOpenID.id }, function(err, foundOpenID) {
             if (err ){
                 callback(err);
@@ -37,16 +38,20 @@ box.on('db.init', function( monk, Config, done ){
     });
 
     box.on('openID.beforeAuth', function(req, callback){
-        AuthTemp.findAndModify(
-            {"session":req.session.id },
-            {
-                created : new Date(),
-                session: req.session.id,
-                referer: req.headers.referer
-            },
-            {upsert:1},
-            callback
-        );
+        if( !req.session ){
+            callback();
+        }else{
+            AuthTemp.findAndModify(
+                {"session":req.session.id },
+                {
+                    created : new Date(),
+                    session: req.session.id,
+                    referer: req.headers.referer
+                },
+                {upsert:1},
+                callback
+            );
+        }
     });
 
     box.on('openID.afterAuth', function(req, callback){

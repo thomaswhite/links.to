@@ -8,8 +8,9 @@
       "afterEmailPing":"/coll/mine?emailPinged",
       "afterEmailVerified":"/coll/mine"
     },
-    "passports":{
-      "google":{
+    "passports":[
+      {
+        "name": "google",
         "arity":3,
         "icon":"google",
         "require":"passport-google",
@@ -24,7 +25,8 @@
           "last_name:name.familyName"
         ]
       },
-      "yahoo":{
+      {
+        "name": "yahoo",
         "arity":3,
         "icon":"yahoo",
         "require":"passport-yahoo",
@@ -40,8 +42,8 @@
           "screen_name:displayName"
         ]
       },
-
-      "dropbox":{
+      {
+        "name": "dropbox",
         "type":"oauth2",
         "arity":4,
         "icon":"dropbox",
@@ -57,8 +59,8 @@
           "screen_name:_json.display_name",
           "country:_json:country"]
       },
-
-      "twitter":{
+      {
+        "name": "twitter",
         "type":"oauth2",
         "arity":4,
         "icon":"twitter",
@@ -80,7 +82,8 @@
           "gravatarURL:_json.profile_image_url",
           "gravatarURL_https:_json.profile_image_url_https"]
       },
-      "facebook":{
+      {
+        "name":"facebook",
         "type":"oauth2",
         "arity":5,
         "icon":"facebook",
@@ -106,7 +109,8 @@
           "gravatarURL96:http:\/\/graph.facebook.com\/#id#\/picture?size=96",
           "gravatarURL96_https:https:\/\/graph.facebook.com\/#id#\/picture?size=96"]
       },
-      "windowslive":{
+      {
+        "name":"windowslive",
         "inactive":true,
         "arity":4,
         "icon":"windowslive",
@@ -128,7 +132,8 @@
           "locale:_json.locale",
           "profileURL:profileUrl"]
       },
-      "meetup":{
+      {
+        "name":"meetup",
         "arity":4,
         "icon":"meetup",
         "require":"passport-meetup",
@@ -147,7 +152,8 @@
           "city:_json.results.city",
           "city:_json.results.city"]
       },
-      "linkedin":{
+      {
+        "name" : "linkedin",
         "type":"oauth2",
         "arity":4,
         "icon":"linkedin",
@@ -162,7 +168,6 @@
           "first_name:_json.firstName",
           "last_name:name.lastName"]
       }
-
-    }
+    ]
 
 }
