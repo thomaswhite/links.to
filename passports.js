@@ -6,36 +6,18 @@
  * To change this template use File | Settings | File Templates.
  */
 var debug = require('debug')('linksTo:passports');
-debug("loading" );
 
 var box = require('./box.js')
     , _ = require('lodash')
     , passport = require('passport')
     , utils = require('./tw-utils.js')
     , gravatar = require('gravatar')
-    , inspect = require('eyes').inspector({
-        styles: {                 // Styles applied to stdout
-            all:     'cyan',      // Overall style applied to everything
-            label:   'underline', // Inspection labels, like 'array' in `array: [1, 2, 3]`
-            other:   'inverted',  // Objects which don't have a literal representation, such as functions
-            key:     'bold',      // The keys in object literals, like 'a' in `{a: 1}`
-            special: 'grey',      // null, undefined...
-            string:  'green',
-            number:  'magenta',
-            bool:    'blue',      // true false
-            regexp:  'green'      // /\d+/
-        },
-        pretty: true,             // Indent object literals
-        hideFunctions: false,     // Don't output functions at all
-        stream: process.stdout,   // Stream to write to, or null
-        maxLength: 2048           // Truncate output if longer
-    })
+
     , config
     , app
     , passports
 
     ;
-
 
 passport.serializeUser(function(user, done) {
     done(null, JSON.stringify(user));
@@ -48,6 +30,8 @@ passport.deserializeUser(function(json, done) {
         done(new Error("Bad JSON string in session"), null);
     }
 });
+
+box.passport = passport;
 
 function userGravatar ( User, Email, replace ){
     var settings = app.locals.config.common.gravatar;
@@ -68,9 +52,10 @@ function userGravatar ( User, Email, replace ){
     }
     return User;
 }
-function setPassport( settings, name, allPassports ){
+function setPassport( settings, cb ){
     var strategy = require(settings.require).Strategy,
-        pick = settings.pick;
+        pick = settings.pick,
+        name = settings.name;
 
     function save_Picked_data( originalProfile, Profile, callback ){
         Profile.provider = name;
@@ -93,11 +78,10 @@ function setPassport( settings, name, allPassports ){
           }
         var picked  = utils.pick( profile, pick );
         picked.token = accessToken;
-        process.nextTick(function(){
+//        process.nextTick(function(){
             save_Picked_data( profile, picked, callback );
-        });
+//        });
     }
-
     function handleConnection( token, profile, pape, oath, callback ){
          switch( arguments.length ){
             case 5: break;
@@ -114,10 +98,12 @@ function setPassport( settings, name, allPassports ){
              });
              */
     }
+
     passport.use(new strategy( settings, settings.type === 'oauth2' ? handleConnection_oauth2 : handleConnection));
     app.get('/authenticate/'+ name,         passport.authenticate(name));
     app.get('/auth/' + name + '/callback',  passport.authenticate(name,  config.passport_after));
     debug("openID:%s ready", name );
+    cb( null, name);
 }
 function ping_email ( req, res){
     if( req.user && req.body.email){
@@ -185,8 +171,9 @@ function auth_after_success (req, res){
 };
 function authenticate (req, res, next ){
     box.parallel('openID.beforeAuth', req, function (err, result) {
-        next();
-    })
+        var dummy;
+    });
+    next();
 };
 function logout (req, res){
     var referer = req.headers.referer;
@@ -204,50 +191,28 @@ function logout (req, res){
 
 box.on('init', function (App, Config, done) {
     config = Config.passport;
-
-    done(null, 'passports ready');
+    done(null, 'passports initiated');
 });
-
 
 exports.init = passports = function( App, Config, initDone ){
     app = App;
-    config = Config;   // Config.passport
+    config = Config.passport;
 
     app.use(passport.initialize());
     app.use(passport.session());
 
-/*
-    box.on('openID.beforeAuth', function(req, callback){
-       debug('openID.beforeAuth, referer:',   req.headers.referer );
-        // save the page we are coming from so after authentication we can go back to the same page
-        callback(null, 0);
-    });
-*/
-    /*
-     this.getUserForOpenID = function ( err, openID_found, callback ){
-     if( err ){
-     callback(err);
-     }else{
-     context.db.users.findUserForOpenID( openID_found, callback );
-     }
-     };
-     */
+    box.utils.async.forEach( config.passports, setPassport, function(err, result){
 
-    this.authenticate = authenticate;
-    this.logout = logout;
-    this.auth_after_success = auth_after_success;
-    this.ping_email = ping_email;
-    this.confirm_email = confirm_email;
+        app.get('/authenticate/:provider',   authenticate );
+        app.get('/logout',                   logout );
+        app.get('/auth-after-success',       auth_after_success);
+        app.post('/secret/ping-email',       ping_email);
+        app.get('/confirm/alabala/:emailID', confirm_email);
 
-    app.get('/authenticate/:provider',       this.authenticate );
-    app.get('/logout',             this.logout );
-    app.get('/auth-after-success', this.auth_after_success);
-    app.post('/secret/ping-email', this.ping_email);
-    app.get('/confirm/alabala/:emailID', this.confirm_email);
-
-    _.each( config.passports, setPassport);
-    debug('all passport have been loaded');
+        debug('initialised.')
+        initDone(null, result);
+    } );
 
 
-    return this;
+    return true;
 };
