@@ -3,13 +3,12 @@
  * User: Thomas
  * Date: 04/03/13
  * Time: 00:13
- * To change this template use File | Settings | File Templates.
  */
 var debug = require('debug')('linksTo:passports');
 
 var box = require('./box.js')
+    , passport = box.passport   // = require('passport')
     , _ = require('lodash')
-    , passport = require('passport')
     , utils = require('./tw-utils.js')
     , gravatar = require('gravatar')
 
@@ -18,20 +17,6 @@ var box = require('./box.js')
     , passports
 
     ;
-
-passport.serializeUser(function(user, done) {
-    done(null, JSON.stringify(user));
-});
-passport.deserializeUser(function(json, done) {
-    var user = JSON.parse(json);
-    if (user){
-        done(null, user);
-    }else{
-        done(new Error("Bad JSON string in session"), null);
-    }
-});
-
-box.passport = passport;
 
 function userGravatar ( User, Email, replace ){
     var settings = app.locals.config.common.gravatar;
@@ -188,31 +173,25 @@ function logout (req, res){
     }
 };
 
-
+/*
 box.on('init', function (App, Config, done) {
     config = Config.passport;
     done(null, 'passports initiated');
 });
+*/
 
-exports.init = passports = function( App, Config, initDone ){
+box.on('init',  function( App, Config, initDone ){
     app = App;
     config = Config.passport;
 
-    app.use(passport.initialize());
-    app.use(passport.session());
+    app.get('/authenticate/:provider',   authenticate );
+    app.get('/logout',                   logout );
+    app.get('/auth-after-success',       auth_after_success);
+    app.post('/secret/ping-email',       ping_email);
+    app.get('/confirm/alabala/:emailID', confirm_email);
 
     box.utils.async.forEach( config.passports, setPassport, function(err, result){
-
-        app.get('/authenticate/:provider',   authenticate );
-        app.get('/logout',                   logout );
-        app.get('/auth-after-success',       auth_after_success);
-        app.post('/secret/ping-email',       ping_email);
-        app.get('/confirm/alabala/:emailID', confirm_email);
-
         debug('initialised.')
         initDone(null, result);
     } );
-
-
-    return true;
-};
+});

@@ -19,3 +19,4 @@ box.on('init', function (App, Config, done) {
   });
   done(null, 'server initialised');
 });
+

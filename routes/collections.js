@@ -131,12 +131,9 @@ exports.init = function( App, Config ){
                     if( !waterfall.collection ){
                         res.redirect( '/coll' );
                     }
-
                     var collection =  waterfall.collection || {}; //_.first(result, function(element, pos, all){ return element.type == 'collection';  })[0] || {};
                     var links      =  waterfall.links || []; //_.first(result, function(element, pos, all){ return element.type == 'links-list';  })[0] || [];
                     var owner      =  req.user && req.user._id ==  collection.owner;
-
-
 /*
                     for(var i=0; results[1] &&  i < results[1].length; i++ ){
                         if( !results[1][i].imagePos ){

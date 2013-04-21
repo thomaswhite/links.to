@@ -42,7 +42,7 @@
 {% for link in grid %}
   <div class="blocked-link">
     {{ macros.link_content( link, canEdit, canDelete, collection) }}
-    {{ macros.link_under_edit( link, canEdit, canDelete, collection) }}
+    {# macros.link_under_edit( link, canEdit, canDelete, collection) #}
     {{ macros.link_tag_row( link, canEdit, canDelete, collection) }}
   </div>
   {% else %}

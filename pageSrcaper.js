@@ -52,6 +52,9 @@ var requestDefaults = {
 };
 
 function prop_or_array( o, prop, value ){
+    if( prop.indexOf('.') > -1 ){
+        prop = prop.split('.').join('_');
+    }
     if( !o[prop]){
         o[prop] = value;
     }else if( typeof o[prop] == 'array' ){
@@ -144,7 +147,8 @@ function scrape_head( token, $, uri,  callback ){
         og = meta.og,
         fb = meta.fb,
         aURL =  _.pick(URL.parse(uri), 'protocol', 'host', 'port'),
-        baseURL = URL.format(aURL);
+        baseURL = URL.format(aURL),
+        currentType = '';
 
     head.title = $($head.find('title')).text();  // $(body.find('h1').text())
 
@@ -160,7 +164,9 @@ function scrape_head( token, $, uri,  callback ){
             elem.attribs.href = URL.resolve( baseURL, elem.attribs.href );
         }
         delete elem.attribs.rel;
-        prop_or_array( head.links, rel, elem.attribs  );
+        if( elem.attribs.href  ){
+            prop_or_array( head.links, rel, elem.attribs );
+        }
         //head.links.push( elem.attribs );
     });
 

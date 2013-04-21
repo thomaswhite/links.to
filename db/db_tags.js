@@ -15,6 +15,7 @@ box.on('db.init', function( monk, Config, done ){
     var   settings = Config.db
         , common_config = Config.common
         , Tags = monk.get('tags')
+        , Dummy = monk.get('dummy');
         ;
 
     // Returns an array of the links for a collection
@@ -25,7 +26,7 @@ box.on('db.init', function( monk, Config, done ){
             newTags = [];
 
         if( newLink.tags ){
-            async.forEach(newLink.tags, function(tag, cb){
+            box.utils.async.forEach(newLink.tags, function(tag, cb){
                     Tags.insert(
                         {
                             tag: tag.word,
@@ -56,7 +57,7 @@ box.on('db.init', function( monk, Config, done ){
         if( !link_id ){
             throw "Link ID expected!";
         }else{
-            Tags.remove( { link_ID: Dummy.id(link_id) }, callback );
+            Tags.remove( { link_ID: link_id }, callback );
         }
     });
 

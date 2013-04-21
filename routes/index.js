@@ -23,12 +23,9 @@ exports.init = function( App, Config ){
     config = Config;
     app = App;
 
-    app.get('/', function( req, res ){
-            res.render('layout', { title: 'Express' });
-        }
-    );
-
-
+    this.top = function( req, res ){
+        res.render('layout', { title: 'Express' });
+    }
     this.collections = require('./collections.js').init(App, Config, box);
     this.links       = require('./links.js').init(App, Config, box);
 
