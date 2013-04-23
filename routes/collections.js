@@ -43,7 +43,7 @@ function collectionList( req, res, next, filter ){
     filter = filter || {};
     box.parallel('collections.list', filter, 0, [], function( err, result ){
         var collections =  _.first(result, function(element, pos, all){ return element.type == 'collections-list';  })[0];
-        debug( "Collections list: \n", box.utils.inspect( result ));
+ //       debug( "Collections list: \n", box.utils.inspect( result ));
 //            debug( "user: \n", app.locals.inspect( app.locals.user ));
         res.render('collections-list', {
             title: 'All collection',
@@ -61,119 +61,141 @@ function collectionList( req, res, next, filter ){
     });
 };
 
+function Favorite  (req, res, next ){
+    if( !app.locals.user || app.locals.user._id ){
+        next();
+    }else{
+        next();
+    }
+};
+
+function Mine (req, res, next ){
+    if( !app.locals.user || !app.locals.user._id ){
+        next();
+    }else{
+        collectionList(  req, res, next, {owner: '' + app.locals.user._id || 0});
+    }
+};
+
+function All ( req, res, next  ){
+    collectionList(  req, res, next );
+};
 
 
-exports.init = function( App, Config ){
+function Add(req, res) {
+    var referer = req.headers.referer;
+    var coll_name = req.body.collectionName || 'New collection';
+    if( !req.user ){
+        context.Page2(req, res, 'add-button', {
+            add_link: '/coll/new'
+        });
+    }else{
+        var coll = newCollection(req.user._id, coll_name.trim());
+        box.emit('collection.add', coll, function(err, collection ) {
+            if (err) {
+                context.notFound(res, 'db error while creating new collection.');
+            }else {
+                box.parallel('collection.added',  collection, function(err, result){
+                    res.redirect( referer  );
+                });
+            }
+        });
+    }
+};
+
+function Delete (req, res) {
+    var referer = req.headers.referer;
+    var coll_id = req.params.id;
+    box.parallel('collection.delete', coll_id, function(err, aResult){
+        res.redirect( req.query.back );
+    });
+    // todo: get the id of current collection to return back after deletion
+};
+
+
+
+function Get (req, res) {
+    var referer = req.headers.referer,
+        collID = req.params.id;
+
+    box.waterfall( 'collection.get', {coll_id: collID}, function( err, waterfall ){
+        if ( err ){
+            context.notFound(res);
+        }else{
+
+            if( !waterfall.collection ){
+                res.redirect( '/coll' );
+            }
+            var collection =  waterfall.collection || {}; //_.first(result, function(element, pos, all){ return element.type == 'collection';  })[0] || {};
+            var links      =  waterfall.links || []; //_.first(result, function(element, pos, all){ return element.type == 'links-list';  })[0] || [];
+            var owner      =  req.user && req.user._id ==  collection.owner;
+            /*
+             for(var i=0; results[1] &&  i < results[1].length; i++ ){
+             if( !results[1][i].imagePos ){
+             results[1][i].imagePos = 0;
+             }
+             }
+             */
+            //                   debug( "waterfall: \n",  waterfall );
+            //                  debug( "user: \n", app.locals.inspect( app.locals.user ));
+            res.render('collection', {
+                title: 'Collection "' + (collection && collection.title ? collection.title : ' not found' ) + '"',
+                user: req.user,
+                grid: links,
+                canEdit: owner,
+                canDelete: owner,
+                linkUnderEdit :  req.query.editLink,
+                collection: collection || {},
+                referer: referer,
+                crumbs : breadcrumbs.make(req, {
+                    owner:owner,
+                    coll:{id:collection._id, title:collection.title }
+                }),
+                addButton:{
+                    link: '/link/new/' + collID,
+                    name: 'links',
+                    placeholder:'Paste links',
+                    type:'input',
+                    buttonText:'Add Link',
+                    hidden:[
+                        {name:"add2coll", value : collID }
+                    ]
+                }
+
+            });
+
+
+        }
+    });
+};
+
+
+box.on('init', function (App, Config, done) {
     app = App;
     config = Config;
+    done(null, 'routers collections.js');
+});
 
-    this.favorite  = function(req, res, next ){
-        if( !app.locals.user || app.locals.user._id ){
-            next();
-        }else{
-            next();
-        }
-    };
-
-    this.mine = function(req, res, next ){
-        if( !app.locals.user || !app.locals.user._id ){
-            next();
-        }else{
-            collectionList(  req, res, next, {owner: '' + app.locals.user._id || 0});
-        }
-    };
-
-    this.all = function( req, res, next  ){
-        collectionList(  req, res, next );
-    };
+box.on('atach-paths', function (app, config,  done) {
+    app.use(
+        box.middler()
+            .get('/coll/mine',       Mine)
+            .get('/coll',            All)
+            .post('/coll/new',       Add)
+            .get(['/coll/:id', '/w/c/:id'], Get)
+            .get('/coll/:id/delete', Delete)
+            .handler
+    );
 
 
-    this.add = function(req, res) {
-        var referer = req.headers.referer;
-        var coll_name = req.body.collectionName || 'New collection';
-        if( !req.user ){
-            context.Page2(req, res, 'add-button', {
-                add_link: '/coll/new'
-            });
-        }else{
-            var coll = newCollection(req.user._id, coll_name.trim());
-            box.emit('collection.add', coll, function(err, collection ) {
-                if (err) {
-                    context.notFound(res, 'db error while creating new collection.');
-                }else {
-                    box.parallel('collection.added',  collection, function(err, result){
-                        res.redirect( referer  );
-                    });
-                }
-            });
-        }
-    };
+//    app.get('/favorites',        routes.collections.favorites);
+//    app.get('/favorites/mine',   routes.collections.favorites_mine);
 
-    this.delete = function(req, res) {
-        var referer = req.headers.referer;
-        var coll_id = req.params.id;
-        box.parallel('collection.delete', coll_id, function(err, aResult){
-            res.redirect( req.query.back );
-        });
-        // todo: get the id of current collection to return back after deletion
-    };
+    //    app.get('/favorites',        routes.collections.favorites);
+    //    app.get('/favorites/mine',   routes.collections.favorites_mine);
 
+    //    app.get('/tags',        routes.collections.tags);
+    //    app.get('/tags/mine',   routes.collections.tags_mine);
 
-    this.get = function(req, res) {
-        var referer = req.headers.referer,
-            collID = req.params.id;
-
-        box.waterfall( 'collection.get', {coll_id: collID}, function( err, waterfall ){
-                if ( err ){
-                    context.notFound(res);
-                }else{
-
-                    if( !waterfall.collection ){
-                        res.redirect( '/coll' );
-                    }
-                    var collection =  waterfall.collection || {}; //_.first(result, function(element, pos, all){ return element.type == 'collection';  })[0] || {};
-                    var links      =  waterfall.links || []; //_.first(result, function(element, pos, all){ return element.type == 'links-list';  })[0] || [];
-                    var owner      =  req.user && req.user._id ==  collection.owner;
-/*
-                    for(var i=0; results[1] &&  i < results[1].length; i++ ){
-                        if( !results[1][i].imagePos ){
-                            results[1][i].imagePos = 0;
-                        }
-                    }
-*/
- //                   debug( "waterfall: \n",  waterfall );
-  //                  debug( "user: \n", app.locals.inspect( app.locals.user ));
-                    res.render('collection', {
-                        title: 'Collection "' + (collection && collection.title ? collection.title : ' not found' ) + '"',
-                        user: req.user,
-                        grid: links,
-                        canEdit: owner,
-                        canDelete: owner,
-                        linkUnderEdit :  req.query.editLink,
-                        collection: collection || {},
-                        referer: referer,
-                        crumbs : breadcrumbs.make(req, {
-                            owner:owner,
-                            coll:{id:collection._id, title:collection.title }
-                        }),
-                        addButton:{
-                            link: '/link/new/' + collID,
-                            name: 'links',
-                            placeholder:'Paste links',
-                            type:'input',
-                            buttonText:'Add Link',
-                            hidden:[
-                                {name:"add2coll", value : collID }
-                            ]
-                        }
-
-                    });
-
-
-                }
-            });
-    };
-
-
-    return this;
-};
+    done(null, 'atach-paths: collections.js'  );
+});

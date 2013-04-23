@@ -8,7 +8,7 @@
 
 var async   = require('async');
 var logger  = require('nlogger').logger(module);
-var breadcrumbs = require('./breadcrumbs.js');
+var breadcrumbs = require('./../routes/breadcrumbs.js');
 var context;
 
 module.exports = {
