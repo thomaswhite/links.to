@@ -8,9 +8,9 @@ var debug = require('debug')('linksTo:passports');
 
 var box = require('./box.js')
     , passport = box.passport   // = require('passport')
-    , _ = require('lodash')
     , utils = require('./tw-utils.js')
     , gravatar = require('gravatar')
+    , dummyStrategy = require('passport-dummy').Strategy
 
     , config
     , app
@@ -20,7 +20,7 @@ var box = require('./box.js')
 
 function userGravatar ( User, Email, replace ){
     var settings = app.locals.config.common.gravatar;
-    var settings96 = _.defaults({s:96}, settings );
+    var settings96 = box.utils._.defaults({s:96}, settings );
     var email = User.email || Email || 'noemail@nodomain.com';
 
     if( replace || !User.gravatarURL  ){
@@ -189,6 +189,19 @@ box.on('init',  function( App, Config, initDone ){
     app.get('/auth-after-success',       auth_after_success);
     app.post('/secret/ping-email',       ping_email);
     app.get('/confirm/alabala/:emailID', confirm_email);
+
+    passport.use(new dummyStrategy(
+        function(done) {
+            return done(null, {username: 'dummy'});
+        }
+    ));
+    app.post('/login/dummy',
+        passport.authenticate('dummy', { failureRedirect: '/login' }),
+        function(req, res) {
+            res.redirect( config.passport_after );
+        }
+    );
+
 
     box.utils.async.forEach( config.passports, setPassport, function(err, result){
         debug('initialised.')
