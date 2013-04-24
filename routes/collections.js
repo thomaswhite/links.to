@@ -173,7 +173,7 @@ function Get (req, res) {
 box.on('init', function (App, Config, done) {
     app = App;
     config = Config;
-    done(null, 'routers collections.js');
+    done(null, 'routers collections.js initialised');
 });
 
 box.on('atach-paths', function (app, config,  done) {
@@ -197,5 +197,5 @@ box.on('atach-paths', function (app, config,  done) {
     //    app.get('/tags',        routes.collections.tags);
     //    app.get('/tags/mine',   routes.collections.tags_mine);
 
-    done(null, 'atach-paths: collections.js'  );
+    done(null, 'route collections.js attached'  );
 });

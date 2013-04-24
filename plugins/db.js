@@ -19,6 +19,7 @@ var   box = require('../box.js')
 
 
 box.on('init', function (App, Config, initDone) {
+    var ts   = new Date().getTime();
     app = App;
     settings = Config.db;
     common_config = Config.common;
@@ -57,7 +58,8 @@ box.on('init', function (App, Config, initDone) {
     search.once('error', initDone );
     search.once('end', function () {
         box.parallel('db.init', monk, Config, function(err, result){
-            result.push( 'db.js initialised' );
+            var ts2   = new Date().getTime();
+            result.push( 'db initialised: ' + (ts2 - ts) + ' ms')     ;
             initDone(null, result );
         });
     });

@@ -40,7 +40,8 @@ function userGravatar ( User, Email, replace ){
 function setPassport( settings, cb ){
     var strategy = require(settings.require).Strategy,
         pick = settings.pick,
-        name = settings.name;
+        name = settings.name,
+        ts   = new Date().getTime();
 
     function save_Picked_data( originalProfile, Profile, callback ){
         Profile.provider = name;
@@ -87,8 +88,10 @@ function setPassport( settings, cb ){
     passport.use(new strategy( settings, settings.type === 'oauth2' ? handleConnection_oauth2 : handleConnection));
     app.get('/authenticate/'+ name,         passport.authenticate(name));
     app.get('/auth/' + name + '/callback',  passport.authenticate(name,  config.passport_after));
-    debug("openID:%s ready", name );
-    cb( null, name);
+    // debug("openID:%s ", name );
+    var ts2 = new Date().getTime();
+
+    cb( null, 'OpenID ' + name + ' initialised ' + ( ts2 - ts > 5 ?(' - ' + ts2 - ts ):'' ));
 }
 function ping_email ( req, res){
     if( req.user && req.body.email){
@@ -173,14 +176,8 @@ function logout (req, res){
     }
 };
 
-/*
-box.on('init', function (App, Config, done) {
-    config = Config.passport;
-    done(null, 'passports initiated');
-});
-*/
-
 box.on('init',  function( App, Config, initDone ){
+    var ts   = new Date().getTime();
     app = App;
     config = Config.passport;
 
@@ -195,16 +192,17 @@ box.on('init',  function( App, Config, initDone ){
             return done(null, {username: 'dummy'});
         }
     ));
-    app.post('/login/dummy',
+    app.get('/login/dummy',
         passport.authenticate('dummy', { failureRedirect: '/login' }),
         function(req, res) {
-            res.redirect( config.passport_after );
+            res.redirect( config.passport_after.successRedirect );
         }
     );
 
 
-    box.utils.async.forEach( config.passports, setPassport, function(err, result){
-        debug('initialised.')
+    box.utils.async.map( config.passports, setPassport, function(err, result){
+        var ts2   = new Date().getTime();
+        result.push( 'Passports initialised: ' + (ts2 - ts) + ' ms')     ;
         initDone(null, result);
     } );
 });

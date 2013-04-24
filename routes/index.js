@@ -5,7 +5,6 @@
 
 var box = require('../box.js')
     , _ = require('lodash')
-    , debug = require('debug')('linksTo:view')
     , breadcrumbs = require('./breadcrumbs.js')
     , config
     , app
@@ -18,13 +17,13 @@ require('./links');
 
 
 function top ( req, res ){
-    res.render('layout', { title: 'Express' });
+    res.render('layout', { title: '' });
 }
 
 box.on('init', function (App, Config, done) {
     app = App;
     config = Config;
-    done(null, 'routers ready');
+    done(null, 'routers initialised');
 });
 
 box.on('atach-paths', function (app, config,  done) {
@@ -33,7 +32,7 @@ box.on('atach-paths', function (app, config,  done) {
          .get('/', top)
          .handler
     );
-    done(null, 'atach-paths: index'  );
+    done(null, 'routes index attached'  );
 });
 
 

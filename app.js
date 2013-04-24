@@ -28,21 +28,20 @@ config.less.paths.push ( path.join(bootstrapPath, 'less') );
 
 box.parallel('init', app, config, function(err, result){
     if (err) return box.emit('error', err);
-    debug(  'Init results:' +  box.utils.inspect(result) );
+    debug( "%s", box.utils.inspect(result, { showHidden: true, depth: null, colors:true }) );
 
     box.parallel('atach-paths', app, config, function(err2, result2){
         if (err) return box.emit('error', err2);
-        debug(  'Atach-path results:' +  box.utils.inspect(result2) );
+        debug( "atach-paths: %j", result2 );
 
         app.use(express.static(path.join(__dirname, 'public')));
         app.use(require('less-middleware')( config.less ));
     //        app.use('/img', express.static(path.join(bootstrapPath, 'img')));
 
 
-        box.parallel('listen', function (err, result) {
-            debug( "Listen event results:" +  box.utils.inspect(result ));
-            debug('Links.To server listening on port ' + app.get('port'));
-            console.log('Links.To server listening on port ' + app.get('port') );
+        box.parallel('listen', function (err, result3) {
+            debug( "Links.To server : %j", result3 );
+            //console.log('Links.To server listening on port ' + app.get('port') );
         });
 
     });

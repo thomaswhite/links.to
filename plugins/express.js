@@ -38,14 +38,13 @@ box.on('init', function (App, Config, done) {
         }));
   });
 
-
-    //  box.server = http.createServer(app);
   box.app.on('error', box.emit.bind(box, 'error'));
 
   box.on('listen', function (cb) {
        box.app.listen(config.port, function () {
-          if (cb) box.once('listening', cb);
-          box.emit('listening');
+//          if (cb) box.once('listening', cb);
+//          box.emit('listening');
+            cb(null, 'listening on port #' +config.port );
        });
   });
 

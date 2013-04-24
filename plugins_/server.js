@@ -13,8 +13,9 @@ box.on('init', function (App, Config, done) {
   box.on('listen', function (cb) {
     box.server.listen(config.port, function () {
       box.server.port = box.server.address().port;
-      if (cb) box.once('listening', cb);
-      box.emit('listening', 'listening' );
+      //if (cb) box.once('listening', cb);
+      // box.emit('listening', address().port );
+      cb(null, 'listening on port #' + box.server.port);
     });
   });
   done(null, 'server initialised');

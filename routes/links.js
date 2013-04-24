@@ -104,7 +104,7 @@ box.on('init', function (App, Config, done) {
     app = App;
     config = Config;
     pageScraper = require('../pageSrcaper.js').init({proxy: config.PROXY}, box );
-    done(null, 'routers links.js');
+    done(null, 'routers links.js initialised');
 });
 
 box.on('atach-paths', function (app, config,  done) {
@@ -114,5 +114,5 @@ box.on('atach-paths', function (app, config,  done) {
            .get('/link/:id/delete/:coll?',  Delete)
            .handler
     );
-    done(null, 'atach-paths: links.js'  ); //
+    done(null, 'atach-paths: links.js attached'  ); //
 });
