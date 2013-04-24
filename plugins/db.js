@@ -29,18 +29,18 @@ box.on('init', function (App, Config, initDone) {
         monk :  monk,
         Dummy : monk.get('dummy')
     }
+    var AuthTemp   = monk.get('auth_temp');
+    AuthTemp.index({expires: 1}, { expireAfterSeconds: 60 });
+    AuthTemp.options.safe = false;
+
+    var session = monk.get(settings.collection);
+    session.index({expires: 1}, { expireAfterSeconds: common_config.session.maxAgeSeconds });
+    session.options.safe = false;
 
     box.on('db.init', function( monk2, Config, done ){
         var settings = Config.db
             , common_config = Config.common;
 
-        var AuthTemp   = monk2.get('auth_temp');
-        AuthTemp.index({expires: 1}, { expireAfterSeconds: 60 });
-        AuthTemp.options.safe = false;
-
-        var session = monk2.get(settings.collection);
-        session.index({expires: 1}, { expireAfterSeconds: common_config.session.maxAgeSeconds });
-        session.options.safe = false;
 
         done(null, 'db:session and db:authTemp initialised.');
     });
@@ -59,7 +59,7 @@ box.on('init', function (App, Config, initDone) {
     search.once('end', function () {
         box.parallel('db.init', monk, Config, function(err, result){
             var ts2   = new Date().getTime();
-            result.push( 'db initialised: ' + (ts2 - ts) + ' ms')     ;
+            result.push( 'plugin db initialised: ' + (ts2 - ts) + ' ms')     ;
             initDone(null, result );
         });
     });

@@ -41,12 +41,12 @@ box.on('init', function (App, Config, done) {
   box.app.on('error', box.emit.bind(box, 'error'));
 
   box.on('listen', function (cb) {
-       box.app.listen(config.port, function () {
+        box.server = box.app.listen(config.port); //      , function () {
 //          if (cb) box.once('listening', cb);
-//          box.emit('listening');
-            cb(null, 'listening on port #' +config.port );
-       });
+        box.emit('listening', box.server);
+        cb(null, 'listening on port #' +config.port );
+//       });
   });
 
-  done(null, 'express initialised');
+  done(null, 'plugin express initialised');
 });

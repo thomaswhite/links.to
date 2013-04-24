@@ -6,5 +6,5 @@ box.middler = middler;
 
 box.on('init', function (app, conf, done) {
   box.middleware = middler(box.app);
-  done(null, 'middleware initialised');
+  done(null, 'plugin middleware initialised');
 });

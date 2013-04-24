@@ -23,7 +23,7 @@ function top ( req, res ){
 box.on('init', function (App, Config, done) {
     app = App;
     config = Config;
-    done(null, 'routers initialised');
+    done(null, 'routers index.js initialised');
 });
 
 box.on('atach-paths', function (app, config,  done) {

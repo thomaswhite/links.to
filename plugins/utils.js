@@ -49,5 +49,5 @@ box.on('init', function (app, conf, done) {
         shorterID: ShorterID,
         async : async
      };
-    done(null, 'utils initialised');
+    done(null, 'plugin utils initialised');
 });
