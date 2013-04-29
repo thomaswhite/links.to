@@ -53,7 +53,8 @@
     "ss-less": "~0.1.1",
     "ss-console": "~0.1.3",
     "ss-stylus": "~0.1.6",
-    "optimist": "~0.4.0"
+    "optimist": "~0.4.0",
+    "passport-http": "~0.2.1"
   },
   "devDependencies": {
     "nodelint": "~0.6",

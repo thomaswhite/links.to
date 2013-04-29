@@ -4,10 +4,24 @@ var box = require('../box.js')
 
 box.ss = ss;
 
+ss.session.store.use('redis');
+ss.session.options.maxAge = 8640000;
+
 // Code & Template Formatters
 ss.client.formatters.add(require('ss-less'));
 ss.client.formatters.add(require('ss-stylus'));
 ss.client.templateEngine.use(require('ss-hogan'));
+
+
+ss.ws.transport.use('engineio', {
+    client: {
+        transports: ['websocket', 'htmlfile', 'xhr-polling', 'jsonp-polling']
+    },
+    server: function(io){
+        io.set('log level', 4)
+    }
+});
+
 
 box.on('init', function (app, config, done) {
   // SS_ENV=production
