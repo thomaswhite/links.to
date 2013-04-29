@@ -27,6 +27,8 @@ var express = box.express //require('express')
 require('./socketstream')
 
 config.less.paths.push ( path.join(bootstrapPath, 'less') );
+config.__dirname = __dirname;
+
 
 box.parallel('init', app, config, function(err, result){
     if (err) return box.emit('error', err);
@@ -36,8 +38,7 @@ box.parallel('init', app, config, function(err, result){
         if (err) return box.emit('error', err2);
         debug( "atach-paths: %s", box.utils.inspect(result2) );
 
-        app.use(express.static(path.join(__dirname, 'public')));
-        app.use(require('less-middleware')( config.less ));
+//        app.use(express.static(path.join(__dirname, 'public')));
     //        app.use('/img', express.static(path.join(bootstrapPath, 'img')));
 
         box.parallel('listen', function (err, result3) {

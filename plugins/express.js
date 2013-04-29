@@ -4,7 +4,7 @@ var box = require('../box.js')
     , mongoStore = require('connect-mongo')(express)
     , cons = require('consolidate')
     , swig = require('swig')
-
+    , path = require('path')
 
 //    , http = require('http')
     , config;
@@ -39,6 +39,13 @@ box.on('init', function (App, Config, done) {
   });
 
   box.app.on('error', box.emit.bind(box, 'error'));
+
+  box.on('atach-paths', function (app, config, cb) {
+      app.use(express.static(path.join(config.__dirname, 'public')));
+      app.use(require('less-middleware')( config.less ));
+      cb(null, path.join(config.__dirname, 'public') + ' attached' );
+  });
+
 
   box.on('listen', function (cb) {
         box.server = box.app.listen(config.port); //      , function () {
