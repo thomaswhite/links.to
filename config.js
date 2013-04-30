@@ -20,6 +20,7 @@ exports.init = function(  env ){
         .argv()
         .env('links_')
         .env('HTTP_')   // HTTP_PROXY
+        .env('HTTP')   // HTTP_PROXY
         .etc()
         .pkg()
         .add({
@@ -36,11 +37,13 @@ exports.init = function(  env ){
                 prefix:  ['/stylesheets', '/less']
             },
             db:{
-                dbModules: path.join(mainDir, 'db', '*.js'),
+                dbModules: path.join(mainDir, 'db', '*.js')
             }
         })
         .folder(configDir)
     ;
+    var json = etc.toJSON();
+    json.request.proxy =  json.PROXY;
 
-    return etc.toJSON();
+    return json;
 };

@@ -168,10 +168,6 @@ body {
   background: url(../images/icons/24/user-3.png) no-repeat center;
   display: inline-block;
 }
-.missing-user32 {
-  background: url(../images/icons/32/user-3.png) no-repeat center;
-  display: inline-block;
-}
 .missing-user96 {
   background: url(../images/icons/96/user-3.png) no-repeat center;
   width: 96px;

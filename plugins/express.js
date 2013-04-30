@@ -42,7 +42,6 @@ box.on('init', function (App, Config, done) {
 
   box.on('atach-paths', function (app, config, cb) {
       app.use(express.static(path.join(config.__dirname, 'public')));
-      app.use(require('less-middleware')( config.less ));
       cb(null, path.join(config.__dirname, 'public') + ' attached' );
   });
 

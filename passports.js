@@ -189,7 +189,12 @@ box.on('init',  function( App, Config, initDone ){
 
     passport.use(new dummyStrategy(
         function(done) {
-            return done(null, {username: 'dummy'});
+            return done(null, {
+                username: 'dummy',
+                "active_provider" : "dummy",
+                "email" : "dummy@dummy.com",
+                _id:1
+            });
         }
     ));
     app.get('/login/dummy',

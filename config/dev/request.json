@@ -1,0 +1,12 @@
+{
+    "uri": ""
+    , "headers": {
+        "User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.22 (KHTML, like Gecko) Chrome/25.0.1364.172 Safari/537.22"
+    }
+    , "method":"GET"
+    , "followRedirect" : true
+    , "followAllRedirects" : true
+    , "maxRedirects" : 10
+    , "encoding" : "UTF-8"
+    , "timeout": 10000
+}    

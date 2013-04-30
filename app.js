@@ -38,6 +38,8 @@ box.parallel('init', app, config, function(err, result){
         if (err) return box.emit('error', err2);
         debug( "atach-paths: %s", box.utils.inspect(result2) );
 
+        app.use(require('less-middleware')( config.less ));
+
 //        app.use(express.static(path.join(__dirname, 'public')));
     //        app.use('/img', express.static(path.join(bootstrapPath, 'img')));
 
