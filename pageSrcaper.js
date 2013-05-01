@@ -31,9 +31,6 @@ var  _ = require('lodash')
         stream: process.stdout,   // Stream to write to, or null
         maxLength: 8192           // Truncate output if longer
     })
-
-
-
     , emitter
    ;
 
@@ -310,16 +307,7 @@ exports.init = function ( requestOptions, mainEmitter ) {
         if ( !request_options.uri ) {
             callback(new Error('You must supply an url.'), null);
         }else{
-            request.head(request_options, function (err, response, body) {
-                 var h = response.headers,
-                    headers = {
-                        server: h.server,
-                        contentType : h['content-type'],
-                        modified: h['last-modified'],
-                        etag: h.etag
-                     };
 
-            });
             request(request_options, function (err, response, body) {
                 body = body.replace(/<(\/?)script/g, '<$1nobreakage');
 

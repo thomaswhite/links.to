@@ -193,6 +193,7 @@ box.on('init',  function( App, Config, initDone ){
                 username: 'dummy',
                 "active_provider" : "dummy",
                 "email" : "dummy@dummy.com",
+                "screen_name": "Dummy User",
                 _id:1
             });
         }

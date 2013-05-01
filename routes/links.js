@@ -7,18 +7,16 @@ var  box = require('../box.js')
    , _ = require('lodash')
    , debug = require('debug')('linksTo:view.links')
    , breadcrumbs = require('./breadcrumbs.js')
-   ,  ShortId  = require('shortid').seed(96715652)
+   , ShortId  = require('shortid').seed(96715652)
    , request = require('request')
-   , cheerio = require('cheerio')
    , pageScraper
+   , requestDefaults = {}
 // var sanitize = require('validator').sanitize;
 
 
    , config
    ,  app
     ;
-
-
 
 
 function ShorterID(){
@@ -61,6 +59,25 @@ function Add (req, res) {
         }
     });
 
+
+    request.head(request_options, function (err, response, body) {
+        var h, found = {};
+        if( response ){
+            h = response.headers;
+            found.headers = {
+                server: h.server,
+                contentType : h['content-type'],
+                modified: h['last-modified'],
+                etag: h.etag
+            };
+            found.state = 'pinged';
+        }else{
+           found.state = 'not-found';
+        };
+        var Link = newLink( req.user._id, req.user.screen_name, found );
+    });
+
+
     pageScraper.emit( 'pageScrape', urls[0], token, function(err){
 
     });
@@ -93,17 +110,18 @@ function newLink (owner, user_screen_name, data ){
         owner: owner,
         imagePos:0,
         updated : new Date(),
-        owner_screen_name: user_screen_name
+        owner_screen_name: user_screen_name,
+        state: 'pinged'
     };
     _.merge( link, data);
     return link;
 };
 
-
 box.on('init', function (App, Config, done) {
     app = App;
     config = Config;
-    pageScraper = require('../pageSrcaper.js').init({proxy: config.PROXY}, box );
+    _.defaults(requestDefaults, config.request );
+    pageScraper = require('../pageSrcaper.js').init(requestDefaults, box );
     done(null, 'routers links.js initialised');
 });
 
