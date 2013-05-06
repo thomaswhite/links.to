@@ -11,6 +11,7 @@ var  box = require('../box.js')
    , request = require('request')
    , pageScraper
    , requestDefaults = {}
+   , url = require('url')
 // var sanitize = require('validator').sanitize;
 
 
@@ -24,25 +25,25 @@ function ShorterID(){
 };
 
 
+
+
 // app.post('/link/new/:coll?', function(req, res)
 function Add (req, res) {
     var referer = req.headers.referer;
     var post = req.body.links;
     //post.body = sanitize(post.body).xss().trim();
     var urls = post.replace(/\r/g,'').split(/\n/); // http://beckism.com/2010/09/splitting-lines-javascript/
-    var token =  ShorterID();
+    var URL = urls[0];
+    var request_options = _.merge( {}, config.request, {uri:URL } );
 
-    pageScraper.on( 'pageScrape.error', function(err, resultToken ){
-        if( resultToken == token ){
-            console.error( err );
-        }
+    box.on( 'link.ready', function( newURL, Link ){
+       res.redirect( newURL  );
     });
-    pageScraper.on( 'pageScrape.notOK', function(err, resultToken, response ){
-        if( resultToken == token ){
-            console.error( err );
-        }
-        //response.statusCode;
+
+    box.on( 'link.not-found', function( newURL, Link ){
+        res.redirect( newURL  );
     });
+
 
     pageScraper.on( 'pageScrape.ready', function( resultToken, Results ){
         if( resultToken == token ){
@@ -59,9 +60,11 @@ function Add (req, res) {
         }
     });
 
-
     request.head(request_options, function (err, response, body) {
-        var h, found = {};
+        var h,
+            found = {url:URL},
+            oURL = url.parse( URL )
+            ;
         if( response ){
             h = response.headers;
             found.headers = {
@@ -73,14 +76,39 @@ function Add (req, res) {
             found.state = 'pinged';
         }else{
            found.state = 'not-found';
+           found.title = "Page not found";
         };
+
+        // TODO add a temp link for the missing URLs
         var Link = newLink( req.user._id, req.user.screen_name, found );
+        box.emit('link.queue', Link, req.body.add2coll, function(err, addedLink ) {
+            if (err) {
+                throw err;
+            }else {
+                box.parallel('link.queued',  addedLink, function(err2, result2){
+                    // now the link exists and it has been added to its collection
+                    if( found.state == 'pinged' ){
+                        box.parallel( 'pageScrape', request_options, function(err, Results){
+                            if (err) {
+                                throw err;
+                            }else {
+                                var updatedLink = Results[0];
+                                box.parallel('link.added',  updatedLink, function(err, result){
+                                    // tags has been added
+                                    box.emit('link.ready',referer, updatedLink  );
+                                });
+                            }
+                        });
+                    }else{
+                        box.emit('link.not-found',referer, addedLink  );
+                    }
+                });
+            }
+        });
+
     });
 
 
-    pageScraper.emit( 'pageScrape', urls[0], token, function(err){
-
-    });
 };
 function Delete (req, res) {
     var referer = req.headers.referer;
@@ -121,7 +149,7 @@ box.on('init', function (App, Config, done) {
     app = App;
     config = Config;
     _.defaults(requestDefaults, config.request );
-    pageScraper = require('../pageSrcaper.js').init(requestDefaults, box );
+    pageScraper = require('../pageSrcaper.js').init(requestDefaults );
     done(null, 'routers links.js initialised');
 });
 

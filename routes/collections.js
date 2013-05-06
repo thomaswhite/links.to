@@ -118,17 +118,41 @@ function Get (req, res) {
     var referer = req.headers.referer,
         collID = req.params.id;
 
-    box.waterfall( 'collection.get', {coll_id: collID}, function( err, waterfall ){
+    box.emit( 'collection.get.one', collID, function( err, collection ){
         if ( err ){
             context.notFound(res);
         }else{
-
-            if( !waterfall.collection ){
+            if( !collection ){
                 res.redirect( '/coll' );
             }
-            var collection =  waterfall.collection || {}; //_.first(result, function(element, pos, all){ return element.type == 'collection';  })[0] || {};
-            var links      =  waterfall.links || []; //_.first(result, function(element, pos, all){ return element.type == 'links-list';  })[0] || [];
             var owner      =  req.user && req.user._id ==  collection.owner;
+            box.emit( 'collection.get.links', collection, {}, function(err2, links){
+                //                  debug( "user: \n", app.locals.inspect( app.locals.user ));
+                res.render('collection', {
+                    title: 'Collection "' + (collection && collection.title ? collection.title : ' not found' ) + '"',
+                    user: req.user,
+                    grid: links,
+                    canEdit: owner,
+                    canDelete: owner,
+                    linkUnderEdit :  req.query.editLink,
+                    collection: collection || {},
+                    referer: referer,
+                    crumbs : breadcrumbs.make(req, {
+                        owner:owner,
+                        coll:{id:collection._id, title:collection.title }
+                    }),
+                    addButton:{
+                        link: '/link/new/' + collID,
+                        name: 'links',
+                        placeholder:'Paste links',
+                        type:'input',
+                        buttonText:'Add Link',
+                        hidden:[
+                            {name:"add2coll", value : collID }
+                        ]
+                    }
+                });
+            });
             /*
              for(var i=0; results[1] &&  i < results[1].length; i++ ){
              if( !results[1][i].imagePos ){
@@ -136,35 +160,6 @@ function Get (req, res) {
              }
              }
              */
-            //                   debug( "waterfall: \n",  waterfall );
-            //                  debug( "user: \n", app.locals.inspect( app.locals.user ));
-            res.render('collection', {
-                title: 'Collection "' + (collection && collection.title ? collection.title : ' not found' ) + '"',
-                user: req.user,
-                grid: links,
-                canEdit: owner,
-                canDelete: owner,
-                linkUnderEdit :  req.query.editLink,
-                collection: collection || {},
-                referer: referer,
-                crumbs : breadcrumbs.make(req, {
-                    owner:owner,
-                    coll:{id:collection._id, title:collection.title }
-                }),
-                addButton:{
-                    link: '/link/new/' + collID,
-                    name: 'links',
-                    placeholder:'Paste links',
-                    type:'input',
-                    buttonText:'Add Link',
-                    hidden:[
-                        {name:"add2coll", value : collID }
-                    ]
-                }
-
-            });
-
-
         }
     });
 };

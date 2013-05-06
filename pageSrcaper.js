@@ -10,8 +10,8 @@ var  _ = require('lodash')
    , request = require('request')
    , cheerio = require('cheerio')
    , keyWords = require('./keyWords')
+   , emitter = require('./box.js')
 
-   , Emitter = require('eventflow')
 // var sanitize = require('validator').sanitize;
 
     , inspect = require('eyes').inspector({
@@ -31,7 +31,7 @@ var  _ = require('lodash')
         stream: process.stdout,   // Stream to write to, or null
         maxLength: 8192           // Truncate output if longer
     })
-    , emitter
+
    ;
 
 
@@ -62,7 +62,7 @@ function prop_or_array( o, prop, value ){
     return o;
 }
 
-function scrape_tokens( token, $, uri,  callback ){
+function scrape_tags( $, uri,  callback ){
     var Tags = keyWords.makeList( $('body').find('p, ul, h1, h2, h3').text(), null, 4, 'en'),
         result = Tags.words.slice(0, 10);
 
@@ -73,7 +73,7 @@ function scrape_tokens( token, $, uri,  callback ){
     });
 }
 
-function scrape_body( token, $, uri,  callback ){
+function scrape_body( $, uri,  callback ){
     var i,
         content = { type:'content', h1:[], h2:[] },
         aH1 = $('h1').toArray(),
@@ -104,7 +104,7 @@ function scrape_body( token, $, uri,  callback ){
     callback( null, content );
 }
 
-function scrape_images( token, $, uri,  callback ){
+function scrape_images( $, uri,  callback ){
     var images = [],
         oURL = URL.parse(uri),
         baseURL = uri; //URL.format(_.pick(oURL, 'protocol', 'host', 'port'));
@@ -137,7 +137,7 @@ function scrape_images( token, $, uri,  callback ){
     callback( null, {images:images, type:'images'} );
 }
 
-function scrape_head( token, $, uri,  callback ){
+function scrape_head( $, uri,  callback ){
     var $head = $('head'),
         head = {type:'head', meta:{  og : {},  fb : {} }, links:{} },
         meta = head.meta,
@@ -273,7 +273,7 @@ function scrape_head( token, $, uri,  callback ){
     callback( null, head );
 }
 
-function scrape_metatags_open_graph( token, $, uri,  callback ){
+function scrape_metatags_open_graph( $, uri,  callback ){
     var head = $('head'),
         currentType = '',
         og = {},
@@ -283,7 +283,7 @@ function scrape_metatags_open_graph( token, $, uri,  callback ){
     callback( null, {og:og, fb:fb, type:'og'});
 }
 
-function  page_save (token, $, uri,  callback ){
+function  page_save ( $, uri,  callback ){
    emitter.invoke('page.save',  $('body').html(), uri, function(err, Page){
        if( !err ){
            Page.type = 'saved-page';
@@ -292,36 +292,30 @@ function  page_save (token, $, uri,  callback ){
    });
 }
 
-exports.init = function ( requestOptions, mainEmitter ) {
-    emitter = mainEmitter || Emitter(this);
+exports.init = function ( requestOptions ) {
     var options = {};
 
      _.defaults(options, requestOptions, requestDefaults );
 
-    emitter.on('pageScrape', function(request_options, token, callback ){
+    emitter.on('pageScrape', function(request_options, callback ){
         if( typeof request_options == 'string'){
             request_options = { uri: request_options };
         }
         _.defaults(request_options, options );
-
+        request_options.method = "GET";
         if ( !request_options.uri ) {
             callback(new Error('You must supply an url.'), null);
         }else{
 
             request(request_options, function (err, response, body) {
-                body = body.replace(/<(\/?)script/g, '<$1nobreakage');
-
                 if (err) {
-                    emitter.emit( 'pageScrape.error', err, token);
+                    callback( err );
                 } else if ( !response || response.statusCode !== 200 ) {
-                    emitter.emit( 'pageScrape.notOK',
-                        new Error('Request to '+options['uri']+' ended with status code: '+(typeof response !== 'undefined' ? response.statusCode : 'unknown')),
-                        response,
-                        token
-                    );
+                    callback(new  Error('Request to '+options['uri']+' ended with status code: '+(typeof response !== 'undefined' ? response.statusCode : 'unknown')));
                 } else{
+                    body = body.replace(/<(\/?)script/g, '<$1nobreakage');
                     var $ = cheerio.load(body, cherioParam);
-                    emitter.parallel( 'pageScrape.process', token, $, request_options.uri, function(err, pageParts){
+                    emitter.parallel( 'pageScrape.process', $, request_options.uri, function(err, pageParts){
                         if( err ){
                             throw err;
                         }else{
@@ -330,16 +324,15 @@ exports.init = function ( requestOptions, mainEmitter ) {
                                 if( !(part = pageParts[i])  ) continue;
                                 type = part.type;
                                 delete part.type;
-                                delete part.token;
                                 _.merge( Results, part );
                             }
                             debug( inspect( Results ) );
-                            emitter.emit('pageScrape.ready', token, Results );
+                            callback( null, Results);
                         }
                     });
                 }
             });
-            callback( null );
+
         }
     });
 
@@ -349,6 +342,6 @@ exports.init = function ( requestOptions, mainEmitter ) {
     emitter.on( 'pageScrape.process', scrape_images  );
     emitter.on( 'pageScrape.process', scrape_body );
 //    emitter.on( 'pageScrape.process', scrape_metatags_open_graph  );
-    emitter.on( 'pageScrape.process', scrape_tokens  );
+    emitter.on( 'pageScrape.process', scrape_tags  );
     return emitter;
 };
