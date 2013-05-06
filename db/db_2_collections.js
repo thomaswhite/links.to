@@ -31,6 +31,16 @@ box.on('db.init', function( monk, Config, done ){
         });
     });
 
+    box.on('collection.get.one', function( coll_id, callback){
+        Collections.findById(coll_id, function(err, found_coll ){
+            if( found_coll) {
+                found_coll.type = "collection";
+            }
+            callback(err, found_coll);
+        });
+    });
+
+
     box.on('collection.delete', function(coll_id, callback){
         if( !coll_id ){
             throw "Collection ID expected!";
@@ -60,12 +70,15 @@ box.on('db.init', function( monk, Config, done ){
         });
     });
 
-    box.on('link.added', function( newLink, callback){
+    box.on('link.queued', function( newLink, callback){
         var link_id =  newLink._id;
         Collections.update(
             { _id: newLink.collection, "links" :{ $ne : link_id }},
             {  $push: {  "links" : link_id } },
-            callback
+            function(err, result){
+                callback(err, result);
+            }
+
         );
     });
     box.on('link.delete', function(link_id, coll_id, callback){

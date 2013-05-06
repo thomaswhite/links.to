@@ -36,10 +36,27 @@ box.on('db.init', function( monk, Config, done ){
         }
     });
 
-    box.on('link.add', function( oLink, collection_id, callback){
+
+    box.on('collection.get.links', function( collection, options, callback){
+        if( collection && collection.links && collection.links.length ){
+            options = options || { sort:[['updated', -1]]};
+            Links.find( { _id :  { $in : collection.links} }, options , function(err, found_links) {
+                callback( err, found_links );
+            });
+        }else{
+            callback( null, [] );
+        }
+    });
+
+    box.on('link.queue', function( oLink, collection_id, callback){
         oLink.collection = collection_id; //[ Links.id( collection_id ) ];
         Links.insert( oLink,  { safe: true }, callback );
     });
+
+    box.on('link.added', function( oLink, callback){
+        Links.update( { _id:oLink._id }, oLink,  { safe: true }, callback );
+    });
+
 
     box.on('link.delete', function(link_id, coll_id, callback){
         if( !link_id ){
