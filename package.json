@@ -55,7 +55,11 @@
     "ss-stylus": "~0.1.6",
     "optimist": "~0.4.0",
     "passport-http": "~0.2.1",
-    "prism": "0.0.1"
+    "prism": "0.0.1",
+    "socket.io": "~0.9.14",
+    "socket.io-mongo": "0.0.8",
+    "session.socket.io": "~0.1.6",
+    "passport.socketio": "~1.0.1"
   },
   "devDependencies": {
     "nodelint": "~0.6",
