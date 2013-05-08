@@ -7,7 +7,7 @@ var  box = require('./box');
     require('./plugins/passport');
     require('./plugins/utils');
     require('./plugins/db');
-    require('./plugins/socketstream');
+//    require('./plugins/socketstream');
 
 //    require('./plugins/server');
 
@@ -24,17 +24,18 @@ var express = box.express //require('express')
     , passports = require('./passports')
     , routes = require('./routes')
     ;
-require('./socketstream')
+
+//   require('./socketstream')
 
 config.less.paths.push ( path.join(bootstrapPath, 'less') );
 config.__dirname = __dirname;
 
 
-box.parallel('init', app, config, function(err, result){
+box.series('init', app, config, function(err, result){
     if (err) return box.emit('error', err);
     debug( "%s", box.utils.inspect(result, { showHidden: true, depth: null, colors:true }) );
 
-    box.parallel('atach-paths', app, config, function(err2, result2){
+    box.series('atach-paths', app, config, function(err2, result2){
         if (err) return box.emit('error', err2);
         debug( "atach-paths: %s", box.utils.inspect(result2) );
 
@@ -43,7 +44,7 @@ box.parallel('init', app, config, function(err, result){
 //        app.use(express.static(path.join(__dirname, 'public')));
     //        app.use('/img', express.static(path.join(bootstrapPath, 'img')));
 
-        box.parallel('listen', function (err, result3) {
+        box.series('listen', function (err, result3) {
             debug( "server : %j", result3 );
             //console.log('Links.To server listening on port ' + app.get('port') );
         });
