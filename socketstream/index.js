@@ -17,7 +17,7 @@ box.on('init', function (App, Config, done) {
     done(null, 'routers index.js initialised');
 });
 
-box.on('atach-paths', function (app, config,  done) {
+box.on('init.attach', function (app, config,  done) {
 // Define a single-page client called 'main'
     box.ss.client.define('main', {
         view: 'app.html',

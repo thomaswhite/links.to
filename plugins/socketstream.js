@@ -31,7 +31,7 @@ box.on('init', function (app, config, done) {
   done(null, 'plugin socketstream initialised');
 });
 
-box.on('listening', function (server) {
+box.on('init.server', function (server) {
     ss.start(server);
     box.app.stack = ss.http.middleware.stack.concat(box.app.stack); // Append SocketStream middleware to the stack
     //cb(null, 'socketstream is listening' );

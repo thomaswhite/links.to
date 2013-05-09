@@ -171,7 +171,7 @@ box.on('init', function (App, Config, done) {
     done(null, 'routers collections.js initialised');
 });
 
-box.on('atach-paths', function (app, config,  done) {
+box.on('init.attach', function (app, config,  done) {
     app.use(
         box.middler()
             .get('/coll/mine',       Mine)

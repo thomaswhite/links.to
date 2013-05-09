@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="MongoConfiguration">
+    <option name="serverConfigurations">
+      <list>
+        <ServerConfiguration>
+          <option name="connectOnIdeStartup" value="true" />
+          <option name="label" value="local Mongo" />
+          <option name="serverName" value="localhost" />
+          <option name="serverPort" value="27017" />
+          <option name="serverVersion" value="2.2.0" />
+          <option name="userDatabase" value="LinksTo" />
+        </ServerConfiguration>
+      </list>
+    </option>
+    <option name="shellPath" value="C:\MongoDB\bin\mongod.exe" />
+  </component>
+</project>
+

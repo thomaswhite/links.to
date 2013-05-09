@@ -7,9 +7,8 @@ var  box = require('./box');
     require('./plugins/passport');
     require('./plugins/utils');
     require('./plugins/db');
+    require('./plugins/socket-io');
 //    require('./plugins/socketstream');
-
-//    require('./plugins/server');
 
 // dummy entry
 //box.on('listen', function(cb){ cb(null, 'dummy listen'); });
@@ -18,13 +17,13 @@ var  box = require('./box');
 var express = box.express //require('express')
     , app = box.app         //express()
     , path = require('path')
-
     , bootstrapPath = path.join(__dirname, 'node_modules', 'bootstrap')
     , config = app.locals.config = box.config = require('./config').init(  'dev' )
     , passports = require('./passports')
     , routes = require('./routes')
     ;
 
+require('./socket-io');
 //   require('./socketstream')
 
 config.less.paths.push ( path.join(bootstrapPath, 'less') );
@@ -35,16 +34,15 @@ box.series('init', app, config, function(err, result){
     if (err) return box.emit('error', err);
     debug( "%s", box.utils.inspect(result, { showHidden: true, depth: null, colors:true }) );
 
-    box.series('atach-paths', app, config, function(err2, result2){
+    box.series('init.attach', app, config, function(err2, result2){
         if (err) return box.emit('error', err2);
-        debug( "atach-paths: %s", box.utils.inspect(result2) );
+        debug( "init.attach: %s", box.utils.inspect(result2) );
 
         app.use(require('less-middleware')( config.less ));
-
 //        app.use(express.static(path.join(__dirname, 'public')));
-    //        app.use('/img', express.static(path.join(bootstrapPath, 'img')));
+    //    app.use('/img', express.static(path.join(bootstrapPath, 'img')));
 
-        box.series('listen', function (err, result3) {
+        box.series('init.listen', function (err, result3) {
             debug( "server : %j", result3 );
             //console.log('Links.To server listening on port ' + app.get('port') );
         });
