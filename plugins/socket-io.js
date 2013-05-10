@@ -1,6 +1,6 @@
 var box = require('../box.js')
   , SessionSockets = require('session.socket.io')
-  , MongoStore = require('socket.io-mongo')
+  , MongoStore     = require('socket.io-mongo')
   , io
   , config
   , store
@@ -9,7 +9,7 @@ var box = require('../box.js')
 
 box.on('init.listen', function(done) {
      box.io = io = require('socket.io').listen(box.server);
-
+/*
      var store = new MongoStore({
          collectionPrefix: 'socket.io.',
          streamCollection: 'stream',
@@ -22,11 +22,12 @@ box.on('init.listen', function(done) {
          port: 27017,
          db: 'socketio'
      });
-     store.on('error', console.error);
-//     io.set('store', store);
 
+    store.on('error', console.error);
+    io.set('store', store);
+*/
+    box.sessionSockets = new SessionSockets(io, box.sessionStore , box.cookieParser);
 
-    box.sessionSockets = new SessionSockets(io,  box.sessionStore, box.cookieParser);
     box.emit('init.socket-io', io, box.sessionSockets );
     done(null, 'plugin socket.io initialised');
 });

@@ -1,4 +1,4 @@
-var that = require('that')
+var that = require('that');
 
 that.on('init', function (conf, done) {
   var opts = conf.view || {};

@@ -1,5 +1,6 @@
 var that = require('that')
   , glob = require('glob')
+  ;
 
 that.on('init', function (conf, done) {
   var opts = conf.controller || {};
