@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="a2227d31-f930-4781-898c-d73535fafae4" name="Default" comment="">
+    <list default="true" id="a2227d31-f930-4781-898c-d73535fafae4" name="Default" comment="remove .idea directory from the repository">
       <change type="DELETED" beforePath="C:\2013\github\links.to\.idea\.name" afterPath="" />
       <change type="DELETED" beforePath="C:\2013\github\links.to\.idea\codeStyleSettings.xml" afterPath="" />
       <change type="DELETED" beforePath="C:\2013\github\links.to\.idea\dictionaries\Thomas.xml" afterPath="" />
@@ -18,13 +18,12 @@
       <change type="DELETED" beforePath="C:\2013\github\links.to\.idea\scopes\scope_settings.xml" afterPath="" />
       <change type="DELETED" beforePath="C:\2013\github\links.to\.idea\vcs.xml" afterPath="" />
       <change type="DELETED" beforePath="C:\2013\github\links.to\.idea\workspace.xml" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gitignore" afterPath="$PROJECT_DIR$/.gitignore" />
     </list>
     <list id="0511da57-e0e5-40fb-9fa9-5f5eed22afe5" name="ignore" comment="ignore" />
     <ignored path="links.to.iws" />
     <ignored path=".idea/workspace.xml" />
     <ignored path="node_modules/" />
-    <file path="/Dummy.txt" changelist="a2227d31-f930-4781-898c-d73535fafae4" time="1368172152147" ignored="false" />
+    <file path="/Dummy.txt" changelist="a2227d31-f930-4781-898c-d73535fafae4" time="1368172401651" ignored="false" />
     <file path="/config.js" changelist="a2227d31-f930-4781-898c-d73535fafae4" time="1367838160664" ignored="false" />
     <file path="/fragment.js" changelist="a2227d31-f930-4781-898c-d73535fafae4" time="1368044317932" ignored="false" />
     <file path="/app.js" changelist="a2227d31-f930-4781-898c-d73535fafae4" time="1368042666406" ignored="false" />
@@ -102,10 +101,19 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="package.json" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="package.json" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/package.json">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="48" column="103" selection-start="1315" selection-end="1315" vertical-scroll-proportion="0.5064935">
+            <state line="48" column="103" selection-start="1315" selection-end="1315" vertical-scroll-proportion="-6.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name=".gitignore" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/.gitignore">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="29" column="4" selection-start="405" selection-end="405" vertical-scroll-proportion="1.1197605">
               <folding />
             </state>
           </provider>
@@ -521,7 +529,11 @@
       <created>1368079352989</created>
       <updated>1368079352989</updated>
     </task>
-    <option name="localTasksCounter" value="33" />
+    <task id="LOCAL-00033" summary="remove .idea directory from the repository">
+      <created>1368172333665</created>
+      <updated>1368172333665</updated>
+    </task>
+    <option name="localTasksCounter" value="34" />
     <servers />
   </component>
   <component name="TodoView" selected-index="0">
@@ -548,23 +560,23 @@
     <frame x="308" y="63" width="1470" height="920" extended-state="0" />
     <editor active="false" />
     <layout>
-      <window_info id="Changes" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.5281782" sideWeight="0.56960225" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.328" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Changes" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.52693826" sideWeight="0.56960225" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.36673346" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.21872766" sideWeight="0.26966292" order="1" side_tool="true" content_ui="tabs" />
-      <window_info id="Mongo Explorer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.1534091" sideWeight="0.47182176" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.18963069" sideWeight="0.47182176" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Mongo Explorer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.1534091" sideWeight="0.47306177" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.18963069" sideWeight="0.47306177" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.497996" sideWeight="0.9978962" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.17182498" sideWeight="0.721" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.5281782" sideWeight="0.4247159" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.52693826" sideWeight="0.42542613" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Mongo Runner" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.42988205" sideWeight="0.8948864" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.48488832" sideWeight="0.5960867" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.34034166" sideWeight="0.5010482" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.34034166" sideWeight="0.50071025" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.43186373" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Unicode Browser" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32949513" sideWeight="0.40444446" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.328" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Code Outline" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.23852721" sideWeight="0.53607213" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="eSnippet Pro" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32765532" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -615,7 +627,7 @@
     <option name="WRAP_WHEN_TYPING_REACHES_RIGHT_MARGIN" value="false" />
     <option name="FORCE_NON_EMPTY_COMMENT" value="false" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="false" />
-    <option name="LAST_COMMIT_MESSAGE" value="socket.io POC on client is working" />
+    <option name="LAST_COMMIT_MESSAGE" value="remove .idea directory from the repository" />
     <option name="MAKE_NEW_CHANGELIST_ACTIVE" value="false" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_FILES_UP_TO_DATE_BEFORE_COMMIT" value="false" />
@@ -629,7 +641,6 @@
     <option name="UPDATE_FILTER_BY_SCOPE" value="false" />
     <option name="SHOW_FILE_HISTORY_AS_TREE" value="false" />
     <option name="FILE_HISTORY_SPLITTER_PROPORTION" value="0.6" />
-    <MESSAGE value="Less files have been added" />
     <MESSAGE value="Add passports" />
     <MESSAGE value="In the process of adding events." />
     <MESSAGE value="Open ID is operational." />
@@ -654,6 +665,7 @@
     <MESSAGE value="Create and queue link element when adding + events" />
     <MESSAGE value="Add socket.io modules" />
     <MESSAGE value="socket.io POC on client is working" />
+    <MESSAGE value="remove .idea directory from the repository" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -761,11 +773,6 @@
         <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="-8.27027" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/.gitignore">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="29" column="19" selection-start="420" selection-end="420" vertical-scroll-proportion="0.76791275" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/.idea/runConfigurations/links_to.xml">
       <provider selected="true" editor-type-id="text-editor">
         <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" />
@@ -773,7 +780,14 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/package.json">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="48" column="103" selection-start="1315" selection-end="1315" vertical-scroll-proportion="0.5064935">
+        <state line="48" column="103" selection-start="1315" selection-end="1315" vertical-scroll-proportion="-6.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.gitignore">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="29" column="4" selection-start="405" selection-end="405" vertical-scroll-proportion="1.1197605">
           <folding />
         </state>
       </provider>
