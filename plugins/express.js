@@ -10,6 +10,7 @@ var box = require('../box.js')
 //    , http = require('http')
     , config;
 
+box.express = express;
 box.app = app;
 box.server = require('http').Server(app);
 

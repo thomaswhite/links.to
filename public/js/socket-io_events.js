@@ -14,12 +14,12 @@ socket.on('init', function (data) {
 });
 
 socket.on('session', function (data) {
-    console.log('session', data);
+    console.log('session:', data);
 });
 
 // "connect" is emitted when the socket connected successfully
 socket.on('connect', function (data) {
-    console.log('connect', data);
+    console.log('connect:', data);
 });
 
 // "disconnect" is emitted when the socket disconnected
