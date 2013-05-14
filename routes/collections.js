@@ -16,7 +16,7 @@ var box = require('../box.js')
 
 function ShorterID(){
     return  ShortId.generate().substr(0, config.db.short_id_length);
-};
+}
 
 
 /**
@@ -37,7 +37,7 @@ function newCollection  (owner, name, description){
         created : new Date(),
         links:[]
     }
-};
+}
 
 function collectionList( req, res, next, filter ){
     filter = filter || {};
@@ -59,7 +59,7 @@ function collectionList( req, res, next, filter ){
             }
         });
     });
-};
+}
 
 function Favorite  (req, res, next ){
     if( !app.locals.user || app.locals.user._id ){
@@ -67,7 +67,7 @@ function Favorite  (req, res, next ){
     }else{
         next();
     }
-};
+}
 
 function Mine (req, res, next ){
     if( !app.locals.user || !app.locals.user._id ){
@@ -75,11 +75,11 @@ function Mine (req, res, next ){
     }else{
         collectionList(  req, res, next, {owner: '' + app.locals.user._id || 0});
     }
-};
+}
 
 function All ( req, res, next  ){
     collectionList(  req, res, next );
-};
+}
 
 
 function Add(req, res) {
@@ -101,7 +101,7 @@ function Add(req, res) {
             }
         });
     }
-};
+}
 
 function Delete (req, res) {
     var referer = req.headers.referer;
@@ -110,7 +110,7 @@ function Delete (req, res) {
         res.redirect( req.query.back );
     });
     // todo: get the id of current collection to return back after deletion
-};
+}
 
 
 
@@ -128,6 +128,8 @@ function Get (req, res) {
             var owner      =  req.user && req.user._id ==  collection.owner;
             box.emit( 'collection.get.links', collection, {}, function(err2, links){
                 //                  debug( "user: \n", app.locals.inspect( app.locals.user ));
+                //box.req.io.emit
+
                 res.render('collection', {
                     title: 'Collection "' + (collection && collection.title ? collection.title : ' not found' ) + '"',
                     user: req.user,
@@ -162,7 +164,7 @@ function Get (req, res) {
              */
         }
     });
-};
+}
 
 
 box.on('init', function (App, Config, done) {
@@ -183,6 +185,33 @@ box.on('init.attach', function (app, config,  done) {
     );
 
 
+    app.io.route('collection', {
+       get:  function(req) {
+           box.emit( 'collection.get.one', req.data.coll_id, function( err, collection ){
+               if ( err ){
+                   context.notFound(res);
+               }else{
+                   if( !collection ){
+                       req.io.respond({
+                           route:'collection:get',
+                           notFound: true,
+                           collection: { coll_id:  req.data.coll_id }
+                       });
+                   }
+                   box.emit( 'collection.get.links', collection, {}, function(err2, links){
+                       collection.links = links;
+                       req.io.respond({
+                           route:'collection:get',
+                           collection: collection
+                       });
+                   });
+               }
+           });
+       }
+    });
+
+
+
 //    app.get('/favorites',        routes.collections.favorites);
 //    app.get('/favorites/mine',   routes.collections.favorites_mine);
 
@@ -192,5 +221,5 @@ box.on('init.attach', function (app, config,  done) {
     //    app.get('/tags',        routes.collections.tags);
     //    app.get('/tags/mine',   routes.collections.tags_mine);
 
-    done(null, 'route collections.js attached'  );
+    done(null, 'route collections attached'  );
 });

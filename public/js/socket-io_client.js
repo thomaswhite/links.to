@@ -16,10 +16,18 @@ socket.on('disconnect', function () {          console.log('socket.io disconnect
 socket.on('error',      function (data ) {     console.log('socket.io error', data);});
 socket.on('reconnect_failed', function () {    console.log('socket.io reconnect_failed');});
 
-socket.emit('ready');
+socket.emit('ready', {test1:1, test2:2});
 socket.on('talk', function(data) {
     console.log ('talk:',  data);
 });
+
+socket.emit('collection:get', {coll_id: '515cb0b146cd06e422000019'}, function(data){
+    console.log (data);
+});
+
+
+
+
 
 /* events:
    Links:

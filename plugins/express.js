@@ -26,7 +26,7 @@ box.on('init', function (App, Config, done) {
   box.cookieParser = express.cookieParser(config.common.session.secret);
   box.sessionStore = new mongoStore(config.db);
 
-    app.configure(function () {
+  app.configure(function () {
         app.use(express.logger('dev'));
         app.use(express.favicon());
         app.use(express.bodyParser());
@@ -43,14 +43,14 @@ box.on('init', function (App, Config, done) {
             , cookie: { maxAge: 1000 * config.common.session.maxAgeSeconds}
             , store: box.sessionStore
         }));
-
-    app.io.configure(function() {
-        app.io.enable('browser client minification');  // send minified client
-        app.io.enable('browser client gzip');          // gzip the file
-       // app.io.set('log level', 1);                    // reduce logging
-    })
-
   });
+
+  app.io.configure(function() {
+        app.io.enable('browser client minification');  // send minified client
+        //    app.io.enable('browser client gzip');          // gzip the file
+        // app.io.set('log level', 1);                    // reduce logging
+  });
+
 
   box.app.on('error', box.emit.bind(box, 'error'));
 
@@ -59,7 +59,6 @@ box.on('init', function (App, Config, done) {
       app.use(express.static(path.join(config.__dirname, 'public')));
       cb(null, path.join(config.__dirname, 'public') + ' attached' );
   });
-
 
   box.on('init.listen', function (cb) {
       app.listen( config.port );
