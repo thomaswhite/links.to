@@ -51,9 +51,7 @@
     "glob": "~3.1.21",
     "optimist": "~0.4.0",
     "socket.io": "~0.9.14",
-    "socket.io-mongo": "0.0.8",
-    "session.socket.io": "~0.1.6",
-    "passport.socketio": "~1.0.1"
+    "express.io": "~1.1.11"
   },
   "devDependencies": {
     "nodelint": "~0.6",

@@ -7,24 +7,21 @@ var  box = require('./box');
     require('./plugins/passport');
     require('./plugins/utils');
     require('./plugins/db');
-    require('./plugins/socket-io');
+//    require('./plugins/socket-io');
 //    require('./plugins/socketstream');
 
 // dummy entry
 //box.on('listen', function(cb){ cb(null, 'dummy listen'); });
 //box.on('atach-path2', function(app, config, cb){ cb(null, 'dummy atach-path'); });
 
-var express = box.express //require('express')
-    , app = box.app         //express()
+var   app = box.app         //express()
     , path = require('path')
     , bootstrapPath = path.join(__dirname, 'node_modules', 'bootstrap')
     , config = app.locals.config = box.config = require('./config').init(  'dev' )
     , passports = require('./passports')
     , routes = require('./routes')
+    , socket = require('./socket-io')
     ;
-
-require('./socket-io');
-//   require('./socketstream')
 
 config.less.paths.push ( path.join(bootstrapPath, 'less') );
 config.__dirname = __dirname;
@@ -37,10 +34,6 @@ box.series('init', app, config, function(err, result){
     box.series('init.attach', app, config, function(err2, result2){
         if (err) return box.emit('error', err2);
         debug( "init.attach: %s", box.utils.inspect(result2) );
-
-        app.use(require('less-middleware')( config.less ));
-//        app.use(express.static(path.join(__dirname, 'public')));
-    //    app.use('/img', express.static(path.join(bootstrapPath, 'img')));
 
         box.series('init.listen', function (err, result3) {
             debug( "server : %j", result3 );

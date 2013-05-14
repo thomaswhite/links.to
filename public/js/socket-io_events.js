@@ -6,40 +6,19 @@
  * To change this template use File | Settings | File Templates.
  */
 
-var socket = io.connect('http://localhost');
+var socket = io.connect('');
 
-socket.on('init', function (data) {
-    console.log('init', data);
-    socket.emit('started', { my: 'my start line' });
-});
+socket.on('connecting', function() {     console.log('socket.io connecting...');});
+socket.on('reconnecting', function() {     console.log('socket.io reconnecting...');});
+socket.on('connect',    function() {     console.log('socket.io connected!');});
+socket.on('reconnect',    function() {     console.log('socket.io reconnect');});
+socket.on('disconnect', function () {          console.log('socket.io disconnected');});
+socket.on('error',      function (data ) {     console.log('socket.io error', data);});
+socket.on('reconnect_failed', function () {    console.log('socket.io reconnect_failed');});
 
-socket.on('session', function (data) {
-    console.log('session:', data);
-});
-
-// "connect" is emitted when the socket connected successfully
-socket.on('connect', function (data) {
-    console.log('connect:', data);
-});
-
-// "disconnect" is emitted when the socket disconnected
-socket.on('disconnect', function (data) {
-    console.log(data);
-});
-
-// "error" is emitted when an error occurs and it cannot be handled by the other event types.
-socket.on('error', function (data) {
-    console.log(data);
-});
-
-// "message" is emitted when a message sent with socket.send is received. message is the sent message, and callback is an optional acknowledgement function.
-socket.on('message', function (message, callback) {
-    console.log('message', message);
-});
-
-// "reconnect" is emitted when socket.io successfully reconnected to the server.
-socket.on('reconnect', function (data) {
-    console.log('reconnect', data);
+socket.emit('ready');
+socket.on('talk', function(data) {
+    console.log ('talk:',  data);
 });
 
 /* events:

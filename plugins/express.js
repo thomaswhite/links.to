@@ -1,6 +1,6 @@
 var box = require('../box.js')
-    , express = box.express =  require('express')
-    , app     = express()
+    , express = box.express =  require('express.io')
+    , app     = box.app = express()
 
     , mongoStore = require('connect-mongo')(express)
     , cons = require('consolidate')
@@ -10,9 +10,8 @@ var box = require('../box.js')
 //    , http = require('http')
     , config;
 
-box.express = express;
-box.app = app;
-box.server = require('http').Server(app);
+app.http().io();
+//box.server = require('http').Server(app);
 
 
 app.configure('development', function () {
@@ -44,21 +43,30 @@ box.on('init', function (App, Config, done) {
             , cookie: { maxAge: 1000 * config.common.session.maxAgeSeconds}
             , store: box.sessionStore
         }));
+
+    app.io.configure(function() {
+        app.io.enable('browser client minification');  // send minified client
+        app.io.enable('browser client gzip');          // gzip the file
+       // app.io.set('log level', 1);                    // reduce logging
+    })
+
   });
 
   box.app.on('error', box.emit.bind(box, 'error'));
 
   box.on('init.attach', function (app, config, cb) {
+      app.use(require('less-middleware')( config.less ));
       app.use(express.static(path.join(config.__dirname, 'public')));
       cb(null, path.join(config.__dirname, 'public') + ' attached' );
   });
 
 
   box.on('init.listen', function (cb) {
-        box.server.listen(config.port);
+      app.listen( config.port );
+      // box.server.listen(config.port);
         // box.emit('init.server', box.server);
-        cb(null, 'listening on port #' +config.port );
+      cb(null, 'listening on port #' +config.port );
   });
 
-  done(null, 'plugin express initialised');
+  done(null, 'plugin express.io initialised');
 });
