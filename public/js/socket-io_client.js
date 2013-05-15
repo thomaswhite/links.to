@@ -17,6 +17,7 @@ socket.on('error',      function (data ) {     console.log('socket.io error', da
 socket.on('reconnect_failed', function () {    console.log('socket.io reconnect_failed');});
 
 socket.emit('ready', {test1:1, test2:2});
+
 socket.on('talk', function(data) {
     console.log ('talk:',  data);
 });

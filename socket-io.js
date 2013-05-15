@@ -13,6 +13,8 @@ box.on('init.attach', function (app, config, cb) {
 
     box.app.io.route('ready', function(req) {
         console.log( req.data );
+        req.session.ts = new Date().getTime();
+        req.session.save();
         req.io.emit('talk', {
             message: 'io event from an io route on the server',
             session: req.session
