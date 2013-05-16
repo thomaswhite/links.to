@@ -1,15 +1,11 @@
 /*
-
 import 'bootstrap';
 import 'responsive';
 
 @bodyBackground: #FAF7EC;
 @navbarBrandColor: #989CAE;
 
-.brand {
-  font-family: @monoFontFamily;
-}
-
+.brand {   font-family: @monoFontFamily;
 */
 body {
   margin-top: 45px;
@@ -269,57 +265,11 @@ http://css-tricks.com/snippets/css/useful-css3-less-mixins/
 .logout {
   margin-right: 0;
 }
-form.form-add-by-name {
-  margin-top: 1em;
+.dropdown-toggle {
+  white-space: nowrap;
 }
-.row.table-header {
-  margin-top: .8em;
-}
-.row.table-header > div {
-  border-bottom: 1px solid gray;
-  background-color: #ffffff;
-}
-/*   --- to be sorted out */
-.minititle {
-  font-weight: bold;
-}
-#description {
-  margin-bottom: 1em;
-}
-.summary,
-.description {
-  font-weight: normal !important;
-  font-size: 100%;
-  line-height: initial !important;
-}
-#grid > div.row.descr {
-  margin-bottom: 1.8em;
-}
-.link-title {
-  font-size: 130%;
-  margin-top: 0.8em;
-}
-.link-summary,
-.link-descr {
-  padding-left: 0.5em;
-}
-.link-updated {
-  font-size: 100%;
-}
-.blocked-link {
-  margin-bottom: .8em;
-}
-.link-top {
-  margin-top: 1.5em;
-}
-.underEdit,
-.link-content {
-  background-color: white;
-  padding: 4px;
-  margin-bottom: 4px;
-}
-.underEdit {
-  background-color: lightblue;
+.logged-user b.caret {
+  margin-top: 14px;
 }
 .thumbnail > img {
   background-color: #eee;
@@ -379,6 +329,78 @@ ul.opened a.thumbnail.inactive {
 .inactive.on {
   display: block;
 }
+.minititle {
+  font-weight: bold;
+}
+#description {
+  margin-bottom: 1em;
+}
+.summary,
+.description {
+  font-weight: normal !important;
+  font-size: 100%;
+  line-height: initial !important;
+}
+.summary {
+  margin-bottom: 0;
+}
+.link-title {
+  font-size: 130%;
+  margin-top: 0.8em;
+}
+.link-summary,
+.link-descr {
+  padding-left: 0.5em;
+}
+.link-updated {
+  font-size: 100%;
+}
+.blocked-link {
+  margin-bottom: .8em;
+}
+.link-top {
+  margin-top: 1.5em;
+}
+.author {
+  font-style: italic;
+  font-size: 80%;
+}
+.link-title .btn {
+  vertical-align: baseline;
+}
+.row.link-title {
+  margin-bottom: .2em;
+  position: relative;
+}
+#grid > div.row.descr {
+  margin-bottom: 1.8em;
+}
+.favicon {
+  width: 16px;
+  height: 16px;
+  vertical-align: baseline;
+  background-color: #eee;
+}
+.edit-label {
+  padding: 4px 5px 4px 20px;
+  margin-left: 10px;
+  border: 1px solid transparent;
+}
+.active .edit-label {
+  background-color: #DDD;
+  border: solid 1px #aaa;
+  border-left: none;
+  padding-left: 21px;
+}
+.underEdit,
+.link-content {
+  background-color: white;
+  padding: 4px;
+  margin-bottom: 4px;
+}
+.underEdit {
+  background-color: lightblue;
+}
 .eip input {
   margin-top: 0;
   margin-bottom: 0;
@@ -392,53 +414,6 @@ NOT.eipBtn.btnEdit {
 }
 NOT.eipBtn.btnDelete {
   background: transparent url(../images/icons/16/action_delete.gif) no-repeat 0 50%;
-}
-.dropdown-toggle {
-  white-space: nowrap;
-}
-.logged-user b.caret {
-  margin-top: 14px;
-}
-.summary {
-  margin-bottom: 0;
-}
-.w100 {
-  width: 100% !important;
-}
-.w95 {
-  width: 95% !important;
-}
-.hovered {
-  border: 1px solid blue;
-  background-color: red;
-}
-.floatR {
-  float: right;
-}
-.author {
-  font-style: italic;
-  font-size: 80%;
-}
-.favicon {
-  width: 16px;
-  height: 16px;
-  vertical-align: baseline;
-  background-color: #eee;
-}
-.row.link-title {
-  margin-bottom: .2em;
-  position: relative;
-}
-.edit-label {
-  padding: 4px 5px 4px 20px;
-  margin-left: 10px;
-  border: 1px solid transparent;
-}
-.active .edit-label {
-  background-color: #DDD;
-  border: solid 1px #aaa;
-  border-left: none;
-  padding-left: 21px;
 }
 form.inplace_form * {
   float: left;
@@ -456,6 +431,9 @@ form.inplace_form button {
 .eip {
   padding-right: 18px;
 }
+form.form-add-by-name {
+  margin-top: 1em;
+}
 form .row input {
   margin-bottom: 2px;
 }
@@ -464,12 +442,29 @@ form .row .title {
   height: 1em;
 }
 /* .form-inline input{ height: 28px}  */
+.row.table-header {
+  margin-top: .8em;
+}
+.row.table-header > div {
+  border-bottom: 1px solid gray;
+  background-color: #ffffff;
+}
+.w100 {
+  width: 100% !important;
+}
+.w95 {
+  width: 95% !important;
+}
+.hovered {
+  border: 1px solid blue;
+  background-color: red;
+}
+.floatR {
+  float: right;
+}
 h3,
 h4,
 h5 {
   float: left;
   margin-right: .5em;
-}
-.link-title .btn {
-  vertical-align: baseline;
 }
