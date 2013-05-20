@@ -1,6 +1,8 @@
 {% extends "layout.html" %}
 {% import 'macros-links.html' as macros %}
 
+{% block pageData -%} , coll_id : '{{ collection._id }}', route:'collection:get' {%- endblock %}
+
 {% block pageTitle -%}Collection {{ collection.title }}{%- endblock %}
 {% block title -%}<h1 class="{{ macros.eip( canEdit)}}" id="title">{{ collection.title }}
   </h1>
@@ -39,7 +41,7 @@
 </div>
 
 <div id="grid">
-{% for link in grid %}
+{% for link in collection.links %}
   <div class="blocked-link">
     {{ macros.link_content( link, canEdit, canDelete, collection) }}
     {# macros.link_under_edit( link, canEdit, canDelete, collection) #}

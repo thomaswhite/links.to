@@ -48,6 +48,20 @@ body {
   /* IE 5+ */
 
 }
+/*
+http://css-tricks.com/snippets/css/useful-css3-less-mixins/
+*/
+/*  ’2px 2px 3px 4px #000, 'inset -2px 1px 1px 0 #000′) */
+/*
+.gradient (@startColor: #eee, @endColor: white) {
+  background-color: @startColor;
+  background: -webkit-gradient(linear, left top, left bottom, from(@startColor), to(@endColor));
+  background: -webkit-linear-gradient(top, @startColor, @endColor);
+  background: -moz-linear-gradient(top, @startColor, @endColor);
+  background: -ms-linear-gradient(top, @startColor, @endColor);
+  background: -o-linear-gradient(top, @startColor, @endColor);
+}
+*/
 .auth-icon,
 .auth-icon32 {
   display: inline-block;
@@ -179,20 +193,6 @@ body {
 .logged-user b.caret {
   margin-top: 14px;
 }
-/*
-http://css-tricks.com/snippets/css/useful-css3-less-mixins/
-*/
-/*  ’2px 2px 3px 4px #000, 'inset -2px 1px 1px 0 #000′) */
-/*
-.gradient (@startColor: #eee, @endColor: white) {
-  background-color: @startColor;
-  background: -webkit-gradient(linear, left top, left bottom, from(@startColor), to(@endColor));
-  background: -webkit-linear-gradient(top, @startColor, @endColor);
-  background: -moz-linear-gradient(top, @startColor, @endColor);
-  background: -ms-linear-gradient(top, @startColor, @endColor);
-  background: -o-linear-gradient(top, @startColor, @endColor);
-}
-*/
 .tag-label {
   margin-left: 5px;
   paddin-left: 6px;
@@ -273,8 +273,8 @@ http://css-tricks.com/snippets/css/useful-css3-less-mixins/
 }
 .thumbnail > img {
   background-color: #eee;
-  max-height: 72px !important;
-  max-width: 72px !important;
+  height: 72px !important;
+  width: 72px !important;
 }
 ul.imgDropdown {
   list-style: none;
@@ -447,7 +447,8 @@ form .row .title {
 }
 .row.table-header > div {
   border-bottom: 1px solid gray;
-  background-color: #ffffff;
+  /*  background-color: #ffffff; */
+
 }
 .w100 {
   width: 100% !important;

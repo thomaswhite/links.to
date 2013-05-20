@@ -36,7 +36,7 @@
 	padding-left: 21px;
 }
 
-.eip_hover{ background: #ffffbb url(../images/icons/16/edit3.gif) no-repeat right 1px;}
+.eip_hover{ background: #ffffbb url(../public/images/icons/16/edit3.gif) no-repeat right 1px;}
 .eip { padding-right: 18px }
 .eip input {  margin-top:0;  margin-bottom: 0;}
 

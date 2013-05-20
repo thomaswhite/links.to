@@ -35,17 +35,25 @@ function newCollection  (owner, name, description){
         description: description || 'Description...',
         linksCount:0,
         created : new Date(),
+        updated:  new Date(),
         links:[]
     }
 }
 
-function collectionList( req, res, next, filter ){
+function collectionList( req, res, next, filter, param ){
     filter = filter || {};
-    box.parallel('collections.list', filter, 0, [], function( err, result ){
-        var collections =  _.first(result, function(element, pos, all){ return element.type == 'collections-list';  })[0];
+    param = param || {page:1};
+    param.limit = param.limit || 48;
+    param.sort = param.sort || [];
+    // filter, limit, sort, callback
+    box.parallel('collections.list', filter, param.limit, param.sort, function( err, result ){
+        var collections = box.utils.pickUpFromAsyncResult( result, 'collections-list' );
+        //    _.first(result, function(element, pos, all){ return element.type == 'collections-list';  })[0];
  //       debug( "Collections list: \n", box.utils.inspect( result ));
 //            debug( "user: \n", app.locals.inspect( app.locals.user ));
         res.render('collections-list', {
+            param: param,
+            filter: filter,
             title: 'All collection',
             grid: collections,
             user: app.locals.user,
@@ -80,7 +88,6 @@ function Mine (req, res, next ){
 function All ( req, res, next  ){
     collectionList(  req, res, next );
 }
-
 
 function Add(req, res) {
     var referer = req.headers.referer;
@@ -120,40 +127,35 @@ function Get (req, res) {
 
     box.emit( 'collection.get.one', collID, function( err, collection ){
         if ( err ){
-            context.notFound(res);
+            console.error(  'collection.get.one', err);
+        }
+        if( err || !collection ){
+            res.redirect( '/coll' );
         }else{
-            if( !collection ){
-                res.redirect( '/coll' );
-            }
             var owner      =  req.user && req.user._id ==  collection.owner;
-            box.emit( 'collection.get.links', collection, {}, function(err2, links){
-                //                  debug( "user: \n", app.locals.inspect( app.locals.user ));
-                //box.req.io.emit
-
-                res.render('collection', {
-                    title: 'Collection "' + (collection && collection.title ? collection.title : ' not found' ) + '"',
-                    user: req.user,
-                    grid: links,
-                    canEdit: owner,
-                    canDelete: owner,
-                    linkUnderEdit :  req.query.editLink,
-                    collection: collection || {},
-                    referer: referer,
-                    crumbs : breadcrumbs.make(req, {
-                        owner:owner,
-                        coll:{id:collection._id, title:collection.title }
-                    }),
-                    addButton:{
-                        link: '/link/new/' + collID,
-                        name: 'links',
-                        placeholder:'Paste links',
-                        type:'input',
-                        buttonText:'Add Link',
-                        hidden:[
-                            {name:"add2coll", value : collID }
-                        ]
-                    }
-                });
+            res.render('collection', {
+                title: 'Collection "' + (collection && collection.title ? collection.title : ' not found' ) + '"',
+                user: req.user,
+        //        grid: collection.linksData,
+                canEdit: owner,
+                canDelete: owner,
+                linkUnderEdit :  req.query.editLink,
+                collection: collection,
+                referer: referer,
+                crumbs : breadcrumbs.make(req, {
+                    owner:owner,
+                    coll:{id:collection._id, title:collection.title }
+                }),
+                addButton:{
+                    link: '/link/new/' + collID,
+                    name: 'links',
+                    placeholder:'Paste links',
+                    type:'input',
+                    buttonText:'Add Link',
+                    hidden:[
+                        {name:"add2coll", value : collID }
+                    ]
+                }
             });
             /*
              for(var i=0; results[1] &&  i < results[1].length; i++ ){
@@ -184,32 +186,25 @@ box.on('init.attach', function (app, config,  done) {
             .handler
     );
 
-
     app.io.route('collection', {
        get:  function(req) {
            box.emit( 'collection.get.one', req.data.coll_id, function( err, collection ){
-               if ( err ){
-                   context.notFound(res);
-               }else{
-                   if( !collection ){
-                       req.io.respond({
-                           route:'collection:get',
-                           notFound: true,
-                           collection: { coll_id:  req.data.coll_id }
-                       });
-                   }
-                   box.emit( 'collection.get.links', collection, {}, function(err2, links){
-                       collection.links = links;
-                       req.io.respond({
-                           route:'collection:get',
-                           collection: collection
-                       });
-                   });
-               }
+                req.io.respond({
+                   route:'collection:get',
+                   collection: collection
+               });
+           });
+       },
+       list: function(req){
+           box.parallel('collections.list', req.data.filter, req.data.param.limit, req.data.param.sort, function( err, result ){
+               var collections = box.utils.pickUpFromAsyncResult( result, 'collections-list' );
+               req.io.respond({
+                   route:'collection:list',
+                   collections: collections
+               });
            });
        }
     });
-
 
 
 //    app.get('/favorites',        routes.collections.favorites);

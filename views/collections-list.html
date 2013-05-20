@@ -4,6 +4,8 @@
 {% block title %}<h1>{{ title2 }}</h1>{% endblock %}
 {% block error %}{{ error }}{% endblock %}
 
+{% block pageData -%} , route:'collection:list', param:{{ param|json_encode(0)|raw }}, filter: {{ filter|json_encode(0)|raw }} {%- endblock %}
+
 {% block content %}
 
   {% for coll in grid %}
@@ -24,7 +26,7 @@
             <span>{{ coll.desciption  }}</span>
           </div>
           <div class="span1 coll-e">{% if coll.links.length %}{{ coll.links.length|default(0)  }}{% endif %}</div>
-          <div class="span2 coll-e">{% if coll.updated %}{{ coll.updated|date('Y-m-d H:i') }}{% endif %}</div>
+          <div class="span2 coll-e">{% if coll.updated %}{{ coll.updated|default(coll.created)|date('Y-m-d H:i') }}{% endif %}</div>
       </div>
   {% else %}
       <div class="row">

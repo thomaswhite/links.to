@@ -18,14 +18,15 @@ socket.on('reconnect_failed', function () {    console.log('socket.io reconnect_
 
 socket.emit('ready', {test1:1, test2:2});
 
-socket.on('talk', function(data) {
-    console.log ('talk:',  data);
+socket.on('start', function(data) {
+    console.log ('start:',  data);
 });
 
-socket.emit('collection:get', {coll_id: '515cb0b146cd06e422000019'}, function(data){
-    console.log (data);
-});
-
+if( pageData.route ){
+    socket.emit(pageData.route, pageData, function(data){
+        console.log (data);
+    });
+}
 
 
 

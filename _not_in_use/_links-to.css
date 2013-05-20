@@ -76,46 +76,46 @@ body {
   vertical-align: middle;
 }
 .auth-google {
-  background-image: url("../images/social/google_16.png");
+  background-image: url("../public/images/social/google_16.png");
 }
 .auth-google32 {
-  background-image: url("../images/social/google_32.png");
+  background-image: url("../public/images/social/google_32.png");
 }
 .auth-yahoo {
-  background-image: url("../images/social/yahoo_16.png");
+  background-image: url("../public/images/social/yahoo_16.png");
 }
 .auth-yahoo32 {
-  background-image: url("../images/social/yahoo_32.png");
+  background-image: url("../public/images/social/yahoo_32.png");
 }
 .auth-facebook {
-  background-image: url("../images/social/facebook_16.png");
+  background-image: url("../public/images/social/facebook_16.png");
 }
 .auth-facebook32 {
-  background-image: url("../images/social/facebook_32.png");
+  background-image: url("../public/images/social/facebook_32.png");
 }
 .auth-twitter {
-  background-image: url("../images/social/twitter_16.png");
+  background-image: url("../public/images/social/twitter_16.png");
 }
 .auth-twitter32 {
-  background-image: url("../images/social/twitter_32.png");
+  background-image: url("../public/images/social/twitter_32.png");
 }
 .auth-twitter {
-  background-image: url("../images/social/twitter_16.png");
+  background-image: url("../public/images/social/twitter_16.png");
 }
 .auth-twitter32 {
-  background-image: url("../images/social/twitter_32.png");
+  background-image: url("../public/images/social/twitter_32.png");
 }
 .auth-linkedin {
-  background-image: url("../images/social/linkedin_16.png");
+  background-image: url("../public/images/social/linkedin_16.png");
 }
 .auth-linkedin32 {
-  background-image: url("../images/social/linkedin_32.png");
+  background-image: url("../public/images/social/linkedin_32.png");
 }
 .auth-windowslive {
-  background-image: url("../images/social/windowslive_16.png");
+  background-image: url("../public/images/social/windowslive_16.png");
 }
 .auth-windowslive32 {
-  background-image: url("../images/social/windowslive_32.png");
+  background-image: url("../public/images/social/windowslive_32.png");
 }
 .auth-meetup {
   background-image: url("../images/social/meetup_16.png");
@@ -130,16 +130,16 @@ body {
   background-image: url("../images/social/meetup_32.png");
 }
 .auth-dropbox {
-  background-image: url("../images/social/dropbox_16.png");
+  background-image: url("../public/images/social/dropbox_16.png");
 }
 .auth-dropbox32 {
-  background-image: url("../images/social/dropbox_32.png");
+  background-image: url("../public/images/social/dropbox_32.png");
 }
 .auth-linkedin {
-  background-image: url("../images/social/linkedin_16.png");
+  background-image: url("../public/images/social/linkedin_16.png");
 }
 .auth-linkedin32 {
-  background-image: url("../images/social/linkedin_32.png");
+  background-image: url("../public/images/social/linkedin_32.png");
 }
 .user-img96 {
   width: 96px;
@@ -165,11 +165,11 @@ body {
   color: black;
 }
 .missing-user27 {
-  background: url(../images/icons/24/user-3.png) no-repeat center;
+  background: url(../public/images/icons/24/user-3.png) no-repeat center;
   display: inline-block;
 }
 .missing-user96 {
-  background: url(../images/icons/96/user-3.png) no-repeat center;
+  background: url(../public/images/icons/96/user-3.png) no-repeat center;
   width: 96px;
   height: 96px;
   border: 1px gray solid;
@@ -216,7 +216,7 @@ form.form-add-by-name {
 }
 .row.table-header > div {
   border-bottom: 1px solid gray;
-  background-color: #ffffff;
+  /* background-color: #ffffff; */
 }
 .minititle {
   font-weight: bold;
@@ -293,10 +293,10 @@ a.iddDrop {
   width: 15px;
 }
 a.iddDrop.closed {
-  background: url(../images/icons/11/11x11-arrow-blue-down.gif) no-repeat center;
+  background: url(../public/images/icons/11/11x11-arrow-blue-down.gif) no-repeat center;
 }
 a.iddDrop.opened {
-  background: url(../images/icons/11/11x11-arrow-blue-up.gif) no-repeat center;
+  background: url(../public/images/icons/11/11x11-arrow-blue-up.gif) no-repeat center;
 }
 a.iddDrop:hover {
   border: 1px solid gray;
@@ -327,10 +327,10 @@ NOT.eipBtn {
   padding-left: 20px;
 }
 NOT.eipBtn.btnEdit {
-  background: transparent url(../images/icons/16/edit3.gif) no-repeat 0 50%;
+  background: transparent url(../public/images/icons/16/edit3.gif) no-repeat 0 50%;
 }
 NOT.eipBtn.btnDelete {
-  background: transparent url(../images/icons/16/action_delete.gif) no-repeat 0 50%;
+  background: transparent url(../public/images/icons/16/action_delete.gif) no-repeat 0 50%;
 }
 .dropdown-toggle {
   white-space: nowrap;
@@ -390,7 +390,7 @@ form.inplace_form button {
   margin-left: 0.4em;
 }
 .eip_hover {
-  background: #ffffbb url(../images/icons/16/edit3.gif) no-repeat right 1px;
+  background: #ffffbb url(../public/images/icons/16/edit3.gif) no-repeat right 1px;
 }
 .eip {
   padding-right: 18px;

@@ -29,7 +29,7 @@ config.__dirname = __dirname;
 
 box.series('init', app, config, function(err, result){
     if (err) return box.emit('error', err);
-    debug( box.utils.inspect(result, { showHidden: true, depth: null, colors:true }) );
+    debug( '\n' + box.utils.inspect(result, { showHidden: true, depth: null, colors:true }) );
 
     box.series('init.attach', app, config, function(err2, result2){
         if (err) return box.emit('error', err2);

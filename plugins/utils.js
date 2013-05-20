@@ -39,6 +39,17 @@ function ShorterID( length ){
     return  ShortId.generate().substr(0, length || 7 );
 };
 
+
+/**
+ *
+ * @param array of results returned by .paralel
+ * @param type - value of the type parameter to be selected
+ * @returns {*}
+ */
+function pickUpFromAsyncResult( a, type ){
+    return _.first(a, function(element, pos, all){ return element.type == type;  })[0];
+}
+
 box.on('init', function (app, conf, done) {
     box.utils = {
         _ : _,
@@ -47,7 +58,8 @@ box.on('init', function (app, conf, done) {
         colors : colors,
         inspect : inspect,
         shorterID: ShorterID,
-        async : async
+        async : async,
+        pickUpFromAsyncResult: pickUpFromAsyncResult
      };
     done(null, 'plugin utils initialised');
 });

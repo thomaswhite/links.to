@@ -33,12 +33,20 @@ box.on('db.init', function( monk, Config, done ){
 
     box.on('collection.get.one', function( coll_id, callback){
         Collections.findById(coll_id, function(err, found_coll ){
-            if( found_coll) {
+            if( err || !found_coll) {
+                callback(err, found_coll);
+            }else{
                 found_coll.type = "collection";
+                box.emit( 'collection.get.links', found_coll, {}, function(err2, links){
+                    found_coll.links = links;
+                    callback(err2, found_coll);
+
+                });
             }
-            callback(err, found_coll);
         });
     });
+
+
 
 
     box.on('collection.delete', function(coll_id, callback){
@@ -75,10 +83,10 @@ box.on('db.init', function( monk, Config, done ){
         Collections.update(
             { _id: newLink.collection, "links" :{ $ne : link_id }},
             {  $push: {  "links" : link_id } },
+            // TODO: set new date for .updated
             function(err, result){
                 callback(err, result);
             }
-
         );
     });
     box.on('link.delete', function(link_id, coll_id, callback){
