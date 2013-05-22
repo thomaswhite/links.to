@@ -51,7 +51,8 @@
     "glob": "~3.1.21",
     "optimist": "~0.4.0",
     "socket.io": "~0.9.14",
-    "express.io": "~1.1.11"
+    "express.io": "~1.1.11",
+    "asset-rack": "~2.2.0"
   },
   "devDependencies": {
     "nodelint": "~0.6",
