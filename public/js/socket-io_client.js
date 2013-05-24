@@ -28,6 +28,22 @@ if( pageData.route ){
     });
 }
 
+var Swig = {
+    template:{}
+};
+
+
+
+$('button.btnAdd').on('click', function(event){
+    var $this = $(this),
+        context = $this.data('context'),
+        $addInput = $('input.addInput')
+        ;
+    context.value =  $addInput.val();
+    socket.emit(context.action, context, function(dataDone){
+        console.log (dataDone);
+    });
+})
 
 
 

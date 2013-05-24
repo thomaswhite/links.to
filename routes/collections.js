@@ -52,6 +52,7 @@ function collectionList( req, res, next, filter, param ){
  //       debug( "Collections list: \n", box.utils.inspect( result ));
 //            debug( "user: \n", app.locals.inspect( app.locals.user ));
         res.render('collections-list', {
+            button_action:{action:'collection:add'},
             param: param,
             filter: filter,
             title: 'All collection',
@@ -134,6 +135,7 @@ function Get (req, res) {
         }else{
             var owner      =  req.user && req.user._id ==  collection.owner;
             res.render('collection', {
+                button_action:{action:'link:add'},
                 title: 'Collection "' + (collection && collection.title ? collection.title : ' not found' ) + '"',
                 user: req.user,
         //        grid: collection.linksData,
@@ -202,6 +204,28 @@ box.on('init.attach', function (app, config,  done) {
                    route:'collection:list',
                    collections: collections
                });
+           });
+       },
+       add:function(reg){
+           //JSON.parse(reg.session.passport.user);
+
+
+           var coll = newCollection(req.user._id, req.data.value.trim());
+           box.emit('collection.add', coll, function(err, collection ) {
+               if (err) {
+                   req.io.respond({
+                       state:'error',
+                       msg:'Error when creating a colllection'
+                   });
+               }else {
+                   box.parallel('collection.added',  collection, function(err, result){
+                       req.io.respond({
+                           state:'ok',
+                           collection: collection,
+                           extra: result
+                       });
+                   });
+               }
            });
        }
     });

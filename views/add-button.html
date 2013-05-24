@@ -3,21 +3,17 @@
 
 {% if noAdd  %}
 {% else if user and canEdit %}
-   <form class="form-inline form-add-by-name" action="{{ addButton.link }}" method="post" id="add">
-     {% for item in addButton.hidden %}
-      <input type="hidden" name="{{ item.name }}"  value="{{ item.value }}"/>
-     {% endfor %}
-
-     {% if  buttonType == 'textarea' %}
+      {% if  buttonType == 'textarea' %}
        <textarea class="input-xxlarge autoGrow" name="{{ addButton.name }}" placeholder="{{ placeholder }}" title="{{ placeholder }}" rows="1"></textarea>
        <button type="submit" class="btn btn-primary btn-mall" href=""><i class="icon-plus icon-white"></i> {{ addButton.buttonText}}</button>
      {% else %}
-     <div class="input-append">
-       <input type="text" class=" input-xxlarge" name="{{ addButton.name }}" id="{{ addButton.name }}" placeholder="{{ placeholder }}" title="{{ placeholder }}"/>
-       <button class="btn btn-primary" type="submit" ><i class="icon-plus icon-white"></i> Link</button>
-     </div>
+      <div class="input-append">
+       <input type="text" class="addInput input-xxlarge" name="{{ addButton.name }}" id="{{ addButton.name }}"
+               placeholder="{{ placeholder }}" title="{{ placeholder }}" />
+       <button class="btn btn-primary btnAdd" type="button"  data-context='{{ button_action|json_encode(0)|raw }}'>Add</button>
+      </div>
      {% endif %}
-   </form>
+
 {% else %}
     <span class="loginPlease">{{ addButton.loginPlease }}</span>
 {% endif %}

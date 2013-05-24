@@ -20,6 +20,12 @@ $(document).ready(function() {
 
 
 
+
+
+
+
+
+
   $(document)
     .delegate('.iddDrop.closed', 'click', function(event){
       $('.opened').removeClass('opened').addClass('closed');

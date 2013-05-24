@@ -20,7 +20,6 @@ box.on('init.attach', function (app, config, cb) {
             session: req.session
         })
     });
-
     cb(null,   'io.rutes attached' );
 
 });
