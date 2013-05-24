@@ -54,7 +54,15 @@ box.on('db.init', function( monk, Config, done ){
     });
 
     box.on('link.added', function( oLink, callback){
-        Links.update( { _id:oLink._id }, oLink,  { safe: true }, callback );
+    // for some reason I can not replace one link with other.
+    // untill I fix it it will be replaced with delete the old and insert the new link
+        Links.updateById( oLink._id, oLink,  callback );
+
+//        Links.remove( {_id: oLink._id }) ;
+//        delete oLink._id;
+
+//        Links.insert( oLink,  { safe: true }, callback );
+
     });
 
 

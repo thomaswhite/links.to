@@ -15,11 +15,12 @@ box.on('init.attach', function (app, config, cb) {
         console.log( req.data );
         req.session.ts = new Date().getTime();
         req.session.save();
-        req.io.emit('start', {
-            message: 'io event from an io route on the server',
-            session: req.session
-        })
+        req.io.respond({
+            msg:'welcome :-)',
+            session: req.session && req.session.user ? JSON.parse( req.session.user ) : {}
+        });
     });
+
     cb(null,   'io.rutes attached' );
 
 });

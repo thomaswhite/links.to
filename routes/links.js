@@ -14,6 +14,12 @@ var  box = require('../box.js')
    , url = require('url')
 // var sanitize = require('validator').sanitize;
 
+    , headers_to_watch = {
+       server: true,
+       contentType : true,
+       "last-modified": true,
+       etag: true
+   }
 
    , config
    ,  app
@@ -25,91 +31,29 @@ function ShorterID(){
 };
 
 
-
-
-// app.post('/link/new/:coll?', function(req, res)
-function Add (req, res) {
-    var referer = req.headers.referer;
-    var post = req.body.links;
-    //post.body = sanitize(post.body).xss().trim();
-    var urls = post.replace(/\r/g,'').split(/\n/); // http://beckism.com/2010/09/splitting-lines-javascript/
-    var URL = urls[0];
-    var request_options = _.merge( {}, config.request, {uri:URL } );
-
-    box.on( 'link.ready', function( newURL, Link ){
-       res.redirect( newURL  );
-    });
-
-    box.on( 'link.not-found', function( newURL, Link ){
-        res.redirect( newURL  );
-    });
-
-
-    pageScraper.on( 'pageScrape.ready', function( resultToken, Results ){
-        if( resultToken == token ){
-            var Link = newLink( req.user._id, req.user.screen_name, Results );
-            box.emit('link.add', Link, req.body.add2coll, function(err, addedLink ) {
-                if (err) {
-                    throw err;
-                }else {
-                    box.parallel('link.added',  addedLink, function(err, result){
-                        res.redirect( referer  );
-                    });
-                }
-            });
-        }
-    });
-
+function ping_a_link( request_options, callback ){
     request.head(request_options, function (err, response, body) {
         var h,
-            found = {url:URL},
-            oURL = url.parse( URL )
+            found = {url:request_options.uri, headers:{}},
+            oURL = url.parse( request_options.uri )
             ;
         if( response ){
             h = response.headers;
-            found.headers = {
-                server: h.server,
-                contentType : h['content-type'],
-                modified: h['last-modified'],
-                etag: h.etag
-            };
+            for( var i in headers_to_watch ){
+                if( h[i] ){
+                    found.headers[i] = h[i];
+                }
+            }
             found.state = 'pinged';
         }else{
-           found.state = 'not-found';
-           found.title = "Page not found";
+            found.state = 'not-found';
+            found.title = "Page not found";
         };
-
-        // TODO add a temp link for the missing URLs
-        var Link = newLink( req.user._id, req.user.screen_name, found );
-        box.emit('link.queue', Link, req.body.add2coll, function(err, addedLink ) {
-            if (err) {
-                throw err;
-            }else {
-                box.parallel('link.queued',  addedLink, function(err2, result2){
-                    // now the link exists and it has been added to its collection
-                    if( found.state == 'pinged' ){
-                        box.parallel( 'pageScrape', request_options, function(err, Results){
-                            if (err) {
-                                throw err;
-                            }else {
-                                var updatedLink = Results[0];
-                                box.parallel('link.added',  updatedLink, function(err, result){
-                                    // tags has been added
-                                    box.emit('link.ready',referer, updatedLink  );
-                                });
-                            }
-                        });
-                    }else{
-                        box.emit('link.not-found',referer, addedLink  );
-                    }
-                });
-            }
-        });
-
+        callback( found );
     });
+}
 
 
-};
 function Delete (req, res) {
     var referer = req.headers.referer;
     var link_id = req.params.id;
@@ -156,9 +100,67 @@ box.on('init', function (App, Config, done) {
 box.on('init.attach', function (app, config,  done) {
     app.use(
         box.middler()
-           .post('/link/new/:coll?',        Add)
+//           .post('/link/new/:coll?',        Add)
            .get('/link/:id/delete/:coll?',  Delete)
            .handler
     );
+
+
+    app.io.route('link', {
+        add:function(req){
+            var url = req.data.value.trim(),
+                request_options = _.merge( {}, config.request, {uri:url }),
+                token = ShortId.generate();
+
+
+            box.on('pageScrape.images', function(event_token, image ){
+               if( event_token == token ){
+                   req.io.emit('pageScrape.image', {url: url, image:image});
+               }
+            });
+            box.on( 'pageScrape.head', function( event_token, head ){
+                if( event_token == token ){
+                    req.io.emit( 'pageScrape.head', {url: url, head:head});
+                }
+            });
+
+
+            ping_a_link( request_options, function( found ){
+                if( found.state == 'not-found' ){
+                    found.result = 'error';
+                    found.value = url;
+                    found.msg   = 'URL can not be found';
+                    req.io.respond( found );
+                }else{
+                    req.io.respond( found );
+                    request_options.token = token;
+                    box.parallel( 'pageScrape', request_options, function(err, Results){
+                        if (err) {
+                            throw err;
+                        }else {
+                            var scrapResult = Results[0]
+                                , user = JSON.parse(req.session.passport.user)
+                                , Link = newLink( user._id, user.screen_name, scrapResult )
+                                ;
+                            box.parallel('link.added',  Link, function(err, result){
+                                // tags has been added
+                                if( err ){
+                                    throw err;
+                                }else{
+                                    req.io.emit( 'link.ready', {
+                                        addedLink : Link,
+                                        result: result
+                                    });
+                                }
+                            });
+                        }
+                    });
+
+                }
+            });
+        }
+    });
+
+
     done(null, 'atach-paths: links.js attached'  ); //
 });

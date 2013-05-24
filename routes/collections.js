@@ -135,7 +135,7 @@ function Get (req, res) {
         }else{
             var owner      =  req.user && req.user._id ==  collection.owner;
             res.render('collection', {
-                button_action:{action:'link:add'},
+                button_action:{action:'link:add', coll_id: collID },
                 title: 'Collection "' + (collection && collection.title ? collection.title : ' not found' ) + '"',
                 user: req.user,
         //        grid: collection.linksData,
@@ -206,21 +206,23 @@ box.on('init.attach', function (app, config,  done) {
                });
            });
        },
-       add:function(reg){
-           //JSON.parse(reg.session.passport.user);
-
-
-           var coll = newCollection(req.user._id, req.data.value.trim());
+       add:function(req){
+           var user = JSON.parse(req.session.passport.user)
+               , name = req.data.value.trim()
+               , coll = newCollection( user._id, name )
+               ;
+           // TODO: verify the name
            box.emit('collection.add', coll, function(err, collection ) {
                if (err) {
                    req.io.respond({
-                       state:'error',
-                       msg:'Error when creating a colllection'
+                       result:'error',
+                       value: name,
+                       msg:'Error when creating collection'
                    });
                }else {
                    box.parallel('collection.added',  collection, function(err, result){
                        req.io.respond({
-                           state:'ok',
+                           result:'ok',
                            collection: collection,
                            extra: result
                        });

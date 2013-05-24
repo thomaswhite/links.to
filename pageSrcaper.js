@@ -62,7 +62,7 @@ function prop_or_array( o, prop, value ){
     return o;
 }
 
-function scrape_tags( $, uri,  callback ){
+function scrape_tags( $, uri, token, callback ){
     var Tags = keyWords.makeList( $('body').find('p, ul, h1, h2, h3').text(), null, 4, 'en'),
         result = Tags.words.slice(0, 10);
 
@@ -73,14 +73,14 @@ function scrape_tags( $, uri,  callback ){
     });
 }
 
-function scrape_body( $, uri,  callback ){
+function scrape_body( $, uri, token, callback ){
     var i,
         content = { type:'content', h1:[], h2:[] },
         aH1 = $('h1').toArray(),
         aH2 = $('h2').toArray(),
         buffer = '',
         Ps = $('body').find('p'),
-        aP = Ps.toArray();;
+        aP = Ps.toArray();
 
     for( i=0; i< aH1.length; i++ ){
         content.h1.push( $( aH1[i]).text().replace(/(\n+|\t+|\s\s+)/g, ' ').trim() );
@@ -100,11 +100,10 @@ function scrape_body( $, uri,  callback ){
     }
     buffer = buffer.substr(0,500);
     content.summary = buffer.substr(0, buffer.lastIndexOf('.')+1);
-
     callback( null, content );
 }
 
-function scrape_images( $, uri,  callback ){
+function scrape_images( $, uri, token,  callback ){
     var images = [],
         oURL = URL.parse(uri),
         baseURL = uri; //URL.format(_.pick(oURL, 'protocol', 'host', 'port'));
@@ -134,10 +133,11 @@ function scrape_images( $, uri,  callback ){
             images.push( elem.attribs );
         }
     });
+    emitter.emit('pageScrape.images', token, images[0] );
     callback( null, {images:images, type:'images'} );
 }
 
-function scrape_head( $, uri,  callback ){
+function scrape_head( $, uri, token,  callback ){
     var $head = $('head'),
         head = {type:'head', meta:{  og : {},  fb : {} }, links:{} },
         meta = head.meta,
@@ -147,26 +147,7 @@ function scrape_head( $, uri,  callback ){
         baseURL = URL.format(aURL),
         currentType = '';
 
-    head.title = $($head.find('title')).text();  // $(body.find('h1').text())
-
-    $head.find( 'link[rel]').each( function(i,elem){
-        var rel = elem.attribs.rel;
-        if(rel == 'stylesheet' ){
-            return;
-        }
-        if( rel == 'shortcut icon' ){
-               rel = 'favicon';
-        }
-        if( elem.attribs.href ){
-            elem.attribs.href = URL.resolve( baseURL, elem.attribs.href );
-        }
-        delete elem.attribs.rel;
-        if( elem.attribs.href  ){
-            prop_or_array( head.links, rel, elem.attribs );
-        }
-        //head.links.push( elem.attribs );
-    });
-
+    head.title = $($head.find('title')).text();
 
     $head.find('meta[name]').each(function(i, elem) {
         var i, name = elem.attribs.name;
@@ -205,6 +186,25 @@ function scrape_head( $, uri,  callback ){
             }
         }
     });
+
+    $head.find( 'link[rel]').each( function(i,elem){
+        var rel = elem.attribs.rel;
+        delete elem.attribs.rel;
+
+        if( rel == 'stylesheet' ){
+            return;
+        }
+        if( rel == 'shortcut icon' ){
+            rel = 'favicon';
+        }
+        if( elem.attribs.href ){
+            elem.attribs.href = URL.resolve( baseURL, elem.attribs.href );
+            prop_or_array( head.links, rel, elem.attribs );
+        }
+        //head.links.push( elem.attribs );
+    });
+
+
 
     $head.find('meta[property^=fb]').each(function(i, item ){
         var value = item.attribs.content.trim(),
@@ -270,10 +270,12 @@ function scrape_head( $, uri,  callback ){
             }
         }
     });
+
+    emitter.emit('pageScrape.head', token, head );
     callback( null, head );
 }
 
-function scrape_metatags_open_graph( $, uri,  callback ){
+function scrape_metatags_open_graph( $, uri, token,  callback ){
     var head = $('head'),
         currentType = '',
         og = {},
@@ -283,7 +285,7 @@ function scrape_metatags_open_graph( $, uri,  callback ){
     callback( null, {og:og, fb:fb, type:'og'});
 }
 
-function  page_save ( $, uri,  callback ){
+function  page_save ( $, uri, token,  callback ){
    emitter.invoke('page.save',  $('body').html(), uri, function(err, Page){
        if( !err ){
            Page.type = 'saved-page';
@@ -303,10 +305,10 @@ exports.init = function ( requestOptions ) {
         }
         _.defaults(request_options, options );
         request_options.method = "GET";
-        if ( !request_options.uri ) {
-            callback(new Error('You must supply an url.'), null);
-        }else{
 
+        if ( !request_options.uri ) {
+            callback(new Error('You must supply an url!'), null);
+        }else{
             request(request_options, function (err, response, body) {
                 if (err) {
                     callback( err );
@@ -315,18 +317,19 @@ exports.init = function ( requestOptions ) {
                 } else{
                     body = body.replace(/<(\/?)script/g, '<$1nobreakage');
                     var $ = cheerio.load(body, cherioParam);
-                    emitter.parallel( 'pageScrape.process', $, request_options.uri, function(err, pageParts){
+                    emitter.series( 'pageScrape.process', $, request_options.uri, request_options.token, function(err, pageParts){
                         if( err ){
-                            throw err;
+                            callback(err);
                         }else{
-                            var Results = {url: request_options.uri }, type, part;
+                            var Results = { type:'scraped-page', url: request_options.uri }, type, part;
                             for( var i = 0; i<pageParts.length; i++){
                                 if( !(part = pageParts[i])  ) continue;
                                 type = part.type;
                                 delete part.type;
                                 _.merge( Results, part );
                             }
-                            debug( inspect( Results ) );
+                            delete Results.body;
+                            //debug( inspect( Results ) );
                             callback( null, Results);
                         }
                     });
@@ -337,11 +340,11 @@ exports.init = function ( requestOptions ) {
     });
 
 
-    emitter.on( 'pageScrape.process', page_save );
     emitter.on( 'pageScrape.process', scrape_head );
-    emitter.on( 'pageScrape.process', scrape_images  );
     emitter.on( 'pageScrape.process', scrape_body );
+    emitter.on( 'pageScrape.process', scrape_images  );
 //    emitter.on( 'pageScrape.process', scrape_metatags_open_graph  );
     emitter.on( 'pageScrape.process', scrape_tags  );
+    emitter.on( 'pageScrape.process', page_save );
     return emitter;
 };

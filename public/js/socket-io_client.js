@@ -16,11 +16,22 @@ socket.on('disconnect', function () {          console.log('socket.io disconnect
 socket.on('error',      function (data ) {     console.log('socket.io error', data);});
 socket.on('reconnect_failed', function () {    console.log('socket.io reconnect_failed');});
 
-socket.emit('ready', {test1:1, test2:2});
-
-socket.on('start', function(data) {
-    console.log ('start:',  data);
+socket.emit('ready', {msg:'Socket.io is operational'},function(data){
+    console.log ('ready:',  data);
 });
+
+socket.on('pageScrape.image', function( data, x ){
+    console.log ('pageScrape.image:', data);
+});
+
+socket.on('pageScrape.head', function( data, x ){
+    console.log ('pageScrape.head', data);
+});
+
+socket.on('link.ready', function( data, x ){
+    console.log ('link.ready', data);
+});
+
 
 if( pageData.route ){
     socket.emit(pageData.route, pageData, function(data){
@@ -32,18 +43,20 @@ var Swig = {
     template:{}
 };
 
+$(document).ready(function() {
+    $('button.btnAdd').on('click', function(event){
+        var $this = $(this).attr('disabled', true ),
+            context = $this.data('context'),
+            $addInput = $('input.addInput')
+            ;
+        context.value =  $addInput.val();
+        socket.emit(context.action, context, function(dataDone){
+            $this.removeAttr('disabled');
+            console.log ('button.btnAdd', dataDone);
+        });
+    }) ;
 
-
-$('button.btnAdd').on('click', function(event){
-    var $this = $(this),
-        context = $this.data('context'),
-        $addInput = $('input.addInput')
-        ;
-    context.value =  $addInput.val();
-    socket.emit(context.action, context, function(dataDone){
-        console.log (dataDone);
-    });
-})
+});
 
 
 
@@ -73,7 +86,6 @@ $('button.btnAdd').on('click', function(event){
    emit direction.list      page, [authorList], [excludeTagList], [includeTagList]
 
  */
-
 
 
 /*
