@@ -76,8 +76,9 @@ function Delete (req, res) {
  * @param description
  * @returns {{type: string, shortID: *, owner: *, title: *, description: (*|string), linksCount: number, links: Array}}
  */
-function newLink (owner, user_screen_name, data ){
+function newLink (data, collection_id, owner, user_screen_name ){
     var link =  {
+        collection : collection_id,
         shortID : ShorterID(),
         owner: owner,
         imagePos:0,
@@ -140,16 +141,24 @@ box.on('init.attach', function (app, config,  done) {
                         }else {
                             var scrapResult = Results[0]
                                 , user = JSON.parse(req.session.passport.user)
-                                , Link = newLink( user._id, user.screen_name, scrapResult )
+                                , link2add = newLink( scrapResult, req.data.coll_id, user._id, user.screen_name  )
                                 ;
-                            box.parallel('link.added',  Link, function(err, result){
-                                // tags has been added
+
+                            delete link2add.type;
+                            delete link2add.state;
+
+                            req.data.link = link2add;
+                            req.io.emit( 'link.ready', {
+                                result:'ok',
+                                data: req.data
+                            });
+
+                            box.parallel('link.add', link2add, function(err, result){
                                 if( err ){
                                     throw err;
                                 }else{
-                                    req.io.emit( 'link.ready', {
-                                        addedLink : Link,
-                                        result: result
+                                    req.io.emit( 'link.saved', {
+                                        result:'ok'
                                     });
                                 }
                             });

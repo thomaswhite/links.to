@@ -31,7 +31,9 @@ socket.on('pageScrape.head', function( data, x ){
 socket.on('link.ready', function( data, x ){
     console.log ('link.ready', data);
 });
-
+socket.on('link.saved', function( data, x ){
+    console.log ('link.saved', data);
+});
 
 if( pageData.route ){
     socket.emit(pageData.route, pageData, function(data){

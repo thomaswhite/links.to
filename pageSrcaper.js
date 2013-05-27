@@ -38,7 +38,7 @@ var  _ = require('lodash')
 var cherioParam = {
     ignoreWhitespace: false,
     xmlMode: true,
-    lowerCaseTags: false
+    lowerCaseTags: true
 };
 
 var requestDefaults = {
@@ -47,6 +47,14 @@ var requestDefaults = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.22 (KHTML, like Gecko) Chrome/25.0.1364.172 Safari/537.22'
     }
 };
+
+var metaTagsToJoin = [
+    'title',
+    'author',
+    'abstract',
+    'description',
+    'keywords'
+];
 
 function prop_or_array( o, prop, value ){
     if( prop.indexOf('.') > -1 ){
@@ -62,20 +70,45 @@ function prop_or_array( o, prop, value ){
     return o;
 }
 
+/**
+ *
+ * @param O
+ * @param name
+ * @param value
+ */
+
+function metaSetValue( O, name, value, delimiter, baseURL ){
+    var o = O, names = null;
+    if( typeof delimiter == 'string'){
+        delimiter = [delimiter];
+    }
+    for( var i = 0; delimiter && delimiter.length && i < delimiter.length; i++ ){
+        if( name.indexOf( delimiter[i]) > -1 ){
+            names = name.split( delimiter[i] );
+            name =  name = names[names.length - 1];
+            break;
+        }
+    }
+    for( var i=0; names && names.length && i < names.length - 1; i++  ){
+        var n = names[i].toLowerCase();
+        o = o[ n ] = o[ n ] || {};
+    }
+    o[ name ] = value;
+}
+
 function scrape_tags( $, uri, token, callback ){
     var Tags = keyWords.makeList( $('body').find('p, ul, h1, h2, h3').text(), null, 4, 'en'),
         result = Tags.words.slice(0, 10);
 
     result.local = Tags.locale;
     callback( null,{
-        tags: result,
-        type:'tags'
+        tags: result
     });
 }
 
 function scrape_body( $, uri, token, callback ){
     var i,
-        content = { type:'content', h1:[], h2:[] },
+        content = { type:'body', h1:[], h2:[] },
         aH1 = $('h1').toArray(),
         aH2 = $('h2').toArray(),
         buffer = '',
@@ -94,11 +127,11 @@ function scrape_body( $, uri, token, callback ){
 
     for( i=0; i< aP.length; i++ ){
         buffer += $(aP[i]).text().replace(/(\n+|\t+|\s\s+)/g, ' ').trim();
-        if( buffer.length > 500 ){
+        if( buffer.length > 750 ){
             break;
         }
     }
-    buffer = buffer.substr(0,500);
+    buffer = buffer.substr(0,750);
     content.summary = buffer.substr(0, buffer.lastIndexOf('.')+1);
     callback( null, content );
 }
@@ -108,7 +141,6 @@ function scrape_images( $, uri, token,  callback ){
         oURL = URL.parse(uri),
         baseURL = uri; //URL.format(_.pick(oURL, 'protocol', 'host', 'port'));
 
-    images.type = 'images';
     $('img').each(function(i, elem) {
         var a,
             src = elem.attribs.src,
@@ -133,79 +165,48 @@ function scrape_images( $, uri, token,  callback ){
             images.push( elem.attribs );
         }
     });
+
     emitter.emit('pageScrape.images', token, images[0] );
-    callback( null, {images:images, type:'images'} );
+    callback( null, {images:images, type:'body'} );
 }
 
-function scrape_head( $, uri, token,  callback ){
-    var $head = $('head'),
-        head = {type:'head', meta:{  og : {},  fb : {} }, links:{} },
-        meta = head.meta,
-        og = meta.og,
-        fb = meta.fb,
-        aURL =  _.pick(URL.parse(uri), 'protocol', 'host', 'port'),
-        baseURL = URL.format(aURL),
-        currentType = '';
 
-    head.title = $($head.find('title')).text();
+function scrape_metaTags( $head, baseURL ){
+    var meta = {};
 
     $head.find('meta[name]').each(function(i, elem) {
-        var i, name = elem.attribs.name;
-        if( name.indexOf('.') === -1 && elem.attribs && elem.attribs.content ){
-            var content = unescape(elem.attribs.content.trim()),
-                field = name,
-                names = name.split(':');
-            switch( name ){
-                case 'google-site-verification':
-                case 'robots':
-                case 'generator':
-                case 'http-equiv':
-                    break;
+        var name = elem.attribs.name,
+            nameParts = name.split('.');
 
-                case 'keywords':
-                    content =  content.split(',');
+        if( elem.attribs  && elem.attribs.content ){
+                var content = unescape(elem.attribs.content.trim()),
+                    names = name.split(':');
 
-                case 'author':
-                case 'description':
+                switch( name ){
+                    case 'google-site-verification':
+                    case 'robots':
+                    case 'generator':
+                    case 'http-equiv':
+                        break;
 
-                    head[name] =
-                    meta[ name] = content;
-                    break;
-
-                default:
-                    if( names.length > 1 ){
-                        var meta2 = meta[ names[0] ] || {};
-                        meta2[ names[1] ] = content;
-                        if( !meta[ names[0] ] ){
-                            meta[ names[0] ] = meta2;
+                    case 'keywords':
+                    case 'dc.keywords':
+                        content =  content.split(',');
+                        for(var i = 0; i < content.length; i++){
+                            content[i] = content[i].trim();
                         }
-                    }else{
-                        head[name] =
-                        meta[name] = content;
-                    }
-            }
+
+                    default:
+                        metaSetValue( meta, name, content, [':', '.'], baseURL);
+                }
         }
     });
 
-    $head.find( 'link[rel]').each( function(i,elem){
-        var rel = elem.attribs.rel;
-        delete elem.attribs.rel;
+    return meta;
+}
 
-        if( rel == 'stylesheet' ){
-            return;
-        }
-        if( rel == 'shortcut icon' ){
-            rel = 'favicon';
-        }
-        if( elem.attribs.href ){
-            elem.attribs.href = URL.resolve( baseURL, elem.attribs.href );
-            prop_or_array( head.links, rel, elem.attribs );
-        }
-        //head.links.push( elem.attribs );
-    });
-
-
-
+function scrape_fbTags( $head, baseURL ){
+    var fb = {};
     $head.find('meta[property^=fb]').each(function(i, item ){
         var value = item.attribs.content.trim(),
             aP = item.attribs.property.split(':'),
@@ -214,7 +215,11 @@ function scrape_head( $, uri, token,  callback ){
 
         fb[ type ] = value;
     });
+    return fb;
+}
 
+function scrape_ogTags( $head, baseURL ){
+    var og = {}, currentType;
     $head.find('meta[property^="og:"]').each(function(i, item ){
         var value = item.attribs.content.trim(),
             aP = item.attribs.property.split(':'),
@@ -270,25 +275,68 @@ function scrape_head( $, uri, token,  callback ){
             }
         }
     });
-
-    emitter.emit('pageScrape.head', token, head );
-    callback( null, head );
+    return og;
 }
 
-function scrape_metatags_open_graph( $, uri, token,  callback ){
-    var head = $('head'),
-        currentType = '',
-        og = {},
-        fb = {};
+function scrape_head_links($head, baseURL){
+    var links = {};
+    $head.find( 'link[rel]').each( function(i,elem){
+        var rel = elem.attribs.rel;
+        delete elem.attribs.rel;
 
+        if( rel == 'stylesheet' ){
+            return;
+        }
+        if( rel == 'shortcut icon' ){
+            rel = 'favicon';
+        }
+        if( elem.attribs.href ){
+            elem.attribs.href = URL.resolve( baseURL, elem.attribs.href );
+            prop_or_array( links, rel, elem.attribs );
+        }
+        //head.links.push( elem.attribs );
+    });
+    return links;
+}
 
-    callback( null, {og:og, fb:fb, type:'og'});
+function scrape_head( $, uri, token,  callback ){
+    var $head = $('head'),
+        result = { head:{} },
+        head = result.head,
+        aURL =  _.pick(URL.parse(uri), 'protocol', 'host', 'port'),
+        baseURL = URL.format(aURL);
+
+    result.title = $($head.find('title')).text();
+    head.meta  = scrape_metaTags( $head, baseURL );
+    head.meta.fb = scrape_fbTags( $head, baseURL );
+    head.meta.og = scrape_ogTags( $head, baseURL );
+    head.links = scrape_head_links($head, baseURL);
+
+    var groups = [];
+    groups.push( head.meta );
+    groups.push( head.meta.og);
+    groups.push(  head.meta.fb );
+
+    for( var i=0; i< metaTagsToJoin.length; i++){
+        if(  result[ metaTagsToJoin[i]] ) continue;
+        for( var g= 0, content; g < groups.length; g++){
+            if( (content = groups[g][ metaTagsToJoin[i] ]) ){
+                result[ metaTagsToJoin[i]] = content;
+               break;
+           }
+        }
+    }
+    if( result.title.indexOf('|') > -1 ){
+        result.title = result.title.split('|')[0];
+    }
+    emitter.emit('pageScrape.head', token, result );
+    callback( null, result );
 }
 
 function  page_save ( $, uri, token,  callback ){
    emitter.invoke('page.save',  $('body').html(), uri, function(err, Page){
        if( !err ){
-           Page.type = 'saved-page';
+           Page.type = 'none';
        }
        callback(err, Page);
    });
@@ -323,12 +371,19 @@ exports.init = function ( requestOptions ) {
                         }else{
                             var Results = { type:'scraped-page', url: request_options.uri }, type, part;
                             for( var i = 0; i<pageParts.length; i++){
-                                if( !(part = pageParts[i])  ) continue;
+                                if( !(part = pageParts[i]) || part.type == 'none'  ) continue;
                                 type = part.type;
                                 delete part.type;
-                                _.merge( Results, part );
+                                if( type ){
+                                    var tmp = {};
+                                    tmp[type] = part;
+                                    _.merge( Results, tmp );
+                                    //Results[type] = part;
+                                }else{
+                                    _.merge( Results, part );
+                                }
                             }
-                            delete Results.body;
+                            //delete Results.body;
                             //debug( inspect( Results ) );
                             callback( null, Results);
                         }

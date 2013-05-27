@@ -78,7 +78,7 @@ box.on('db.init', function( monk, Config, done ){
         });
     });
 
-    box.on('link.queued', function( newLink, callback){
+    box.on('link.added', function( newLink, callback){
         var link_id =  newLink._id;
         Collections.update(
             { _id: newLink.collection, "links" :{ $ne : link_id }},
@@ -89,6 +89,7 @@ box.on('db.init', function( monk, Config, done ){
             }
         );
     });
+
     box.on('link.delete', function(link_id, coll_id, callback){
         Collections.updateById(
             coll_id,

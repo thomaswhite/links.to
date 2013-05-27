@@ -48,11 +48,24 @@ box.on('db.init', function( monk, Config, done ){
         }
     });
 
-    box.on('link.queue', function( oLink, collection_id, callback){
-        oLink.collection = collection_id; //[ Links.id( collection_id ) ];
-        Links.insert( oLink,  { safe: true }, callback );
+    box.on('link.add', function( oLink, callback){
+        var cb = callback;
+        Links.insert( oLink,  { safe: true }, function( err, addedLink){
+            if( err ){
+                callback(err);
+            }else{
+                box.parallel('link.added',  addedLink, function(err, result){
+                    if( err ){
+                        callback(err);
+                    }else{
+                        addedLink.type = 'link';
+                        callback(null, addedLink);
+                    }
+                });
+            }
+        });
     });
-
+/*
     box.on('link.added', function( oLink, callback){
     // for some reason I can not replace one link with other.
     // untill I fix it it will be replaced with delete the old and insert the new link
@@ -64,7 +77,7 @@ box.on('db.init', function( monk, Config, done ){
 //        Links.insert( oLink,  { safe: true }, callback );
 
     });
-
+*/
 
     box.on('link.delete', function(link_id, coll_id, callback){
         if( !link_id ){
