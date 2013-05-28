@@ -55,29 +55,11 @@ box.on('db.init', function( monk, Config, done ){
                 callback(err);
             }else{
                 box.parallel('link.added',  addedLink, function(err, result){
-                    if( err ){
-                        callback(err);
-                    }else{
-                        addedLink.type = 'link';
-                        callback(null, addedLink);
-                    }
+                    callback(err, addedLink);
                 });
             }
         });
     });
-/*
-    box.on('link.added', function( oLink, callback){
-    // for some reason I can not replace one link with other.
-    // untill I fix it it will be replaced with delete the old and insert the new link
-        Links.updateById( oLink._id, oLink,  callback );
-
-//        Links.remove( {_id: oLink._id }) ;
-//        delete oLink._id;
-
-//        Links.insert( oLink,  { safe: true }, callback );
-
-    });
-*/
 
     box.on('link.delete', function(link_id, coll_id, callback){
         if( !link_id ){

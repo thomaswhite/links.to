@@ -48,14 +48,6 @@ var requestDefaults = {
     }
 };
 
-var metaTagsToJoin = [
-    'title',
-    'author',
-    'abstract',
-    'description',
-    'keywords'
-];
-
 function prop_or_array( o, prop, value ){
     if( prop.indexOf('.') > -1 ){
         prop = prop.split('.').join('_');
@@ -89,9 +81,14 @@ function metaSetValue( O, name, value, delimiter, baseURL ){
             break;
         }
     }
+    // create missing steps
     for( var i=0; names && names.length && i < names.length - 1; i++  ){
         var n = names[i].toLowerCase();
         o = o[ n ] = o[ n ] || {};
+    }
+    if( names == null && name != 'keywords'){
+        // save plane tags here
+        o = o['names'] = o['names'] || {};
     }
     o[ name ] = value;
 }
@@ -171,7 +168,7 @@ function scrape_images( $, uri, token,  callback ){
 }
 
 
-function scrape_metaTags( $head, baseURL ){
+function scrape_meta_names( $head, baseURL ){
     var meta = {};
 
     $head.find('meta[name]').each(function(i, elem) {
@@ -237,7 +234,7 @@ function scrape_ogTags( $head, baseURL ){
 
         if( type === 'keywords' ){
             value = value.split(',');
-            type = 'tags';
+            //type = 'tags';
         }
 
         if( type.indexOf('.') !== -1 ){
@@ -299,36 +296,25 @@ function scrape_head_links($head, baseURL){
     return links;
 }
 
+
 function scrape_head( $, uri, token,  callback ){
     var $head = $('head'),
-        result = { head:{} },
+        result = { head:{ title: $($head.find('title')).text() }, display:{} },
         head = result.head,
+        display = result.display,
         aURL =  _.pick(URL.parse(uri), 'protocol', 'host', 'port'),
-        baseURL = URL.format(aURL);
+        baseURL = URL.format(aURL),
+        meta = scrape_meta_names( $head, baseURL );
 
-    result.title = $($head.find('title')).text();
-    head.meta  = scrape_metaTags( $head, baseURL );
-    head.meta.fb = scrape_fbTags( $head, baseURL );
-    head.meta.og = scrape_ogTags( $head, baseURL );
+    // result.display.title = $($head.find('title')).text();
+    _.merge( head, meta );
+    _.merge(head.fb, scrape_fbTags( $head, baseURL ));
+    _.merge(head.og, scrape_ogTags( $head, baseURL ));
     head.links = scrape_head_links($head, baseURL);
 
-    var groups = [];
-    groups.push( head.meta );
-    groups.push( head.meta.og);
-    groups.push(  head.meta.fb );
-
-    for( var i=0; i< metaTagsToJoin.length; i++){
-        if(  result[ metaTagsToJoin[i]] ) continue;
-        for( var g= 0, content; g < groups.length; g++){
-            if( (content = groups[g][ metaTagsToJoin[i] ]) ){
-                result[ metaTagsToJoin[i]] = content;
-               break;
-           }
-        }
-    }
-    if( result.title.indexOf('|') > -1 ){
-        result.title = result.title.split('|')[0];
-    }
+//    if( result.title.indexOf('|') > -1 ){
+//        result.title = result.title.split('|')[0];
+//    }
     emitter.emit('pageScrape.head', token, result );
     callback( null, result );
 }
@@ -398,7 +384,6 @@ exports.init = function ( requestOptions ) {
     emitter.on( 'pageScrape.process', scrape_head );
     emitter.on( 'pageScrape.process', scrape_body );
     emitter.on( 'pageScrape.process', scrape_images  );
-//    emitter.on( 'pageScrape.process', scrape_metatags_open_graph  );
     emitter.on( 'pageScrape.process', scrape_tags  );
     emitter.on( 'pageScrape.process', page_save );
     return emitter;

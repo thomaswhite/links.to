@@ -26,6 +26,135 @@ var  box = require('../box.js')
     ;
 
 
+
+
+var metaTagsToJoin = [
+    'title',
+    'author',
+    'abstract',
+    'description',
+//    'keywords',
+    'thumbnail',
+    'summary',
+     'url',
+    'tags'
+];
+
+function pick_meta_field(groups, tag){
+    var content = '';
+    for( var g= 0; g < groups.length; g++){
+        if( !groups[g] ) continue;
+        if( (content = groups[g][ tag ]) ){
+            content;
+            break;
+        }
+    }
+    return content;
+}
+
+function page_display( page, metaTagsToJoin ){
+
+    var groups = [],
+        head = page.head,
+        display = page.display = page.display || {},
+        names = head.names,
+        og    = head.og,
+        fb    = head.fb,
+        twetter = head.twetter
+        ;
+    groups.push( head.names );
+    groups.push( head.og);
+    groups.push( head.twetter);
+    groups.push( head.fb );
+
+    for( var i=0; i< metaTagsToJoin.length; i++){
+        var tag = metaTagsToJoin[i],
+            value = null;
+        if(  display[ tag ] ) continue;
+        switch( tag ){
+            case 'title':
+                value = pick_meta_field(groups, tag);
+                if( !value ){
+                    value = head.title || (page.body.h1 ? page.body.h1[0] : null );
+                }
+                break;
+
+            case 'description':
+                value = pick_meta_field(groups, tag);
+                if( value ){
+                    delete page.body.summary;
+                }else{
+                    value = page.body.summary;
+                }
+                break;
+
+            case 'url':
+                if( head.links && head.links.canonical ){
+                     value = head.links.canonical.href;
+                     display.canonicalURL = true;
+                }else{
+                    value = pick_meta_field(groups, 'url');
+                }
+                break;
+
+            case 'thumbnail':
+                value = names.thumbnail || pick_meta_field(groups, 'image');
+                if( !value && page.body.image && page.body.image.length){
+                    value = page.body.image[0].src;
+                    display.imagePos = 0;
+                }else{
+                    display.imagePos = -1;
+                }
+                break;
+
+            case 'author':
+                if( head.links.author ){
+                    var author =  head.links.author;
+                    if( typeof author == 'string' ){
+                         if( head.links.author.indexOf('@') > -1  ){
+                            value = {
+                                type:'email',
+                                value: author
+                            }
+                         }else{
+                             value = {
+                                 type:'text',
+                                 value: author
+                             }
+                         }
+                    }else if( author.href ){
+                        value = {
+                            value:author.href,
+                            type:'url'
+                        }
+                    }
+                }
+                break;
+
+            case 'tags':
+                value = _.first(page.tags || [], 5);
+                break;
+
+
+            case 'abstract':
+            case 'summary':
+        }
+        if( value ){
+            display[ tag ]  = value;
+        }
+
+    }
+    if ( !display.title ){
+        display.title = display.url;
+    }
+    display.collection = page.collection;
+    display.shortID    = page.shortID;
+    return page;
+}
+
+
+
+
 function ShorterID(){
     return  ShortId.generate().substr(0, config.db.short_id_length);
 };
@@ -34,7 +163,7 @@ function ShorterID(){
 function ping_a_link( request_options, callback ){
     request.head(request_options, function (err, response, body) {
         var h,
-            found = {url:request_options.uri, headers:{}},
+            found = {url:request_options.uri, headers:{}, token:request_options.token, state: 'pinged'},
             oURL = url.parse( request_options.uri )
             ;
         if( response ){
@@ -44,7 +173,6 @@ function ping_a_link( request_options, callback ){
                     found.headers[i] = h[i];
                 }
             }
-            found.state = 'pinged';
         }else{
             found.state = 'not-found';
             found.title = "Page not found";
@@ -76,15 +204,13 @@ function Delete (req, res) {
  * @param description
  * @returns {{type: string, shortID: *, owner: *, title: *, description: (*|string), linksCount: number, links: Array}}
  */
-function newLink (data, collection_id, owner, user_screen_name ){
+function newLink (data, collection_id, owner, user_screen_name, token ){
     var link =  {
         collection : collection_id,
-        shortID : ShorterID(),
+        shortID : token || ShorterID(),
         owner: owner,
-        imagePos:0,
         updated : new Date(),
-        owner_screen_name: user_screen_name,
-        state: 'pinged'
+        owner_screen_name: user_screen_name
     };
     _.merge( link, data);
     return link;
@@ -113,6 +239,7 @@ box.on('init.attach', function (app, config,  done) {
                 request_options = _.merge( {}, config.request, {uri:url }),
                 token = ShortId.generate();
 
+            req.data.token = token;
 
             box.on('pageScrape.images', function(event_token, image ){
                if( event_token == token ){
@@ -141,24 +268,27 @@ box.on('init.attach', function (app, config,  done) {
                         }else {
                             var scrapResult = Results[0]
                                 , user = JSON.parse(req.session.passport.user)
-                                , link2add = newLink( scrapResult, req.data.coll_id, user._id, user.screen_name  )
+                                , link2add = newLink( scrapResult, req.data.coll_id, user._id, user.screen_name, token  )
                                 ;
 
-                            delete link2add.type;
-                            delete link2add.state;
+                            page_display( link2add, metaTagsToJoin );
 
                             req.data.link = link2add;
                             req.io.emit( 'link.ready', {
                                 result:'ok',
                                 data: req.data
                             });
+ //                           box.utils.inspect(link2add, { showHidden: true, depth: null, colors:true })
 
                             box.parallel('link.add', link2add, function(err, result){
+                                var link = result[0];
+                                link.display.id = link._id;
                                 if( err ){
                                     throw err;
                                 }else{
                                     req.io.emit( 'link.saved', {
-                                        result:'ok'
+                                        result:'ok',
+                                        link: link.display
                                     });
                                 }
                             });
