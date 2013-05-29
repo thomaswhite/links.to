@@ -3,9 +3,10 @@ var box = require('../box.js')
     , app     = box.app = express()
 
     , mongoStore = require('connect-mongo')(express)
-    , cons = require('consolidate')
+    , cons = box.cons = require('consolidate')
     , swig = require('swig')
     , path = require('path')
+    , hogan = box.hogan = require('hogan.js')
 
 //    , http = require('http')
     , config;
@@ -33,6 +34,8 @@ box.on('init', function (App, Config, done) {
         app.use(express.methodOverride());
 
         app.engine('html', cons.swig );
+        app.engine('hjs',  cons.hogan );
+
         app.set('view engine', 'html');
         app.set('views',  config.views );
         swig.init( config.swig );
@@ -57,6 +60,29 @@ box.on('init', function (App, Config, done) {
   box.on('init.attach', function (app, config, cb) {
       app.use(require('less-middleware')( config.less ));
       app.use(express.static(path.join(config.__dirname, 'public')));
+
+      app.get('/hogan', function( req, res){
+
+          var compiledTemplate = hogan.compile(config.__dirname + '/views/hogan/index.hjs', {asString: true});
+          console.log( compiledTemplate );
+
+          cons.hogan( config.__dirname + '/views/hogan/index.hjs',{
+                  partials: {
+                      part  : 'part'
+                  },
+                  title: 'Home Page',
+                  author: 'Bruce Wayne'
+              }
+              , function(err, html){
+                  //res.writeHead(200, {"Content-Type": "application/json"});
+                  //res.write( JSON.stringify({ok:true, value: value, name:name }) );
+                  res.write( html  );
+                  res.end();
+              }
+          );
+
+      });
+
       cb(null, path.join(config.__dirname, 'public') + ' attached' );
   });
 
