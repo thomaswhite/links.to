@@ -1,12 +1,12 @@
 var box = require('../box.js')
     , express = box.express =  require('express.io')
     , app     = box.app = express()
-
     , mongoStore = require('connect-mongo')(express)
+    , path = require('path')
+    , kleiDust = require('klei-dust')
+
     , cons = box.cons = require('consolidate')
     , swig = require('swig')
-    , path = require('path')
-    , hogan = box.hogan = require('hogan.js')
 
 //    , http = require('http')
     , config;
@@ -32,12 +32,14 @@ box.on('init', function (App, Config, done) {
         app.use(express.favicon());
         app.use(express.bodyParser());
         app.use(express.methodOverride());
+        app.set('views',  config.views );
+
+        app.engine('dust', kleiDust.dust);
+        app.set('view engine', 'dust');
+        app.set('view options', {layout: false});
 
         app.engine('html', cons.swig );
-        app.engine('hjs',  cons.hogan );
-
         app.set('view engine', 'html');
-        app.set('views',  config.views );
         swig.init( config.swig );
 
         app.use( box.cookieParser );
