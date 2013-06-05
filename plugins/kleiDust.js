@@ -18,13 +18,15 @@ box.on('init', function (App, Config, done) {
           stream: false
     });
 
+    done(null, 'plugin kleiDust initialised ');
+    return;
     require('../lib/watcher').watch(
         kleiDust.getDust(),
         path.join(config.__dirname, 'views'),
         path.join(config.__dirname, 'public/templates'),
         '.dust',
         function(err, result ){
-            done(null, 'plugin kleiDust initialised ' + util.inspect(result, { showHidden: true, depth: null, colors:false }) );
+            done(null, 'plugin kleiDust initialised ' + util.inspect(result, { depth: null, colors:false }) );
         }
     );
 });
@@ -32,15 +34,17 @@ box.on('init', function (App, Config, done) {
 box.on('init.attach', function(app, config, done){
 
     box.dust = {
-        render: function(template, context, res) {
-            var opt = kleiDust.getOptions();
+        render: function( res, template, context) {
+            var opt = kleiDust.getOptions(),
+                Context = kleiDust.getDust().makeBase( context );
+
             if( opt.stream  ){
-                var stream = kleiDust.getDust().stream(template, context);
+                var stream = kleiDust.getDust().stream(template, Context);
                 stream.on('data', function(data) {       res.write(data);     });
                 stream.on('end', function() {            res.end();           });
                 stream.on('error', function(err) {       res.end(err);        });
             }else{
-                kleiDust.dust(template, context, function(err, out) {
+                kleiDust.dust(template, Context, function(err, out) {
                     if (err ){
                         throw err;
                     }else{

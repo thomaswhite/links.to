@@ -26,21 +26,22 @@
                     <li class="dropdown">
                   {?user}
                         <a href="#" class="dropdown-toggle logged-user"  data-toggle="dropdown" >
-                          {% if  user.gravatarURL  %}
+                          {?gravatarURL}
                               <img class="user-img27"  src="{{ user.gravatarURL }}" height="27" width="27" title="{user.user_name}">
-                          {% else %}
+                          {/gravatarURL}
+                          {^gravatarURL}
                               <div class="missing-user27"></div>
-                          {%  endif  %}
+                          {/gravatarURL}
                           <b class="caret"></b>
                         </a>
 
                       <ul class="dropdown-menu icons32">
-                        <li>{% include "nav-user-badge.html" %}</li>
+                        <li>{>"navigation/user_badge"/}</li>
                      </ul>
                   {/user}
                   {^user}
                       <a href="#" class="dropdown-toggle" data-toggle="dropdown">Login <b class="caret"></b></a>
-                      {% include "nav-openIDs-login-list.html" %}
+                      {>"navigation/openIDs_login_list"/}
                   {/user}
                   </li>
                 </ul>

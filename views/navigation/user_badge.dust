@@ -1,0 +1,29 @@
+<table width="300px" cellpadding="5" class="user-badge-box">
+  <tr align="left" valign="top">
+    <td>
+      {?user}{#gravatarURL96}<img class="user-img96"  src="{{ user.gravatarURL96 }}">{/gravatarURL96}{/user}
+      {^user}<div class="missing-user96"></div>{/user}
+    </td>
+    <td>
+      <div class="user-name">{#user}{screen_name}{/user} </div>
+      <div class="user-email">
+        {?user}{email}{/user}
+        {^user}No email{/user}
+      </div>
+    </td>
+  </tr>
+  <tr valign="top">
+    <td>
+      <a class="btn" href="/user/profile">
+        <span class="auth-icon auth-{#user}{active_provider}{/user}" height="40px" ></span>
+        <span>Edit profile</span>
+      </a>
+    </td>
+    <td align="right">
+      <a class="btn logout " href="/logout" title="{{ title }}">
+        <span>Log Out</span>
+        <i class="icon-play"></i>
+      </a>
+    </td>
+  </tr>
+</table>

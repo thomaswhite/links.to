@@ -51,7 +51,12 @@ function collectionList( req, res, next, filter, param ){
         //    _.first(result, function(element, pos, all){ return element.type == 'collections-list';  })[0];
  //       debug( "Collections list: \n", box.utils.inspect( result ));
 //            debug( "user: \n", app.locals.inspect( app.locals.user ));
-        res.render('collections-list', {
+
+
+//    res.render('main', box.dust.makeBase({ title: 'title' }) );
+
+        box.dust.render(res, 'collections/collections-list', {
+//        res.render('collections-list', {
             button_action:{action:'collection:add'},
             param: param,
             filter: filter,
@@ -59,7 +64,7 @@ function collectionList( req, res, next, filter, param ){
             grid: collections,
             user: app.locals.user,
             canEdit:true,
-            crumbs : breadcrumbs.make(req, {  }),
+            crumbs : breadcrumbs.make(req, { }),
             addButton:{
                 link: '/coll/new',
                 name: 'collectionName',

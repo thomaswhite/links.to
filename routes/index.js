@@ -13,7 +13,7 @@ require('./links');
 
 
 function top ( req, res ){
-    box.dust.render('main', box.dust.makeBase({ title: 'title' }), res );
+    box.dust.render( res, 'main', { title: 'Home page' } );
 //    res.render('main', box.dust.makeBase({ title: 'title' }) );
 }
 
