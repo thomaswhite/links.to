@@ -2,6 +2,7 @@ var debug = require('debug')('linksTo:app');
 var  box = require('./box');
 
 // bootstrap
+    require('./plugins/kleiDust');
     require('./plugins/express');
     require('./plugins/middleware');
     require('./plugins/passport');

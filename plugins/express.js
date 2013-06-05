@@ -3,7 +3,6 @@ var box = require('../box.js')
     , app     = box.app = express()
     , mongoStore = require('connect-mongo')(express)
     , path = require('path')
-    , kleiDust = require('klei-dust')
 
     , cons = box.cons = require('consolidate')
     , swig = require('swig')
@@ -14,101 +13,63 @@ var box = require('../box.js')
 app.http().io();
 //box.server = require('http').Server(app);
 
-box.dust = {
-    render: function(template, context, res) {
-        var opt = kleiDust.getOptions();
-        if( opt.stream  ){
-            var stream = kleiDust.getDust().stream(template, context);
-            stream.on('data', function(data) {       res.write(data);     });
-            stream.on('end', function() {            res.end();           });
-            stream.on('error', function(err) {       res.end(err);        });
-        }else{
-            kleiDust.dust(template, context, function(err, out) {
-                if (err ){
-                    throw err;
-                }else{
-                    res.send( out);
-                }
-            });
-        }
-    },
-    makeBase: function( o ) {
-        return kleiDust.getDust().makeBase( o );
-    }
-};
-
 app.configure('development', function () {
     app.use(express.errorHandler());
 });
 
 box.on('init', function (App, Config, done) {
-  config = Config;
+    config = Config;
 
-  app.set('port', config.port );
+    app.set('port', config.port );
 
-  box.cookieParser = express.cookieParser(config.common.session.secret);
-  box.sessionStore = new mongoStore(config.db);
-
-  kleiDust.setOptions({
-      root: path.join(config.__dirname, 'templates'),
-      relativeToFile: true,
-      keepWhiteSpace: true,
-      useHelpers: false,
-      cache: false,
-      stream: false
-  });
-
-  require('../lib/watcher').watch(
-            kleiDust.getDust(),
-            path.join(config.__dirname, 'templates'),
-            path.join(config.__dirname, 'public/templates'),
-            '.dust'
-  );
-
-  app.configure(function () {
-        app.use(express.logger('dev'));
-        app.use(express.favicon());
-        app.use(express.bodyParser());
-        app.use(express.methodOverride());
-        app.set('views',  config.views );
-
-        app.engine('dust', kleiDust.dust);
-        app.set('view engine', 'dust');
-        app.set('view options', {layout: false});
-/*
-        app.engine('html', cons.swig );
-        app.set('view engine', 'html');
-        swig.init( config.swig );
-*/
-        app.use( box.cookieParser );
-        app.use(express.session({
-            secret: config.common.session.secret
-            , cookie: { maxAge: 1000 * config.common.session.maxAgeSeconds}
-            , store: box.sessionStore
-        }));
-  });
-
-  app.io.configure(function() {
-        app.io.enable('browser client minification');  // send minified client
-        //    app.io.enable('browser client gzip');          // gzip the file
-        // app.io.set('log level', 1);                    // reduce logging
-  });
+    box.cookieParser = express.cookieParser(config.common.session.secret);
+    box.sessionStore = new mongoStore(config.db);
 
 
-  box.app.on('error', box.emit.bind(box, 'error'));
+    app.configure(function () {
+            app.use(express.logger('dev'));
+            app.use(express.favicon());
+            app.use(express.bodyParser());
+            app.use(express.methodOverride());
+            app.set('views',  config.views );
 
-  box.on('init.attach', function (app, config, cb) {
-      app.use(require('less-middleware')( config.less ));
-      app.use(express.static(path.join(config.__dirname, 'public')));
-      cb(null, path.join(config.__dirname, 'public') + ' attached' );
-  });
+            app.engine('dust', box.kleiDust.dust);
+            app.set('view engine', 'dust');
+            app.set('view options', {layout: false});
+    /*
+            app.engine('html', cons.swig );
+            app.set('view engine', 'html');
+            swig.init( config.swig );
+    */
+            app.use( box.cookieParser );
+            app.use(express.session({
+                secret: config.common.session.secret
+                , cookie: { maxAge: 1000 * config.common.session.maxAgeSeconds}
+                , store: box.sessionStore
+            }));
+    });
 
-  box.on('init.listen', function (cb) {
-      app.listen( config.port );
-      // box.server.listen(config.port);
-      // box.emit('init.server', box.server);
-      cb(null, 'listening on port #' +config.port );
-  });
+    app.io.configure(function() {
+            app.io.enable('browser client minification');  // send minified client
+            //    app.io.enable('browser client gzip');          // gzip the file
+            // app.io.set('log level', 1);                    // reduce logging
+    });
 
-  done(null, 'plugin express.io initialised');
+
+    box.app.on('error', box.emit.bind(box, 'error'));
+
+    box.on('init.attach', function (app, config, cb) {
+          app.use(require('less-middleware')( config.less ));
+          app.use(express.static(path.join(config.__dirname, 'public')));
+          cb(null, path.join(config.__dirname, 'public') + ' attached' );
+    });
+
+    box.on('init.listen', function (cb) {
+          app.listen( config.port );
+          // box.server.listen(config.port);
+          // box.emit('init.server', box.server);
+          cb(null, 'listening on port #' +config.port );
+    });
+
+    done(null, 'plugin express.io initialised');
 });

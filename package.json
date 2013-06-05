@@ -56,7 +56,8 @@
     "klei-dust": "~0.6.7",
     "dustjs-linkedin": "~1.2.4",
     "dustjs-helpers": "~1.1.1",
-    "watch-tree-maintained": "~0.1.2"
+    "watch-tree-maintained": "~0.1.2",
+    "readdirp": "~0.2.4"
   },
   "devDependencies": {
     "nodelint": "~0.6",
