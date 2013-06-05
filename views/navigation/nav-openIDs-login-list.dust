@@ -1,0 +1,11 @@
+<ul class="dropdown-menu icons32">
+  <li><a href="/authenticate/google"><i class="auth-icon32 auth-google32"></i><span>Goodle</span></a></li>
+  <li><a href="/authenticate/yahoo"><i class="auth-icon32 auth-yahoo32"></i><span>Yahoo</span></a></li>
+  <li><a href="/authenticate/facebook"><i class="auth-icon32 auth-facebook32"></i>Facebook</a></li>
+  <li><a href="/authenticate/twitter"><i class="auth-icon32 auth-twitter32"></i>Twitter</a></li>
+  <!-- li><a href="/authenticate/windowslive"><i class="auth-icon auth-windowslive"></i>Windows Live</a></li -->
+  <li><a href="/authenticate/dropbox"><i class="auth-icon32 auth-dropbox32"></i>DropBox</a></li>
+  <li><a href="/authenticate/meetup"><i class="auth-icon32 auth-meetup32"></i>Meetup</a></li>
+  <li><a href="/authenticate/linkedin"><i class="auth-icon32 auth-linkedin32"></i>Linkedin</a></li>
+  <li><a href="/login/dummy"><i class="auth-icon32 missing-user32"></i>Dummy user</a></li>
+</ul>

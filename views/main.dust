@@ -18,11 +18,11 @@
     </script>
   </head>
   <body calss="{bodyClass}">
-    {<navbar/}
+    {+navbar}navbar{/navbar}
     <div class="container">
-      {<breadcrumbs}breadcrumbs{/breadcrumbs}
+      {+breadcrumbs}breadcrumbs{/breadcrumbs}
       <div class="row"><div class="span8 error">{error}</div></div>
-      <div class="row"><div class="span8">{+title}<h1>{{ title }}</h1>{/title}</div></div>
+      <div class="row"><div class="span8">{+title}<h1>title</h1>{/title}</div></div>
       {+content} _content_ {/content}
       {+contentRows/}
       {+contentBottom/}
