@@ -4,20 +4,17 @@
  */
 
 var box = require('../box.js')
-    , _ = require('lodash')
-    , breadcrumbs = require('./breadcrumbs.js')
     , config
     , app
-
     ;
 
 require('./collections');
 require('./links');
 
 
-
 function top ( req, res ){
-    res.render('layout', { title: '' });
+    box.dust.render('main', box.dust.makeBase({ title: 'title' }), res );
+//    res.render('main', box.dust.makeBase({ title: 'title' }) );
 }
 
 box.on('init', function (App, Config, done) {

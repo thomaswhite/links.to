@@ -14,6 +14,28 @@ var box = require('../box.js')
 app.http().io();
 //box.server = require('http').Server(app);
 
+box.dust = {
+    render: function(template, context, res) {
+        var opt = kleiDust.getOptions();
+        if( opt.stream  ){
+            var stream = kleiDust.getDust().stream(template, context);
+            stream.on('data', function(data) {       res.write(data);     });
+            stream.on('end', function() {            res.end();           });
+            stream.on('error', function(err) {       res.end(err);        });
+        }else{
+            kleiDust.dust(template, context, function(err, out) {
+                if (err ){
+                    throw err;
+                }else{
+                    res.send( out);
+                }
+            });
+        }
+    },
+    makeBase: function( o ) {
+        return kleiDust.getDust().makeBase( o );
+    }
+};
 
 app.configure('development', function () {
     app.use(express.errorHandler());
@@ -27,6 +49,22 @@ box.on('init', function (App, Config, done) {
   box.cookieParser = express.cookieParser(config.common.session.secret);
   box.sessionStore = new mongoStore(config.db);
 
+  kleiDust.setOptions({
+      root: path.join(config.__dirname, 'templates'),
+      relativeToFile: true,
+      keepWhiteSpace: true,
+      useHelpers: false,
+      cache: false,
+      stream: false
+  });
+
+  require('../lib/watcher').watch(
+            kleiDust.getDust(),
+            path.join(config.__dirname, 'templates'),
+            path.join(config.__dirname, 'public/templates'),
+            '.dust'
+  );
+
   app.configure(function () {
         app.use(express.logger('dev'));
         app.use(express.favicon());
@@ -37,11 +75,11 @@ box.on('init', function (App, Config, done) {
         app.engine('dust', kleiDust.dust);
         app.set('view engine', 'dust');
         app.set('view options', {layout: false});
-
+/*
         app.engine('html', cons.swig );
         app.set('view engine', 'html');
         swig.init( config.swig );
-
+*/
         app.use( box.cookieParser );
         app.use(express.session({
             secret: config.common.session.secret
@@ -62,36 +100,13 @@ box.on('init', function (App, Config, done) {
   box.on('init.attach', function (app, config, cb) {
       app.use(require('less-middleware')( config.less ));
       app.use(express.static(path.join(config.__dirname, 'public')));
-
-      app.get('/hogan', function( req, res){
-
-          var compiledTemplate = hogan.compile(config.__dirname + '/views/hogan/index.hjs', {asString: true});
-          console.log( compiledTemplate );
-
-          cons.hogan( config.__dirname + '/views/hogan/index.hjs',{
-                  partials: {
-                      part  : 'part'
-                  },
-                  title: 'Home Page',
-                  author: 'Bruce Wayne'
-              }
-              , function(err, html){
-                  //res.writeHead(200, {"Content-Type": "application/json"});
-                  //res.write( JSON.stringify({ok:true, value: value, name:name }) );
-                  res.write( html  );
-                  res.end();
-              }
-          );
-
-      });
-
       cb(null, path.join(config.__dirname, 'public') + ' attached' );
   });
 
   box.on('init.listen', function (cb) {
       app.listen( config.port );
       // box.server.listen(config.port);
-        // box.emit('init.server', box.server);
+      // box.emit('init.server', box.server);
       cb(null, 'listening on port #' +config.port );
   });
 
