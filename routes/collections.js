@@ -45,7 +45,7 @@ function collectionList( req, res, next, filter, param ){
     filter = filter || {};
     param = param || {page:1};
     param.limit = param.limit || 48;
-    param.sort = param.sort || [];
+    param.sort = param.sort || {updated:-1, created:-1};
     // filter, limit, sort, callback
     box.parallel('collections.list', filter, param.limit, param.sort, function( err, result ){
         var collections = box.utils.pickUpFromAsyncResult( result, 'collections-list' );
