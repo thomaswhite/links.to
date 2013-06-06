@@ -1,21 +1,21 @@
 {^noAdd}
     {?canEdit}
       {?user}
-        {@select key=\"{buttonType}\"}
+        {@select key="{buttonType}"}
           {@eq value="textarea"}
            <textarea class="input-xxlarge autoGrow" name="{name}" placeholder="{placeholder}" title="{placeholder}" rows="1"></textarea>
            <button type="submit" class="btn btn-primary btn-mall" href=""><i class="icon-plus icon-white"></i> {buttonText}</button>
           {/eq}
           {@default}
               <div class="input-append">
-                 <input type="text" class="addInput input-xxlarge" name="{ name }" id="{name}" placeholder="{placeholder}" title="{placeholder}" />
-                 <button class="btn btn-primary btnAdd" type="button"  data-context='{ button_action|js|s }'>Add</button>
+                 <input type="text" class="addInput input-xxlarge" name="{name}" id="{name}" placeholder="{placeholder}" title="{placeholder}" />
+                 <button class="btn btn-primary btnAdd" type="button"  data-context='{button_action|js|s}'>Add</button>
               </div>
           {/default}
         {/select}
       {/user}
       {^user}
-         <span class="loginPlease">{ loginPlease }</span>
+         <span class="loginPlease">{loginPlease}</span>
       {/user}
    {/canEdit}
 {/noAdd}

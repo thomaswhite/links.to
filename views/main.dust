@@ -17,12 +17,13 @@
       }
     </script>
   </head>
-  <body calss="{bodyClass}">
+  <body class="{+bodyClass/}">
     {>"navigation/navbar"/}
     <div class="container">
       {>"navigation/breadcrumbs"/}
       <div class="row"><div class="span8 error">{error}</div></div>
       <div class="row"><div class="span8">{+title}<h1>{title}</h1>{/title}</div></div>
+      {+beforeContent/}
       {+content} _content_ {/content}
       {+contentRows/}
       {+contentBottom/}

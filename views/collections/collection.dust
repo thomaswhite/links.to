@@ -1,7 +1,7 @@
 {>"main"/}
 
+{<bodyClass>collection</bodyClass>
 {<pageTitle}Collection {title}{/pageTitle}
-
 {<title}
   <h1 class="eip" id="title">Collection {title}</h1>
   {?canDelete}
@@ -40,9 +40,11 @@
                 <a href="#" class="btn btn-primary" title="Share"><i class="icon-white icon-share-alt"></i></a>
                </span>
             {?canDelete}
-              <span class="btn-group">
-                <a class="btn btn-danger btn-mini"  href="/link/{_id}/delete/{_id}" title="Delete"><i class="icon-white icon-trash"></i></a>
-              </span>
+             {^grid.length}
+                  <span class="btn-group">
+                    <a class="btn btn-danger btn-mini"  href="/link/{_id}/delete/{_id}" title="Delete"><i class="icon-white icon-trash"></i></a>
+                  </span>
+              {/grid.length}
             {/canDelete}
             </span>
         </div>
@@ -55,6 +57,11 @@
       </div>
     </div>
 
+    <div class="row">
+        <div class="span12 button">
+            {>"controls/add_button"/}
+        </div>
+    </div>
 
     <div id="grid">
       {#links}
@@ -68,3 +75,4 @@
     </div>
   {/collection}
 {/content}
+

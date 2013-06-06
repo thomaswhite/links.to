@@ -1,9 +1,10 @@
 {>"main"/}
 
+{<bodyClass>collection-list</bodyClass>
 {<pageTitle}My collections in Links.to{/pageTitle}
 {<title}<h1>{title2}</h1>{/title}
 {<error}{error}{/error}
-{<pageData} , route:'collection:list', param:{param|js|s}, filter: {filter|js|s }} {/pageData}
+{<pageData} , route:'collection:list', param:{param|js|s}, filter: {filter|js|s} {/pageData}
 
 {<content}
   <div class="row table-header">
@@ -32,10 +33,10 @@
 {/content}
 
 
-{<contentBottom}
+{<beforeContent}
   <div class="row">
     <div class="span12 button">
-        {! > "controls/add_button" / !}
+        {>"controls/add_button"/}
     </div>
   </div>
-{/contentBottom}
+{/beforeContent}
