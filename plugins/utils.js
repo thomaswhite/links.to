@@ -32,7 +32,7 @@ var box = require('../box.js')
         maxLength: 32000           // Truncate output if longer
     })
     , async = require('async')
-
+    , moment = require('moment')
     ;
 
 function ShorterID( length ){
@@ -50,6 +50,17 @@ function pickUpFromAsyncResult( a, type ){
     return _.first(a, function(element, pos, all){ return element.type == type;  })[0];
 }
 
+function formatUpdated (arr){
+    var A = arr && arr.hasOwnProperty('length') ? arr : [arr];
+    A.forEach(function(o) {
+        if(o.updated){
+            var d =  moment(o.updated);
+            o.updatedStr = d.format('YYYY-MM-DD HH:mm');
+            o.updatedFromNow = d.fromNow();
+        }
+    });
+}
+
 box.on('init', function (app, conf, done) {
     box.utils = {
         _ : _,
@@ -59,7 +70,8 @@ box.on('init', function (app, conf, done) {
         inspect : inspect,
         shorterID: ShorterID,
         async : async,
-        pickUpFromAsyncResult: pickUpFromAsyncResult
+        pickUpFromAsyncResult: pickUpFromAsyncResult,
+        formatUpdated:formatUpdated
      };
     done(null, 'plugin utils initialised');
 });

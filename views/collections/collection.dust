@@ -1,0 +1,70 @@
+{>"main"/}
+
+{<pageTitle}Collection {title}{/pageTitle}
+
+{<title}
+  <h1 class="eip" id="title">Collection {title}</h1>
+  {?canDelete}
+    {#grid.length}
+       <a class="btn btn-danger btn-mini"  href="/coll/{collection._id}/delete?back=/coll/mine"><i class="icon-trash icon-white"></i> Delete</a>
+    {/grid.length}
+  {/canDelete}
+{/title}
+
+{<error}{error}{/error}
+
+{<pageData} , route:'collection:get', coll_id : '{collection._id}',  param:{param|js|s}, filter: {filter|js|s} {/pageData}
+
+{<pageBottom}
+    <div class="eipBase" data-url="/coll/{collection._id}/eip"><br/></div>
+    <script type="text/javascript" src="/js/jquery.editinplace.js"></script>
+            <!-- script type="text/javascript" src="/js/jquery.autosize.js"></script -->
+            <!-- script type="text/javascript" src="/js/edit-in-place.js"></script -->
+    <script type="text/javascript" src="/js/tw-textarea-autoGrow.js"></script>
+    <script type="text/javascript" src="/js/autoGrowInput.js"></script>
+    <script type="text/javascript" src="/js/collection-link-edit.js"></script>
+    <script type="text/javascript" src="/js/swig.pack.min.js"></script>
+{/pageBottom}
+
+{<content}
+ {#collection}
+   <div class="row">
+        <div class="span8 {?canEdit}eip{/canEdit} ta wrap coll_description" >{description}</div>
+    </div>
+    <div class="row">
+        <div class="span8 ">
+            <span class="btn-toolbar">
+              <span class="btn-group">
+                <a href="#" class="btn btn-primary" title="Like"><i class="icon-white  icon-thumbs-up"></i></a>
+                <a href="#" class="btn btn-primary" title="Add to favorites"><i class="icon-white icon-heart"></i></a>
+                <a href="#" class="btn btn-primary" title="Share"><i class="icon-white icon-share-alt"></i></a>
+               </span>
+            {?canDelete}
+              <span class="btn-group">
+                <a class="btn btn-danger btn-mini"  href="/link/{_id}/delete/{_id}" title="Delete"><i class="icon-white icon-trash"></i></a>
+              </span>
+            {/canDelete}
+            </span>
+        </div>
+    </div>
+    <br/>
+
+    <div class="row">
+      <div class="span12 button">
+          {! > "controls/add_button" / !}
+      </div>
+    </div>
+
+
+    <div id="grid">
+      {#links}
+          <div class="blocked-link">
+             {>"links/link_content"/}
+             {>"links/link_tag_row"/}
+          </div>
+          {:else}
+          <div class="row"><div class="span6">No links in this collection yet.</div></div>
+      {/links}
+    </div>
+  {/collection}
+{/content}

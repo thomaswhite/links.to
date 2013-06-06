@@ -235,6 +235,9 @@ http://css-tricks.com/snippets/css/useful-css3-less-mixins/
 .tag-row * {
   vertical-align: top;
 }
+span.updated i {
+  margin-right: 0.25em;
+}
 .dropdown-menu li * {
   vertical-align: middle;
 }

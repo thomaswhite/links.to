@@ -1,0 +1,3 @@
+{?updatedFromNow}
+<span class="updated"  title="{updatedStr}" ><i class="icon-calendar"></i><span">{updatedFromNow}</span></span>
+{/updatedFromNow}

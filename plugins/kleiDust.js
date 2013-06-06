@@ -1,7 +1,9 @@
 var box = require('../box.js')
     , path = require('path')
     , kleiDust = require('klei-dust')
+    , helpers = require('dustjs-helpers')
     , util = require('util')
+    , debug = require('debug')('linksTo:plugin:kleiDust')
     , config;
 
 box.kleiDust = kleiDust;
@@ -37,6 +39,8 @@ box.on('init.attach', function(app, config, done){
         render: function( res, template, context) {
             var opt = kleiDust.getOptions(),
                 Context = kleiDust.getDust().makeBase( context );
+
+  //          debug( "Dust render context: \n", box.utils.inspect( context ));
 
             if( opt.stream  ){
                 var stream = kleiDust.getDust().stream(template, Context);

@@ -19,6 +19,7 @@ function ShorterID(){
 }
 
 
+
 /**
  *
  * @param owner
@@ -51,7 +52,6 @@ function collectionList( req, res, next, filter, param ){
         //    _.first(result, function(element, pos, all){ return element.type == 'collections-list';  })[0];
  //       debug( "Collections list: \n", box.utils.inspect( result ));
 //            debug( "user: \n", app.locals.inspect( app.locals.user ));
-
 
 //    res.render('main', box.dust.makeBase({ title: 'title' }) );
 
@@ -139,11 +139,11 @@ function Get (req, res) {
             res.redirect( '/coll' );
         }else{
             var owner      =  req.user && req.user._id ==  collection.owner;
-            res.render('collection', {
+            box.dust.render(res, 'collections/collection', {
+            //res.render('collection', {
                 button_action:{action:'link:add', coll_id: collID },
                 title: 'Collection "' + (collection && collection.title ? collection.title : ' not found' ) + '"',
                 user: req.user,
-        //        grid: collection.linksData,
                 canEdit: owner,
                 canDelete: owner,
                 linkUnderEdit :  req.query.editLink,
