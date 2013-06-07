@@ -95,15 +95,19 @@ function page_display( page, metaTagsToJoin ){
                 }else{
                     value = pick_meta_field(groups, 'url');
                 }
+                if( !value ){
+                    value = page.url;
+                }
                 break;
 
             case 'thumbnail':
-                value = names.thumbnail || pick_meta_field(groups, 'image');
-                if( !value && page.body.image && page.body.image.length){
+                display.imagePos = '';
+                value = head.names && head.names.thumbnail ? head.names.thumbnail : pick_meta_field(groups, 'thumbnail');
+                if( !value && head.og.image && head.og.image.length){
+                    value = head.og.image[0].url;
+                }else if( !value && page.body.image && page.body.image.length){
                     value = page.body.image[0].src;
                     display.imagePos = 0;
-                }else{
-                    display.imagePos = -1;
                 }
                 break;
 
@@ -135,7 +139,6 @@ function page_display( page, metaTagsToJoin ){
                 value = _.first(page.tags || [], 5);
                 break;
 
-
             case 'abstract':
             case 'summary':
         }
@@ -147,8 +150,8 @@ function page_display( page, metaTagsToJoin ){
     if ( !display.title ){
         display.title = display.url;
     }
-    display.collection = page.collection;
-    display.shortID    = page.shortID;
+    // display.collection = page.collection;
+    // display.shortID    = page.shortID;
     return page;
 }
 

@@ -40,7 +40,7 @@ box.on('init.attach', function(app, config, done){
             var opt = kleiDust.getOptions(),
                 Context = kleiDust.getDust().makeBase( context );
 
-  //          debug( "Dust render context: \n", box.utils.inspect( context ));
+ //         debug( "Dust render context: \n", box.utils.inspect( context ));
 
             if( opt.stream  ){
                 var stream = kleiDust.getDust().stream(template, Context);

@@ -12,20 +12,10 @@
     <div class="span1 coll-e">Links</div>
     <div class="span2 coll-e">Last updated</div>
   </div>
+{! <pre>{user|js|s}</pre>  !}
   {#grid}
-      <div class="row">
-          <div class="span5 coll-title">
-            <a href="/coll/{_id}" title="{description}" >{title}
-              {! if owner == user._id }
-                 <span class="icon-user" title="This collection is mine"></span>
-              { endif !}
-            </a>
-            <span>{desciption}</span>
-          </div>
-          <div class="span1 coll-e">{links.length}</div>
-          <div class="span2 coll-e">{>"date_time/updated"/}</div>
-      </div>
-  {:else}
+      {>"collections/collections_list_line" /}
+    {:else}
       <div class="row">
         <div class="span8">No collections available yet.</div>
       </div>
@@ -34,9 +24,5 @@
 
 
 {<beforeContent}
-  <div class="row">
-    <div class="span12 button">
-        {>"controls/add_button"/}
-    </div>
-  </div>
+   {>"controls/add_button_row"/}
 {/beforeContent}

@@ -387,6 +387,9 @@ body.collection h1 {
   vertical-align: baseline;
   background-color: #eee;
 }
+.my-collection {
+  color: #ff0000;
+}
 .edit-label {
   padding: 4px 5px 4px 20px;
   margin-left: 10px;

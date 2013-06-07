@@ -299,7 +299,7 @@ function scrape_head_links($head, baseURL){
 
 function scrape_head( $, uri, token,  callback ){
     var $head = $('head'),
-        result = { head:{ title: $($head.find('title')).text() }, display:{} },
+        result = { head:{ title: $($head.find('title')).text() ,fb:{}, og:{} }, display:{} },
         head = result.head,
         display = result.display,
         aURL =  _.pick(URL.parse(uri), 'protocol', 'host', 'port'),
@@ -307,9 +307,9 @@ function scrape_head( $, uri, token,  callback ){
         meta = scrape_meta_names( $head, baseURL );
 
     // result.display.title = $($head.find('title')).text();
-    _.merge( head, meta );
-    _.merge(head.fb, scrape_fbTags( $head, baseURL ));
-    _.merge(head.og, scrape_ogTags( $head, baseURL ));
+    _.extend( head, meta );
+    _.extend(head.fb, scrape_fbTags( $head, baseURL ));
+    _.extend(head.og, scrape_ogTags( $head, baseURL ));
     head.links = scrape_head_links($head, baseURL);
 
 //    if( result.title.indexOf('|') > -1 ){
@@ -349,7 +349,18 @@ exports.init = function ( requestOptions ) {
                 } else if ( !response || response.statusCode !== 200 ) {
                     callback(new  Error('Request to '+options['uri']+' ended with status code: '+(typeof response !== 'undefined' ? response.statusCode : 'unknown')));
                 } else{
-                    body = body.replace(/<(\/?)script/g, '<$1nobreakage');
+
+                    var SCRIPT_REGEX2= /<script\b[^>]*>(.*?)<\/script>/ig;
+                    var SCRIPT_REGEX = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi;
+                    while (SCRIPT_REGEX.test(body)) {
+                        body = body.replace(SCRIPT_REGEX, "");
+                    }
+                    while (SCRIPT_REGEX2.test(body)) {
+                        body = body.replace(SCRIPT_REGEX2, "");
+                    }
+                    // /<script\ .*?<\/.*?script>/i
+                    // body = body.replace(/<(\/?)script/g, '<$1nobreakage');
+
                     var $ = cheerio.load(body, cherioParam);
                     emitter.series( 'pageScrape.process', $, request_options.uri, request_options.token, function(err, pageParts){
                         if( err ){

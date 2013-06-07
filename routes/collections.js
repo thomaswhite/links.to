@@ -51,7 +51,9 @@ function collectionList( req, res, next, filter, param ){
         var collections = box.utils.pickUpFromAsyncResult( result, 'collections-list' );
         //    _.first(result, function(element, pos, all){ return element.type == 'collections-list';  })[0];
  //       debug( "Collections list: \n", box.utils.inspect( result ));
-//            debug( "user: \n", app.locals.inspect( app.locals.user ));
+
+          //  debug( "user: \n",  app.locals.user );
+          //  debug( "session: \n",  req.session );
 
 //    res.render('main', box.dust.makeBase({ title: 'title' }) );
 
@@ -62,7 +64,7 @@ function collectionList( req, res, next, filter, param ){
             filter: filter,
             title: 'All collection',
             grid: collections,
-            user: app.locals.user|| '',
+            user: app.locals.user || '',
             canEdit:true,
             crumbs : breadcrumbs.make(req, { }),
             addButton:{
@@ -142,8 +144,8 @@ function Get (req, res) {
             box.dust.render(res, 'collections/collection', {
             //res.render('collection', {
                 button_action:{action:'link:add', coll_id: collID },
-                title: 'Collection "' + (collection && collection.title ? collection.title : ' not found' ) + '"',
-                user: req.user || '',
+                title: (collection && collection.title ? collection.title : 'Collection not found' ) + '"',
+                user: app.locals.user || '',
                 canEdit: owner,
                 canDelete: owner,
                 linkUnderEdit :  req.query.editLink,

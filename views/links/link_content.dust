@@ -1,25 +1,26 @@
 <div class="row link-title {^images.length}noImg{/images.length}">
-    <div class="span8 link-content">
-       {?images.length}
-            <ul class="iddCont imgDropdown eipURL" data-url="/link/{_id}/eip" >
-                <li>
-                    <a href="#" class="thumbnail" data-imagePos="{imagePos}">
-                        <img src="{images[imagePos].src}">
-                    </a>
-                </li>
-                {#images}
+    {#display}
+        <div class="span8 link-content">
+            {?thumbnail}
+                <ul class="iddCont imgDropdown eipURL" data-url="/link/{_id}/eip" >
+                    <li>
+                        <a href="#" class="thumbnail" data-imagePos="{imagePos}">
+                            <img src="{thumbnail}">
+                        </a>
+                    </li>
+                    {#images}
                     <li>
                         <a href="#" class="thumbnail inactive" data-imagePos="{$idx}"><img src="{src}"></a>
                     </li>
-                {/images}
-            </ul>
-        {/images.length}
-
-        <h5>
-            <a class="link-title wrap {?canEdit}eip{/canEdit}" href="{url}?linked-from=www.links.to/w/c/{collection._id}" target="_blank">{title}</a>
-        </h5>
-        {?autor}<span class="author">Author:<span class="author_name">{author}</span></span>{/autor}
-        {?description}<span title="description" class="description wrap ta">{description}</span>{/description}
-        {^description}<span title="Summary" class="description wrap ta summary">{summary}</span>{/description}
-    </div>
+                    {/images}
+                </ul>
+            {/thumbnail}
+            <h5>
+                <a class="link-title wrap {?canEdit}eip{/canEdit}" href="{url}?linked-from=www.links.to/w/c/{collection_id}" target="_blank">{title}</a>
+            </h5>
+            {?autor}<span class="author">Author:<span class="author_name">{author}</span></span>{/autor}
+            {?description}<span title="description" class="description wrap ta">{description}</span>{/description}
+            {^description}<span title="Summary" class="description wrap ta summary">{summary}</span>{/description}
+        </div>
+    {/display}
 </div>

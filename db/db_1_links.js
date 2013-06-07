@@ -39,10 +39,9 @@ box.on('db.init', function( monk, Config, done ){
 
     box.on('collection.get.links', function( collection, options, callback){
         if( collection && collection.links && collection.links.length ){
-            options = options || { sort:[['updated', -1]]};
-            Links.find( { _id :  { $in : collection.links} }, options , function(err, found_links) {
-                callback( err, found_links );
-            });
+            options = { $sort:{'updated': -1}, fields:{head:false, type:false, body:false, tags:false} };
+            Links.find( { _id :  { $in : collection.links} }, options, callback);
+//          Links.find( { _id :  { $in : collection.links}, fields:{head:false, type:false, body:false,  tags:false}  }, options , callback);
         }else{
             callback( null, [] );
         }

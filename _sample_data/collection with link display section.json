@@ -1,0 +1,87 @@
+{
+  button_action: {
+    action: 'link:add',
+    coll_id: '519f62ab9ea49afc2f000001'
+  },
+  title: 'collection 10"',
+  user: '',
+  canEdit: true,
+  canDelete: true,
+  linkUnderEdit: undefined,
+  collection: {
+    _id: 111,
+    created: "Fri, 24 May 2013 12:52:59 GMT",
+    description: 'Description...',
+    links: [{
+        collection: '519f62ab9ea49afc2f000001',
+        shortID: 'llQqvXF22F',
+        owner: 1,
+        updated: "Fri, 07 Jun 2013 13:51:07 GMT",
+        owner_screen_name: 'Dummy User',
+        url: 'http://www.squidoo.com/seth',
+        display: {
+          title: 'Seth Godin!',
+          description: "WRITER of bestselling books about marketing. SPEAKER with a unique style and great reputation. ENTREPRENEUR with a track record. Seth's blog just reached its 4000th post. Back when the algorithm was interesting, the blog was ranked by Technorati as the #1...",
+          imagePos: -1,
+          thumbnail: 'http://i1.squidoocdn.com/resize_square/squidoo_images/250/draft_lens53360_cartonsmall.jpg',
+          canonicalURL: true,
+          url: 'http://www.squidoo.com/seth',
+          tags: [{
+              word: 'window',
+              count: 76
+            }, {
+              word: 'function',
+              count: 50
+            }, {
+              word: 'false',
+              count: 45
+            }, {
+              word: 'gb_display_options',
+              count: 45
+            }, {
+              word: 'squidoocomments',
+              count: 45
+            }
+          ]
+        },
+        _id: {
+          _bsontype: 'ObjectID',
+          id: "123"
+        },
+        updatedStr: '2013-06-07 14:51',
+        updatedFromNow: '5 minutes ago'
+      }
+    ],
+    linksCount: 0,
+    owner: 1,
+    shortID: 'bbz9Ow',
+    title: 'collection 10',
+    type: 'collection',
+    updated: Fri,
+    24 May 2013 12: 52: 59 GMT
+  },
+  referer: 'http://127.0.0.1:3000/coll',
+  crumbs: [{
+      href: '/coll',
+      title: 'All Collections'
+    }, {
+      href: '/coll/mine',
+      title: 'My collections'
+    }, {
+      href: '/coll/519f62ab9ea49afc2f000001',
+      title: 'collection 10'
+    }
+  ],
+  addButton: {
+    link: '/link/new/519f62ab9ea49afc2f000001',
+    name: 'links',
+    placeholder: 'Paste links',
+    type: 'input',
+    buttonText: 'Add Link',
+    hidden: [{
+        name: 'add2coll',
+        value: '519f62ab9ea49afc2f000001'
+      }
+    ]
+  }
+}

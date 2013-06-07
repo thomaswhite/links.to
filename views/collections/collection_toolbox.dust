@@ -1,0 +1,18 @@
+<div class="row">
+    <div class="span8 ">
+            <span class="btn-toolbar">
+              <span class="btn-group">
+                <a href="#" class="btn btn-primary" title="Like"><i class="icon-white  icon-thumbs-up"></i></a>
+                <a href="#" class="btn btn-primary" title="Add to favorites"><i class="icon-white icon-heart"></i></a>
+                <a href="#" class="btn btn-primary" title="Share"><i class="icon-white icon-share-alt"></i></a>
+               </span>
+            {?canDelete}
+             {^grid.length}
+                  <span class="btn-group">
+                    <a class="btn btn-danger btn-mini"  href="/link/{_id}/delete/{_id}" title="Delete"><i class="icon-white icon-trash"></i></a>
+                  </span>
+              {/grid.length}
+            {/canDelete}
+            </span>
+    </div>
+</div>

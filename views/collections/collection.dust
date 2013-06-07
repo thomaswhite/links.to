@@ -13,7 +13,7 @@
 
 {<error}{error}{/error}
 
-{<pageData} , route:'collection:get', coll_id : '{collection._id}' {/pageData}
+{<pageData} , route:'collection:get', coll_id : '{#collection}{_id}{/collection}' {/pageData}
 
 {<pageBottom}
     <div class="eipBase" data-url="/coll/{collection._id}/eip"><br/></div>
@@ -31,43 +31,14 @@
    <div class="row">
         <div class="span8 {?canEdit}eip{/canEdit} ta wrap coll_description" >{description}</div>
     </div>
-    <div class="row">
-        <div class="span8 ">
-            <span class="btn-toolbar">
-              <span class="btn-group">
-                <a href="#" class="btn btn-primary" title="Like"><i class="icon-white  icon-thumbs-up"></i></a>
-                <a href="#" class="btn btn-primary" title="Add to favorites"><i class="icon-white icon-heart"></i></a>
-                <a href="#" class="btn btn-primary" title="Share"><i class="icon-white icon-share-alt"></i></a>
-               </span>
-            {?canDelete}
-             {^grid.length}
-                  <span class="btn-group">
-                    <a class="btn btn-danger btn-mini"  href="/link/{_id}/delete/{_id}" title="Delete"><i class="icon-white icon-trash"></i></a>
-                  </span>
-              {/grid.length}
-            {/canDelete}
-            </span>
-        </div>
-    </div>
-    <br/>
-
-    <div class="row">
-      <div class="span12 button">
-          {! > "controls/add_button" / !}
-      </div>
-    </div>
-
-    <div class="row">
-        <div class="span12 button">
-            {>"controls/add_button"/}
-        </div>
-    </div>
+    {>"collections/collection_toolbox.dust"/}
+    {>"controls/add_button_row"/}
 
     <div id="grid">
-      {#links}
+      {#links collection_id="{_id}"}
           <div class="blocked-link">
-             {>"links/link_content"/}
-             {>"links/link_tag_row"/}
+             {>"links/link_content" /}
+             {>"links/link_tag_row" /}
           </div>
           {:else}
           <div class="row"><div class="span6">No links in this collection yet.</div></div>
