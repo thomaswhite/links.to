@@ -1,6 +1,6 @@
 {>"main"/}
 
-{<bodyClass>collection</bodyClass>
+{<bodyClass}collection{/bodyClass}
 {<pageTitle}Collection {title}{/pageTitle}
 {<title}
   <h1 class="eip" id="title">Collection {title}</h1>
@@ -13,7 +13,7 @@
 
 {<error}{error}{/error}
 
-{<pageData} , route:'collection:get', coll_id : '{collection._id}',  param:{param|js|s}, filter: {filter|js|s} {/pageData}
+{<pageData} , route:'collection:get', coll_id : '{collection._id}' {/pageData}
 
 {<pageBottom}
     <div class="eipBase" data-url="/coll/{collection._id}/eip"><br/></div>

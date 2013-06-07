@@ -62,7 +62,7 @@ function collectionList( req, res, next, filter, param ){
             filter: filter,
             title: 'All collection',
             grid: collections,
-            user: app.locals.user,
+            user: app.locals.user|| '',
             canEdit:true,
             crumbs : breadcrumbs.make(req, { }),
             addButton:{
@@ -143,7 +143,7 @@ function Get (req, res) {
             //res.render('collection', {
                 button_action:{action:'link:add', coll_id: collID },
                 title: 'Collection "' + (collection && collection.title ? collection.title : ' not found' ) + '"',
-                user: req.user,
+                user: req.user || '',
                 canEdit: owner,
                 canDelete: owner,
                 linkUnderEdit :  req.query.editLink,

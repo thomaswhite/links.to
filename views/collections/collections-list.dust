@@ -1,6 +1,6 @@
 {>"main"/}
 
-{<bodyClass>collection-list</bodyClass>
+{<bodyClass}collection-list{/bodyClass}
 {<pageTitle}My collections in Links.to{/pageTitle}
 {<title}<h1>{title2}</h1>{/title}
 {<error}{error}{/error}
