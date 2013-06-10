@@ -1,4 +1,5 @@
 {^noAdd}
+    {!  #user}user:{.|js|s}{/user !}
     {?canEdit}
       {?user}
         {@select key="{buttonType}"}

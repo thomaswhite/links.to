@@ -11,6 +11,50 @@ body {
   margin-top: 45px;
   background: #efefef url(/images/gray_jean.png);
 }
+/*
+ LESS DSS (dynamic stylesheet) 1.8.5 (for less.js 1.3+)
+ MORE INFO: http://cl.ly/Dqnr
+
+ https://github.com/mrkrupski/LESS-Dynamic-Stylesheet
+
+ LESS mixins by Chris Krupski
+*/
+/* Backgrounds Group
+========================== */
+/* @group gradient-veritical() */
+/* @end */
+/* @group background-clip() */
+/* @end */
+/* Box Group
+========================== */
+/* @option: box-display() */
+/* @end */
+/* @group box-shadow() */
+/* @end */
+/* Border Group
+========================== */
+/* @group rounded() */
+/* @end */
+/* Transform Group
+========================== */
+/* @group matrix() */
+/* @end */
+/* @group rotate() */
+/* @end */
+/* @group scale() */
+/* @end */
+/* @group translate() */
+/* @end */
+/* @group skew() */
+/* @end */
+/* Transition
+========================== */
+/* Animation Group
+========================== */
+/* Column
+========================== */
+/* Misc Group
+========================== */
 .noWrap {
   white-space: nowrap;
 }
@@ -193,50 +237,58 @@ http://css-tricks.com/snippets/css/useful-css3-less-mixins/
 .logged-user b.caret {
   margin-top: 14px;
 }
-.tag-label {
-  margin-left: 5px;
-  paddin-left: 6px;
-  float: right;
-  /*  border:1px solid #444; */
-
-  font-weight: normal;
-  background-color: #468847;
-  color: white;
-  -webkit-border-top-right-radius: 0;
-  -webkit-border-bottom-right-radius: 0;
-  -webkit-border-bottom-left-radius: 5px;
-  -webkit-border-top-left-radius: 5px;
-  -moz-border-radius-topright: 0;
-  -moz-border-radius-bottomright: 0;
-  -moz-border-radius-bottomleft: 5px;
-  -moz-border-radius-topleft: 5px;
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-  border-bottom-left-radius: 5px;
-  border-top-left-radius: 5px;
-  -moz-background-clip: padding;
-  -webkit-background-clip: padding-box;
-  background-clip: padding-box;
-}
-.tag-label * {
-  vertical-align: baseline ;
-}
-.tag-label .tag-name {
-  margin-right: 0;
-  padding: 0px 2px 3px 6px;
-}
-.tag-label .tag-number {
-  margin-left: 0;
-  color: white;
-  background-color: #333;
-  padding: 1px 4px;
-  min-width: 1em;
-}
 .tag-row * {
   vertical-align: top;
 }
 span.updated i {
   margin-right: 0.25em;
+}
+.tags a {
+  float: left;
+  background: #888;
+  /*#c5c5c5; */
+
+  color: #fff;
+  text-decoration: none;
+  margin: 0 0 10px 18px;
+  padding: 2px 10px 1px;
+  position: relative;
+  transition: all .25s linear;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
+  white-space: nowrap;
+  line-height: 20px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  box-shadow: 5px 3px 10px rgba(50, 50, 50, 0.45);
+  -webkit-box-shadow: 5px 3px 10px rgba(50, 50, 50, 0.45);
+  -moz-box-shadow: 5px 3px 10px rgba(50, 50, 50, 0.45);
+}
+.tags a:before {
+  content: "";
+  border-style: solid;
+  border-color: transparent #888 transparent transparent;
+  border-width: 11px 12px 12px 0;
+  position: absolute;
+  left: -11px;
+  top: 0;
+  transition: all .25s linear;
+}
+.tags a:hover {
+  background-color: #39F;
+}
+.tags a:hover:before {
+  border-color: transparent #39F transparent transparent;
+}
+.tags a:after {
+  background: none repeat scroll 0 0 #FFFFFF;
+  border-radius: 50% 50% 50% 50%;
+  box-shadow: 0 1px 1px #737373 inset;
+  content: "";
+  height: 5px;
+  left: -1px;
+  position: absolute;
+  top: 9px;
+  width: 5px;
 }
 .dropdown-menu li * {
   vertical-align: middle;
@@ -281,8 +333,8 @@ span.updated i {
 }
 ul.imgDropdown {
   list-style: none;
-  float: left;
-  margin: 0 5px 5px 0;
+  float: right;
+  margin: 0 0 0 6px;
 }
 .iddCont {
   position: relative;
@@ -335,6 +387,17 @@ ul.opened a.thumbnail.inactive {
 body.collection h1 {
   font-size: 2.2em;
 }
+.link-content {
+  background-color: white;
+  padding: .6em;
+  margin-bottom: 4px;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+  /* for multi values */
+
+  -webkit-box-shadow: 4px 4px 19px rgba(50, 50, 50, 0.75);
+  box-shadow: 4px 4px 19px rgba(50, 50, 50, 0.75);
+}
 .minititle {
   font-weight: bold;
 }
@@ -351,7 +414,7 @@ body.collection h1 {
   margin-bottom: 0;
 }
 .link-title {
-  font-size: 130%;
+  font-size: 120%;
   margin-top: 0.8em;
 }
 .link-summary,
@@ -362,7 +425,7 @@ body.collection h1 {
   font-size: 100%;
 }
 .blocked-link {
-  margin-bottom: .8em;
+  margin-bottom: 1em;
 }
 .link-top {
   margin-top: 1.5em;
@@ -387,6 +450,9 @@ body.collection h1 {
   vertical-align: baseline;
   background-color: #eee;
 }
+.link-tools-block {
+  float: right;
+}
 .my-collection {
   color: #ff0000;
 }
@@ -400,12 +466,6 @@ body.collection h1 {
   border: solid 1px #aaa;
   border-left: none;
   padding-left: 21px;
-}
-.underEdit,
-.link-content {
-  background-color: white;
-  padding: 4px;
-  margin-bottom: 4px;
 }
 .underEdit {
   background-color: lightblue;

@@ -140,19 +140,19 @@ function Get (req, res) {
         if( err || !collection ){
             res.redirect( '/coll' );
         }else{
-            var owner      =  req.user && req.user._id ==  collection.owner;
+            var isOwner      =  req.user && req.user._id ==  collection.owner ? true : '';
             box.dust.render(res, 'collections/collection', {
             //res.render('collection', {
                 button_action:{action:'link:add', coll_id: collID },
                 title: (collection && collection.title ? collection.title : 'Collection not found' ) + '"',
                 user: app.locals.user || '',
-                canEdit: owner,
-                canDelete: owner,
+                canEdit: isOwner,
+                canDelete: isOwner,
                 linkUnderEdit :  req.query.editLink,
                 collection: collection,
                 referer: referer,
                 crumbs : breadcrumbs.make(req, {
-                    owner:owner,
+                    owner:isOwner,
                     coll:{id:collection._id, title:collection.title }
                 }),
                 addButton:{

@@ -25,8 +25,11 @@ $(document).ready(function() {
 
         delegate: {
             willOpenEditInPlace: function(aDOMNode, aSettingsDict, event) {
-                aDOMNode.find('input').autoGrowInput();
-                aDOMNode.find('textarea').autosize();
+                if( aSettingsDict.editorElement.is('textarea') ){
+                    aSettingsDict.editorElement.autosize();
+                }else{
+                    aSettingsDict.editorElement.autoGrowInput();
+                }
             },
 
             willCloseEditInPlace: function(aDOMNode, aSettingsDict, event) {

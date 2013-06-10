@@ -1,30 +1,55 @@
-
-.tag-label{
-  margin-left: 5px;
-  paddin-left:6px;
-  float:right;
-/*  border:1px solid #444; */
-  font-weight: normal;
-  background-color: #468847;
-  color: white;
-  .border-radiuses(0,0, 5px, 5px);
-  &  * {   vertical-align: baseline ; }
-  & .tag-name{
-    margin-right:0;
-    padding:0px 2px 3px 6px;
-  }
-
-  & .tag-number{
-    margin-left: 0;
-    color: white;
-    background-color: #333;
-    padding:1px 4px;
-    min-width: 1em;
-  }
-}
-
 .tag-row *{ vertical-align: top; }
 
 span.updated{
   & i { margin-right: 0.25em;}
+}
+
+
+.tags a {
+  float: left;
+  background: #888; /*#c5c5c5; */
+  color: #fff;
+  text-decoration: none;
+  margin: 0 0 10px 18px;
+  padding: 2px 10px 1px;
+  position: relative;
+  transition: all .25s linear;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
+  white-space: nowrap;
+  line-height: 20px;
+
+  .rounded(3px);
+  box-shadow: 5px 3px 10px rgba(50, 50, 50, 0.45);
+  -webkit-box-shadow: 5px 3px 10px rgba(50, 50, 50, 0.45);
+  -moz-box-shadow: 5px 3px 10px rgba(50, 50, 50, 0.45);
+}
+
+.tags a:before {
+  content: "";
+  border-style: solid;
+  border-color: transparent #888 transparent transparent;
+  border-width: 11px 12px 12px 0;
+  position: absolute;
+  left: -11px;
+  top: 0;
+  transition: all .25s linear;
+}
+
+.tags a:hover {
+  background-color: #39F;
+}
+.tags a:hover:before {
+  border-color: transparent #39F transparent transparent;
+}
+
+.tags a:after {
+  background: none repeat scroll 0 0 #FFFFFF;
+  border-radius: 50% 50% 50% 50%;
+  box-shadow: 0 1px 1px #737373 inset;
+  content: "";
+  height: 5px;
+  left: -1px;
+  position: absolute;
+  top: 9px;
+  width: 5px;
 }

@@ -18,8 +18,8 @@
 {<pageBottom}
     <div class="eipBase" data-url="/coll/{collection._id}/eip"><br/></div>
     <script type="text/javascript" src="/js/jquery.editinplace.js"></script>
-            <!-- script type="text/javascript" src="/js/jquery.autosize.js"></script -->
-            <!-- script type="text/javascript" src="/js/edit-in-place.js"></script -->
+    <script type="text/javascript" src="/js/jquery.autosize.js"></script>
+    <script type="text/javascript" src="/js/edit-in-place.js"></script>
     <script type="text/javascript" src="/js/tw-textarea-autoGrow.js"></script>
     <script type="text/javascript" src="/js/autoGrowInput.js"></script>
     <script type="text/javascript" src="/js/collection-link-edit.js"></script>

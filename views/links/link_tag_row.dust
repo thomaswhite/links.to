@@ -1,21 +1,18 @@
 <div class="row">
     <div class="span8 tag-row">
-        {>"date_time/updated"/}
-        {?canEdit}<a class="btn btn-warning btn-mini floatR"  href="#" >Edit</a>{/canEdit}
-        {?canDelete}<a class="btn btn-danger btn-mini floatR"  href="/link/{_id}/delete/{#collection}{_id}{/collection}" >Delete</a>{/canDelete}
-        {?canEdit}<a class="btn btn-warning btn-mini edit-btn" href="/link/{_id}/refresh" title="refresh"><i class="icon-refresh"></i></a>{/canEdit}
+       <span class="link-tools-block">
+        {?canEdit}<a class="btn btn-success btn-mini "  href="#" >Edit</a>{/canEdit}
+        {?canEdit}<a class="btn btn-warning btn-mini edit-btn " href="/link/{_id}/refresh" title="refresh"><i class="icon-refresh"></i></a>{/canEdit}
+        {?canDelete}<a class="btn btn-danger btn-mini "  href="/link/{_id}/delete/{collection}" >Delete</a>{/canDelete}
+          <span>{>"date_time/updated"/}</span>
+        </span>
         {#display}
+            <span class="tags">
             {#tags}
-                {@select key="{$idx}"}
-                   {@lt value=5}
-                      <span class="tag-label" title="Found {count} times">
-                         <span class="tag-name">{word}</span>
-                         <span class="tag-number">{count}</span>
-                      </span>
-                   {/lt}
-                {/select}
+                 <a href="#" title="Found {count} times">{word}</a>
             {/tags}
+            </span>
         {/display}
-        {?canEdit} <button class="btn btn-mini"><i class="icon-plus"></i></button>{/canEdit}
+        {!  ?canEdit} <button class="btn btn-mini"><i class="icon-plus"></i></button>{/canEdit !}
     </div>
 </div>

@@ -85,6 +85,8 @@ $.fn.editInPlace.defaults = {
 	preinit:			null, // function: this function gets called after a click on an editable element but before the editor opens. If you return false, the inline editor will not open. Prototype: function(currentDomNode). DEPRECATED in 2.2.0 use delegate shouldOpenEditInPlace call instead
 	postclose:			null, // function: this function gets called after the inline editor has closed and all values are updated. Prototype: function(currentDomNode). DEPRECATED in 2.2.0 use delegate didCloseEditInPlace call instead
 	delegate:			null // object: if it has methods with the name of the callbacks documented below in delegateExample these will be called. This means that you just need to impelment the callbacks you are interested in.
+    // TW
+    , doHideInsteadOfReplace:false
 };
 
 // Lifecycle events that the delegate can implement
@@ -165,7 +167,13 @@ $.extend(InlineEditor.prototype, {
 		this.dom
 			.bind('mouseenter.editInPlace', function(){ that.addHoverEffect(); })
 			.bind('mouseleave.editInPlace', function(){ that.removeHoverEffect(); })
-			.bind('click.editInPlace', function(anEvent){ that.openEditor(anEvent); });
+			.bind('click.editInPlace', function(anEvent){
+                that.openEditor(anEvent);
+                anEvent.preventDefault();
+                anEvent.stopPropagation();
+                return false; // edit <a> elements
+
+            });
 	},
 	
 	disconnectOpeningEvents: function() {
@@ -269,17 +277,30 @@ $.extend(InlineEditor.prototype, {
 		var buttons_html  = (this.settings.show_buttons) ? this.settings.save_button + ' ' + this.settings.cancel_button : '';
 		var editorElement = this.createEditorElement().trigger('change'); // needs to happen before anything is replaced
 		/* insert the new in place form after the element they click, then empty out the original element */
-		this.dom.html('<form class="inplace_form" style="display: inline; margin: 0; padding: 0;"></form>')
+
+        var form = $('<form class="inplace_form" style="display: inline; margin: 0; padding: 0;"></form>')
+            .append(editorElement)
+            .append(buttons_html);
+
+        // TW
+        this.settings.editorElement = editorElement;
+//        if( this.settings.doHideInsteadOfReplace ){
+            this.dom2 = this.dom.clone();
+            this.dom.bind('click', function(){return false});
+//        }else{
+            this.dom.html('<form class="inplace_form" style="display: inline; margin: 0; padding: 0;"></form>')
 			.find('form')
 				.append(editorElement)
 				.append(buttons_html);
+ //       };
 	},
 	
 	createEditorElement: function() {
 		if (-1 === $.inArray(this.settings.field_type, ['text', 'textarea', 'select']))
 			throw "Unknown field_type <fnord>, supported are 'text', 'textarea' and 'select'";
 		
-		var editor = null;
+		var editor = null,
+            fontSize = this.dom.css("fontSize");
 		if ("select" === this.settings.field_type) {
 			editor = this.createSelectEditor();
         } else if ("text" === this.settings.field_type){
@@ -292,7 +313,7 @@ $.extend(InlineEditor.prototype, {
 				+ ' rows="' + this.settings.textarea_rows + '" '
 				+ ' cols="' + this.settings.textarea_cols + '" />');
         }
-		return editor;
+		return editor.css('fontSize', fontSize);
 	},
 	
 	setInitialValue: function() {
@@ -371,6 +392,7 @@ $.extend(InlineEditor.prototype, {
 			var escape = 27;
 			if (escape === anEvent.which)
 				return cancelEditorAction();
+            that.settings.editorElement.trigger('change'); // TW resize the textarea
 		});
 		
 		// workaround for webkit nightlies where they won't submit at all on enter
@@ -479,10 +501,12 @@ $.extend(InlineEditor.prototype, {
 			this.reportError("Error: Failed to save value: " + enteredText);
 			this.restoreOriginalValue();
 		}
-		else
+		else{
 			// REFACT: use setClosedEditorContent
-			this.dom.html(newHTML);
-		
+            this.dom2.html(newHTML);
+            this.dom.replaceWith( this.dom2 );
+            this.dom2 = null;
+        }
 		if (this.didCallNoCallbacks()) {
 			this.enableOrDisableAnimationCallbacks(false, false);
 			this.reinit();
