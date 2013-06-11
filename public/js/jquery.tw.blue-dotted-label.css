@@ -1,0 +1,29 @@
+.bdLabel{
+  position:relative;
+  display:inline-block;
+  padding: .85em 0 0 0;
+  margin-right: .5em;
+  overflow: hidden;
+
+  & span{
+    color:blue;
+    position: absolute;
+    white-space: nowrap;
+    top:.7em;
+    background-color: #fff;
+    z-index: 999;
+    padding:0 .3em ;
+    margin:0 0 0 0.5em;
+    overflow: hidden;
+    text-overflow:ellipsis;
+    font:  normal 75%/normal Arial, Helvetica, sans-serif;
+  }
+  & textarea, & input{
+    overflow: auto;
+    padding: .4em;
+    vertical-align: top;
+    display:inline-block;
+    border: 1px dotted blue;
+   .rounded (3px)
+  }
+}

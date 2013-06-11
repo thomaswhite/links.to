@@ -511,6 +511,34 @@ form .row .title {
   height: 1em;
 }
 /* .form-inline input{ height: 28px}  */
+.bdLabel {
+  position: relative;
+  display: inline-block;
+  padding: .85em 0 0 0;
+  margin-right: .5em;
+  overflow: hidden;
+}
+.bdLabel span {
+  color: blue;
+  position: absolute;
+  white-space: nowrap;
+  top: .7em;
+  background-color: #fff;
+  z-index: 999;
+  padding: 0 .3em ;
+  margin: 0 0 0 0.5em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font: normal 75%/normal Arial, Helvetica, sans-serif;
+}
+.bdLabel textarea,
+.bdLabel input {
+  border: 1px dotted blue;
+  overflow: auto;
+  padding: .4em;
+  vertical-align: top;
+  display: inline-block;
+}
 .row.table-header {
   margin-top: .8em;
 }

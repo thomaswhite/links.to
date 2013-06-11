@@ -20,8 +20,8 @@ box.on('init', function (App, Config, done) {
           stream: false
     });
 
-    done(null, 'plugin kleiDust initialised ');
-    return;
+ //   done(null, 'plugin kleiDust initialised ');
+ //   return;
     require('../lib/watcher').watch(
         kleiDust.getDust(),
         path.join(config.__dirname, 'views'),

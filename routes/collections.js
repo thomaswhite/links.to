@@ -46,6 +46,9 @@ function collectionList( req, res, next, filter, param ){
     param = param || {page:1};
     param.limit = param.limit || 48;
     param.sort = param.sort || {updated:-1, created:-1};
+
+    var user  =  req.session && req.session.passport && req.session.passport.user ? JSON.parse(req.session.passport.user):''
+        ;
     // filter, limit, sort, callback
     box.parallel('collections.list', filter, param.limit, param.sort, function( err, result ){
         var collections = box.utils.pickUpFromAsyncResult( result, 'collections-list' );
@@ -64,7 +67,7 @@ function collectionList( req, res, next, filter, param ){
             filter: filter,
             title: 'All collection',
             grid: collections,
-            user: app.locals.user || '',
+            user: user,
             canEdit:true,
             crumbs : breadcrumbs.make(req, { }),
             addButton:{
@@ -140,12 +143,15 @@ function Get (req, res) {
         if( err || !collection ){
             res.redirect( '/coll' );
         }else{
-            var isOwner      =  req.user && req.user._id ==  collection.owner ? true : '';
+            var user  =  req.session && req.session.passport && req.session.passport.user ? JSON.parse(req.session.passport.user):''
+                , isOwner =  user._id ==  collection.owner ? true : ''
+                ;
+
             box.dust.render(res, 'collections/collection', {
             //res.render('collection', {
                 button_action:{action:'link:add', coll_id: collID },
                 title: (collection && collection.title ? collection.title : 'Collection not found' ) + '"',
-                user: app.locals.user || '',
+                user: user,
                 canEdit: isOwner,
                 canDelete: isOwner,
                 linkUnderEdit :  req.query.editLink,
