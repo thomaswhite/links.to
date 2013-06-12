@@ -30,6 +30,13 @@ socket.on('pageScrape.head', function( data, x ){
 
 socket.on('link.ready', function( data, x ){
     console.log ('link.ready', data);
+    dust.render("links/link",  data.data.link, function(err, out) {
+        if( err ) {
+            console.error(err)
+        }else{
+            console.log( out );
+        }
+    });
 });
 socket.on('link.saved', function( data, x ){
     console.log ('link.saved', data);
@@ -60,7 +67,16 @@ $(document).ready(function() {
 
 });
 
-
+function render(model) {
+    if (!model) { return; }
+    dust.render(model.template, model, function(err, out) {
+        if (err) {
+            console.log(err);
+        } else {
+            $('#collections').append(out);
+        }
+    });
+}
 
 /* events:
    Links:

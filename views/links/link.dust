@@ -1,0 +1,9 @@
+<div class="blocked-link">
+    {?display}
+        {>"links/link_content" /}
+        {>"links/link_tag_row" /}
+    {/display}
+    {^display}
+       <div>No link data.</div>
+    {/display}
+</div>
