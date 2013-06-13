@@ -1,24 +1,17 @@
 /**
- * Created with JetBrains WebStorm.
  * User: Thomas
  * Date: 08/05/13
  * Time: 21:01
- * To change this template use File | Settings | File Templates.
  */
 
 var socket = io.connect('');
-
-socket.on('connecting', function() {     console.log('socket.io connecting...');});
-socket.on('reconnecting', function() {     console.log('socket.io reconnecting...');});
-socket.on('connect',    function() {     console.log('socket.io connected!');});
-socket.on('reconnect',    function() {     console.log('socket.io reconnect');});
-socket.on('disconnect', function () {          console.log('socket.io disconnected');});
-socket.on('error',      function (data ) {     console.log('socket.io error', data);});
+socket.on('connecting',     function() {     console.log('socket.io connecting...');});
+socket.on('reconnecting',   function() {     console.log('socket.io reconnecting...');});
+socket.on('connect',        function() {     console.log('socket.io connected!');});
+socket.on('reconnect',      function() {     console.log('socket.io reconnect');});
+socket.on('disconnect',     function () {          console.log('socket.io disconnected');});
+socket.on('error',          function (data ) {     console.log('socket.io error', data);});
 socket.on('reconnect_failed', function () {    console.log('socket.io reconnect_failed');});
-
-socket.emit('ready', {msg:'Socket.io is operational'},function(data){
-    console.log ('ready:',  data);
-});
 
 socket.on('pageScrape.image', function( data, x ){
     console.log ('pageScrape.image:', data);
@@ -42,18 +35,42 @@ socket.on('link.saved', function( data, x ){
     console.log ('link.saved', data);
 });
 
-if( pageData.route ){
-    socket.emit(pageData.route, pageData, function(data){
-        console.log (data);
+// was: ready
+// This will bootstrap resources from the server
+// and data for 'pageParam.route'
+socket.emit('loaded', pageParam, function(data){
+    console.log ('loaded:',  data);
+});
+
+function pageAddRoutes(){
+    page.base('/');
+    page('/', index);
+//    page('/coll/mine',  Mine);
+    page('/coll',       coll_list);
+//    page(['/coll/:id', '/w/c/:id'], Get);
+//    page('/coll/:id/delete', Delete);
+
+}
+
+function index(){
+    dust.render("main", {}, function(err, out) {
+        if( err ) {
+            console.error(err)
+        }else{
+            $('#content').html( err || out );
+        }
     });
 }
 
-var Swig = {
-    template:{}
-};
+function coll_list(context, next ){
+
+
+
+    next();
+}
 
 $(document).ready(function() {
-    $('button.btnAdd').on('click', function(event){
+    $('body').on('click', 'button.btnAdd', function(event){
         var $this = $(this).attr('disabled', true ),
             context = $this.data('context'),
             $addInput = $('input.addInput')

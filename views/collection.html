@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% import 'macros-links.html' as macros %}
 
-{% block pageData -%} , coll_id : '{{ collection._id }}', route:'collection:get' {%- endblock %}
+{% block pageParam -%} , coll_id : '{{ collection._id }}', route:'collection:get' {%- endblock %}
 
 {% block pageTitle -%}Collection {{ collection.title }}{%- endblock %}
 {% block title -%}<h1 class="{{ macros.eip( canEdit)}}" id="title">{{ collection.title }}

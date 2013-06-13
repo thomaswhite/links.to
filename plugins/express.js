@@ -59,6 +59,7 @@ box.on('init', function (App, Config, done) {
     box.app.on('error', box.emit.bind(box, 'error'));
 
     box.on('init.attach', function (app, config, cb) {
+          app.use(express.compress());
           app.use(require('less-middleware')( config.less ));
           app.use(express.static(path.join(config.__dirname, 'public')));
           cb(null, path.join(config.__dirname, 'public') + ' attached' );

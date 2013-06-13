@@ -4,7 +4,7 @@
 {% block title %}<h1>{{ title2 }}</h1>{% endblock %}
 {% block error %}{{ error }}{% endblock %}
 
-{% block pageData -%} , route:'collection:list', param:{{ param|json_encode(0)|raw }}, filter: {{ filter|json_encode(0)|raw }} {%- endblock %}
+{% block pageParam -%} , route:'collection:list', param:{{ param|json_encode(0)|raw }}, filter: {{ filter|json_encode(0)|raw }} {%- endblock %}
 
 {% block content %}
 

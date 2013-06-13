@@ -13,7 +13,7 @@
 
 {<error}{error}{/error}
 
-{<pageData} , route:'collection:get', coll_id : '{#collection}{_id}{/collection}' {/pageData}
+{<pageParam} , route:'collection:get', coll_id : '{#collection}{_id}{/collection}' {/pageParam}
 
 {<pageBottom}
     <div class="eipBase" data-url="/coll/{collection._id}/eip"><br/></div>

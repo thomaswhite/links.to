@@ -13,7 +13,7 @@
     <link href="/css/links-to.css" rel="stylesheet" />
 
     {% block head %}{% endblock %}
-    <script>pageData = { dummy:0{% block pageData %}{% endblock %} }</script>
+    <script>pageParam = { dummy:0{% block pageParam %}{% endblock %} }</script>
   </head>
   <body calss="{% block bodyClass %}{% endblock %}">
     {% include "navbar.html" %}

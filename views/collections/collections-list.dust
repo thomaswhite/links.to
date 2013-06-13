@@ -4,7 +4,7 @@
 {<pageTitle}My collections in Links.to{/pageTitle}
 {<title}<h1>{title2}</h1>{/title}
 {<error}{error}{/error}
-{<pageData} , route:'collection:list', param:{param|js|s}, filter: {filter|js|s} {/pageData}
+{<pageParam} , route:'collection:list', param:{param|js|s}, filter: {filter|js|s} {/pageParam}
 
 {<content}
   <div class="row table-header">
