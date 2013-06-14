@@ -23,8 +23,6 @@
     <script type="text/javascript" src="/js/tw-textarea-autoGrow.js"></script>
     <script type="text/javascript" src="/js/autoGrowInput.js"></script>
     <script type="text/javascript" src="/js/collection-link-edit.js"></script>
-    <script type="text/javascript" src="/js/dust-core-1.2.4.js"></script>
-    <script type="text/javascript" src="/templates/all.js"></script>
 {/pageBottom}
 
 {<content}
