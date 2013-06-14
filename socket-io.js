@@ -11,13 +11,14 @@ var box = require('./box');
 
 box.on('init.attach', function (app, config, cb) {
 
-    box.app.io.route('ready', function(req) {
+    box.app.io.route('loaded', function(req) {
         console.log( req.data );
         req.session.ts = new Date().getTime();
         req.session.save();
         req.io.respond({
-            msg:'welcome :-)',
-            session: req.session && req.session.user ? JSON.parse( req.session.user ) : {}
+            msg:'your session',
+            session: req.session,
+            user: req.session && req.session.passport && req.session.passport.user ? JSON.parse( req.session.passport.user ) : {}
         });
     });
 

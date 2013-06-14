@@ -44,9 +44,12 @@
     </script>
     <script type="text/javascript" src="/js/page.js"></script>
     <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="/js/links-to_socketio.js"></script>
+
     <script type="text/javascript" src="/js/dust-core-1.2.4.js"></script>
     <script type="text/javascript" src="/templates/all.js"></script>
-    <script type="text/javascript" src="/js/links-to.js"></script>
+
+    <script type="text/javascript" src="/js/links-to_page.js"></script>
 
     <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
     <script type="text/javascript">fallback( $ && $.fn ? $.fn.affix : null, '/bootstrapcdn-offline/2.3.1/bootstrap.min.js'  );</script>
