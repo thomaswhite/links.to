@@ -47,7 +47,7 @@ function ShorterID( length ){
  * @returns {*}
  */
 function pickUpFromAsyncResult( a, type ){
-    return _.first(a, function(element, pos, all){ return element.type == type;  })[0];
+    return a ?_.first(a, function(element, pos, all){ return element.type == type;  })[0]: null;
 }
 
 function formatUpdated (arr){

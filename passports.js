@@ -137,9 +137,10 @@ function auth_after_success (req, res){
     // console.log('\n/auth-after-success', '\nUSER:', req.user );
 
     box.invoke('openID.afterAuth', req, function(err, Saved){
-        var referer = !err && Saved ? Saved.referer : '';
+        var referer = !err && Saved ? Saved.referer : '',
+             user  =  req.session && req.session.passport && req.session.passport.user ? JSON.parse(req.session.passport.user):'';
         if( 1 || req.user && ( req.user.email || req.user.emailPinged )){
-            app.locals.user = req.user ;
+            // app.locals.user = req.user ;
             // debug( "authenticated user: \n", app.locals.user);
             res.redirect( referer || 'http://127.0.0.1:3000/coll'  ); // config.passport_after.userHasEmail
         }else{

@@ -7,7 +7,7 @@
  */
 
 module.exports = {
-    make: function( req,  param ){
+    make: function( param ){
         param = param || {};
         var crumbs = [
             {

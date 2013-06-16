@@ -5,13 +5,11 @@
  */
 
 function pageAddRoutes(){
+    page({dispatch:false});
     page.base('/');
     page('/', index);
-//    page('/coll/mine',  Mine);
-    page('/coll',       coll_list);
-//    page(['/coll/:id', '/w/c/:id'], Get);
-//    page('/coll/:id/delete', Delete);
-
+    page(['/coll','/coll/mine'],       coll_list);
+//  page(['/coll/:id', '/w/c/:id'], Get);
 }
 
 function index(){
@@ -29,7 +27,7 @@ function coll_list(context, next ){
     next();
 }
 
-$(document).ready(function() {
+function page_init() {
     $('body').on('click', 'button.btnAdd', function(event){
         var $this = $(this).attr('disabled', true ),
             context = $this.data('context'),
@@ -41,16 +39,21 @@ $(document).ready(function() {
             console.log ('button.btnAdd', dataDone);
         });
     }) ;
+};
 
-});
-
-function render(model) {
+function render(model, data, target, append) {
     if (!model) { return; }
-    dust.render(model.template, model, function(err, out) {
+    dust.render(model, data, function(err, out) {
         if (err) {
             console.log(err);
+        }else if( !target ){
+            console.log( out );
         } else {
-            $('#collections').append(out);
+            if( append ){
+                $(target).append(out);
+            }else{
+                $(target).html(out);
+            }
         }
     });
 }

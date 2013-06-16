@@ -13,23 +13,26 @@
 
 {<error}{error}{/error}
 
-{<pageParam} , route:'collection:get', coll_id : '{#collection}{_id}{/collection}' {/pageParam}
-
 {<pageBottom}
     <div class="eipBase" data-url="/coll/{collection._id}/eip"><br/></div>
-    <script type="text/javascript" src="/js/jquery.editinplace.js"></script>
-    <script type="text/javascript" src="/js/jquery.autosize.js"></script>
-    <script type="text/javascript" src="/js/edit-in-place.js"></script>
-    <script type="text/javascript" src="/js/tw-textarea-autoGrow.js"></script>
-    <script type="text/javascript" src="/js/autoGrowInput.js"></script>
-    <script type="text/javascript" src="/js/collection-link-edit.js"></script>
+    <script>
+      head.js(
+        "/js/jquery.editinplace.js",
+        "/js/jquery.autosize.js",
+        "/js/edit-in-place.js",
+        "/js/tw-textarea-autoGrow.js",
+        "/js/autoGrowInput.js"
+        //, "/js/collection-link-edit.js"
+      );
+    </script>
 {/pageBottom}
 
 {<content}
  {#collection}
+<div id="{contentID}">
    <div class="row">
         <div class="span8 {?canEdit}eip{/canEdit} ta wrap coll_description" >{description}</div>
-    </div>
+   </div>
     {! >"collections/collection_toolbox.dust"/ !}
     {>"controls/add_button_row"/}
     <div id="grid">
@@ -40,5 +43,6 @@
       {/links}
     </div>
   {/collection}
+</div>
 {/content}
 

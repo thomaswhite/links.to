@@ -4,14 +4,21 @@
  * Time: 21:01
  */
 
-var socket = io.connect('');
+var socket = io.connect(''),
+    socketContext = {},
+    socketData = {} // saved by pager URL
+    ;
+
+
+
 socket.on('connecting',     function() {     console.log('socket.io connecting...');});
 socket.on('reconnecting',   function() {     console.log('socket.io reconnecting...');});
 socket.on('connect',        function() {     console.log('socket.io connected!');});
 socket.on('reconnect',      function() {     console.log('socket.io reconnect');});
 socket.on('disconnect',     function () {          console.log('socket.io disconnected');});
 socket.on('error',          function (data ) {     console.log('socket.io error', data);});
-socket.on('reconnect_failed', function () {    console.log('socket.io reconnect_failed');});
+socket.on('reconnect_failed', function () {     console.log('socket.io reconnect failed');});
+socket.on('connect_failed', function () {       console.log('socket.io connect failed');}) // "connect_failed" is emitted when socket.io fails to establish a connection to the server and has no more transports to fallback to.
 
 socket.on('pageScrape.image', function( data, x ){
     console.log ('pageScrape.image:', data);
@@ -23,24 +30,34 @@ socket.on('pageScrape.head', function( data, x ){
 
 socket.on('link.ready', function( data, x ){
     console.log ('link.ready', data);
-    dust.render("links/link",  data.data.link, function(err, out) {
-        if( err ) {
-            console.error(err)
-        }else{
-            console.log( out );
-        }
-    });
+    render("links/link", data.data.link, null, 0);
 });
 socket.on('link.saved', function( data, x ){
     console.log ('link.saved', data);
 });
 
-// was: ready
+// ============================================================
+
 // This will bootstrap resources from the server
 // and data for 'pageParam.route'
 socket.emit('loaded', pageParam, function(data){
+    socketContext = data;
     console.log ('loaded:',  data);
 });
+socket.on('user', function( data, x ){
+    socketContext.user = data;
+    console.log ('socketContext', socketContext);
+});
+
+socket.on('data', function( param, data ){
+    console.log ('data', param, data);
+    socketData[param.path] = data;
+    //TODO: add data under [search].data and append rows when paginate
+    //TODO: trigger update event to refresh the target Area.
+    page.show(param.route); // navigate to the route and now there will be data for it.
+});
+
+
 
 /* events:
    Links:

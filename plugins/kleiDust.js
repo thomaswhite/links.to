@@ -38,7 +38,7 @@ box.on('init.attach', function(app, config, done){
     box.dust = {
         render: function( res, template, context) {
             var opt = kleiDust.getOptions(),
-                Context = kleiDust.getDust().makeBase( context );
+                Context = context.stack && context.stack.tail ? context:  kleiDust.getDust().makeBase( context );
 
  //         debug( "Dust render context: \n", box.utils.inspect( context ));
 

@@ -8,20 +8,25 @@
 
 var box = require('./box');
 
-
 box.on('init.attach', function (app, config, cb) {
 
     box.app.io.route('loaded', function(req) {
         console.log( req.data );
+        var User = req.session && req.session.passport && req.session.passport.user ?  JSON.parse( req.session.passport.user ):null;
         req.session.ts = new Date().getTime();
+        req.session.time = new Date();
+        req.session.User = User;
         req.session.save();
-        req.io.respond({
-            msg:'your session',
+        req.io.emit( 'user', User);
+ /*       req.io.respond({
             session: req.session,
             user: req.session && req.session.passport && req.session.passport.user ? JSON.parse( req.session.passport.user ) : {}
         });
+*/
+        if( req.data.route){
+            req.io.route(req.data.route);
+        }
     });
-
     cb(null,   'io.rutes attached' );
 
 });

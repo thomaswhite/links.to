@@ -1,0 +1,31 @@
+<script>
+  head.js(
+      {jquery:"//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"},
+      {page:"/js/page.js"},
+      {dust:"/js/dust-core-1.2.4.js"},
+      {dust_templates: "/templates/all.js"},
+      {main:"/js/links-to_main.js"},
+      function(){
+        page_init()
+      }
+  );
+  head.js("//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js");
+</script>
+{!
+
+<script>
+  function fallback(fn, src ){
+    if ( !fn ) {  document.write(unescape("%3Cscript src='" + src + "' type='text/javascript'%3E%3C/script%3E"));  }
+  }
+</script>
+<script type="text/javascript">fallback( window.jQuery, '/js/jquery-1.8.3.min.js'  );</script>
+<script type="text/javascript">
+    // TODO find some other way to check for CDN CSS fallback
+    if ( 0 &&  typeof jQuery == 'undefined') {
+        document.write(unescape('%3Clink rel="stylesheet" type="text/css" href="/bootstrapcdn-offline/2.3.1/bootstrap-combined.no-icons.min.css" /%3E'));
+        document.write(unescape('%3Clink rel="stylesheet" type="text/css" href="/font-awesome/css/font-awesome.min.css" /%3E'));
+        document.write(unescape('%3Clink rel="stylesheet" type="text/css" href="/css/links-to.css" /%3E'));
+    }
+    fallback( $ && $.fn ? $.fn.affix : null, '/bootstrapcdn-offline/2.3.1/bootstrap.min.js'  )
+</script>
+!}

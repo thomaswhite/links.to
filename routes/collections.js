@@ -18,6 +18,56 @@ function ShorterID(){
     return  ShortId.generate().substr(0, config.db.short_id_length);
 }
 
+var pages = [
+    {
+        route:['/coll'],
+        io:{
+            route:'collection:list',
+            listenTo:'collection_list_data'
+        },
+        tempateID:'collections/collections-list',
+        containerID:'',
+        contentID:''
+    },
+    {
+        route:['/coll/mine'],
+        io:{
+            route:'collection:mine',
+            listenTo:'collection_mine_data'
+        },
+        tempateID:'collections/collections-list',
+        containerID:'',
+        contentID:''
+    },
+    {
+        route:['/coll/:id', '/w/c/:id'],
+        io:{
+           route:'collection:get',
+           listenTo:'collection_get_data'
+        },
+        tempateID:'collections/collection',
+        containerID:'',
+        contentID:''
+    },
+    {
+        io:{
+            route:'collection:add',
+            listenTo:'collection_add_data'
+        },
+        tempateID:'collections/collection',
+        containerID:'',
+        contentID:''
+    },
+    {
+        io:{
+            route:'collection:delete'
+        },
+        tempateID:'collections/collections-list',
+        containerID:'',
+        contentID:''
+    }
+];
+
 
 
 /**
@@ -41,35 +91,15 @@ function newCollection  (owner, name, description){
     }
 }
 
-function collectionList( req, res, next, filter, param ){
-    filter = filter || {};
-    param = param || {page:1};
-    param.limit = param.limit || 48;
-    param.sort = param.sort || {updated:-1, created:-1};
-
-    var user  =  req.session && req.session.passport && req.session.passport.user ? JSON.parse(req.session.passport.user):''
-        ;
-    // filter, limit, sort, callback
+function collectionList_data( filter, param, user, callBack ){
     box.parallel('collections.list', filter, param.limit, param.sort, function( err, result ){
-        var collections = box.utils.pickUpFromAsyncResult( result, 'collections-list' );
-        //    _.first(result, function(element, pos, all){ return element.type == 'collections-list';  })[0];
- //       debug( "Collections list: \n", box.utils.inspect( result ));
-
-          //  debug( "user: \n",  app.locals.user );
-          //  debug( "session: \n",  req.session );
-
-//    res.render('main', box.dust.makeBase({ title: 'title' }) );
-
-        box.dust.render(res, 'collections/collections-list', {
-//        res.render('collections-list', {
+        callBack( err, {
             button_action:{action:'collection:add'},
-            param: param,
-            filter: filter,
             title: 'All collection',
-            grid: collections,
+            grid: box.utils.pickUpFromAsyncResult( result, 'collections-list' ),
             user: user,
             canEdit:true,
-            crumbs : breadcrumbs.make(req, { }),
+            crumbs : breadcrumbs.make({ }),
             addButton:{
                 link: '/coll/new',
                 name: 'collectionName',
@@ -79,6 +109,30 @@ function collectionList( req, res, next, filter, param ){
         });
     });
 }
+
+function collectionList( req, res, next, filter, param ){
+    filter = filter || {};
+    param = param || {page:1};
+    param.limit = param.limit || 48;
+    param.sort = param.sort || {updated:-1, created:-1};
+
+    var user  =  req.session && req.session.passport && req.session.passport.user ? JSON.parse(req.session.passport.user):'';
+    var base = box.dust.makeBase({
+        user:user,
+        pageParam:{
+            filter:filter,
+            param:param,
+            route:'collection:list'
+        }
+    });
+
+    collectionList_data( filter, param, user, function(err, displayBlock ){
+        console.log( displayBlock );
+        box.dust.render(res, 'collections/collections-list', base.push(displayBlock));
+    });
+}
+
+
 
 function Favorite  (req, res, next ){
     if( !app.locals.user || app.locals.user._id ){
@@ -131,8 +185,35 @@ function Delete (req, res) {
 }
 
 
+function Get_One_data (collID, user, callBack) {
+    box.emit( 'collection.get.one', collID, function( err, collection ){
+        var isOwner =  user._id ==  collection.owner ? true : '';
+        callBack(err, {
+            button_action:{action:'link:add', coll_id: collID },
+            title: (collection && collection.title ? collection.title : 'Collection not found' ) + '"',
+            user: user,
+            canEdit: isOwner,
+            canDelete: isOwner,
+            collection: collection,
+            crumbs : breadcrumbs.make({
+                owner:isOwner,
+                coll:{id:collection._id, title:collection.title }
+            }),
+            addButton:{
+                link: '/link/new/' + collID,
+                name: 'links',
+                placeholder:'Paste links',
+                type:'input',
+                buttonText:'Add Link',
+                hidden:[
+                    {name:"add2coll", value : collID }
+                ]
+            }
+        });
+    });
+};
 
-function Get (req, res) {
+function Get_One (req, res) {
     var referer = req.headers.referer,
         collID = req.params.id;
 
@@ -145,40 +226,19 @@ function Get (req, res) {
         }else{
             var user  =  req.session && req.session.passport && req.session.passport.user ? JSON.parse(req.session.passport.user):''
                 , isOwner =  user._id ==  collection.owner ? true : ''
+                base = box.dust.makeBase({
+                    user:user,
+                    pageParam:{
+                        route:'collection:get',
+                        coll_id : collection._id
+                    }
+                })
                 ;
 
-            box.dust.render(res, 'collections/collection', {
-            //res.render('collection', {
-                button_action:{action:'link:add', coll_id: collID },
-                title: (collection && collection.title ? collection.title : 'Collection not found' ) + '"',
-                user: user,
-                canEdit: isOwner,
-                canDelete: isOwner,
-                linkUnderEdit :  req.query.editLink,
-                collection: collection,
-                referer: referer,
-                crumbs : breadcrumbs.make(req, {
-                    owner:isOwner,
-                    coll:{id:collection._id, title:collection.title }
-                }),
-                addButton:{
-                    link: '/link/new/' + collID,
-                    name: 'links',
-                    placeholder:'Paste links',
-                    type:'input',
-                    buttonText:'Add Link',
-                    hidden:[
-                        {name:"add2coll", value : collID }
-                    ]
-                }
+            Get_One_data( collID, user, function(err, displayBlock ){
+                console.log( displayBlock );
+                box.dust.render(res, 'collections/collection', base.push(displayBlock));
             });
-            /*
-             for(var i=0; results[1] &&  i < results[1].length; i++ ){
-             if( !results[1][i].imagePos ){
-             results[1][i].imagePos = 0;
-             }
-             }
-             */
         }
     });
 }
@@ -196,7 +256,7 @@ box.on('init.attach', function (app, config,  done) {
             .get('/coll/mine',       Mine)
             .get('/coll',            All)
             .post('/coll/new',       Add)
-            .get(['/coll/:id', '/w/c/:id'], Get)
+            .get(['/coll/:id', '/w/c/:id'], Get_One)
             .get('/coll/:id/delete', Delete)
             .handler
     );
@@ -211,11 +271,12 @@ box.on('init.attach', function (app, config,  done) {
            });
        },
        list: function(req){
-           box.parallel('collections.list', req.data.filter, req.data.param.limit, req.data.param.sort, function( err, result ){
-               var collections = box.utils.pickUpFromAsyncResult( result, 'collections-list' );
+           var User = req.session && req.session.passport && req.session.passport.user ?  JSON.parse( req.session.passport.user ):null;
+           collectionList_data( req.data.filter, req.data.param, User, function(err, displayBlock){
                req.io.respond({
-                   route:'collection:list',
-                   collections: collections
+                   req:req.data,
+                   result: displayBlock,
+                   error:err
                });
            });
        },
@@ -241,6 +302,14 @@ box.on('init.attach', function (app, config,  done) {
                        });
                    });
                }
+           });
+       },
+       remove:function(req){
+           box.parallel('collection.delete', req.data.coll_id, function(err, aResult){
+               req.io.respond({
+                   result:err ? 'error':'ok',
+                   error:err
+               })
            });
        }
     });

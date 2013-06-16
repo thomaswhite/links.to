@@ -4,22 +4,25 @@
 {<pageTitle}My collections in Links.to{/pageTitle}
 {<title}<h1>{title2}</h1>{/title}
 {<error}{error}{/error}
-{<pageParam} , route:'collection:list', param:{param|js|s}, filter: {filter|js|s} {/pageParam}
+
+{! , route:'collection:list', param:{param|js|s}, filter: {filter|js|s} !}
 
 {<content}
-  <div class="row table-header">
-    <div class="span5 table-header">Collection Name</div>
-    <div class="span1 coll-e">Links</div>
-    <div class="span2 coll-e">Last updated</div>
-  </div>
-{! <pre>{user|js|s}</pre>  !}
-  {#grid}
-      {>"collections/collections_list_line" /}
-    {:else}
-      <div class="row">
-        <div class="span8">No collections available yet.</div>
-      </div>
-  {/grid}
+ <div id="{contentID}">
+    <div class="row table-header">
+      <div class="span5 table-header">Collection Name</div>
+      <div class="span1 coll-e">Links</div>
+      <div class="span2 coll-e">Last updated</div>
+    </div>
+  {! <pre>{user|js|s}</pre>  !}
+    {#grid}
+        {>"collections/collections_list_line" /}
+      {:else}
+        <div class="row">
+          <div class="span8">No collections available yet.</div>
+        </div>
+    {/grid}
+ </div>
 {/content}
 
 
