@@ -18,56 +18,6 @@ function ShorterID(){
     return  ShortId.generate().substr(0, config.db.short_id_length);
 }
 
-var pages = [
-    {
-        route:['/coll'],
-        io:{
-            route:'collection:list',
-            listenTo:'collection_list_data'
-        },
-        tempateID:'collections/collections-list',
-        containerID:'',
-        contentID:''
-    },
-    {
-        route:['/coll/mine'],
-        io:{
-            route:'collection:mine',
-            listenTo:'collection_mine_data'
-        },
-        tempateID:'collections/collections-list',
-        containerID:'',
-        contentID:''
-    },
-    {
-        route:['/coll/:id', '/w/c/:id'],
-        io:{
-           route:'collection:get',
-           listenTo:'collection_get_data'
-        },
-        tempateID:'collections/collection',
-        containerID:'',
-        contentID:''
-    },
-    {
-        io:{
-            route:'collection:add',
-            listenTo:'collection_add_data'
-        },
-        tempateID:'collections/collection',
-        containerID:'',
-        contentID:''
-    },
-    {
-        io:{
-            route:'collection:delete'
-        },
-        tempateID:'collections/collections-list',
-        containerID:'',
-        contentID:''
-    }
-];
-
 
 
 /**

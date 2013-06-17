@@ -18,7 +18,7 @@ socket.on('reconnect',      function() {     console.log('socket.io reconnect');
 socket.on('disconnect',     function () {          console.log('socket.io disconnected');});
 socket.on('error',          function (data ) {     console.log('socket.io error', data);});
 socket.on('reconnect_failed', function () {     console.log('socket.io reconnect failed');});
-socket.on('connect_failed', function () {       console.log('socket.io connect failed');}) // "connect_failed" is emitted when socket.io fails to establish a connection to the server and has no more transports to fallback to.
+socket.on('connect_failed', function () {       console.log('socket.io connect failed');}); // "connect_failed" is emitted when socket.io fails to establish a connection to the server and has no more transports to fallback to.
 
 socket.on('pageScrape.image', function( data, x ){
     console.log ('pageScrape.image:', data);
