@@ -93,7 +93,9 @@
     running = true;
     if (false === options.dispatch) dispatch = false;
     if (false !== options.popstate) window.addEventListener('popstate', onpopstate, false);
-    if (false !== options.click) window.addEventListener('click', onclick, false);
+    if (false !== options.click) {
+        window.addEventListener('click', onclick, true );
+    }
     if (!dispatch) return;
     page.replace(location.pathname + location.search, null, true, dispatch);
   };
