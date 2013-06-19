@@ -14,7 +14,9 @@
     <script>
       head.js(
           {socket_io_core:"/socket.io/socket.io.js"},
-          {socket_main:"/js/links-to_socketio.js"}
+          {socket_main:"/js/links-to_socketio.js"}, function(){
+             console.log( 'socket has loaded');
+          }
       );
       head.load(
           "//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.no-icons.min.css",
