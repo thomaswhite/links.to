@@ -84,7 +84,7 @@ function collectionList( req, res, next, filter, param ){
 
     collectionList_data( Parameters.filter, Parameters.param, user, function(err, displayBlock ){
         console.log( displayBlock );
-        box.dust.render(res, 'collections/collections-list', base.push(displayBlock));
+        box.dust.render(res, 'collections/page_collections-list', base.push(displayBlock));
     });
 }
 
@@ -193,7 +193,7 @@ function Get_One (req, res) {
 
             Get_One_data( collID, user, function(err, displayBlock ){
                 console.log( displayBlock );
-                box.dust.render(res, 'collections/collection_page', base.push(displayBlock));
+                box.dust.render(res, 'collections/page_collection', base.push(displayBlock));
             });
         }
     });

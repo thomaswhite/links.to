@@ -1,0 +1,15 @@
+<div id="{contentID}">
+    <div class="row table-header">
+        <div class="span5 table-header">Collection Name</div>
+        <div class="span1 coll-e">Links</div>
+        <div class="span2 coll-e">Last updated</div>
+    </div>
+    {! <pre>{user|js|s}</pre>  !}
+    {#grid}
+    {>"collections/collection_list_line" /}
+    {:else}
+    <div class="row">
+        <div class="span8">No collections available yet.</div>
+    </div>
+    {/grid}
+</div>

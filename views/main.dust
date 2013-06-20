@@ -30,12 +30,13 @@
   <body class="{+bodyClass/}">
     <div id="navbar">{>"navigation/navbar"/}</div>
     <div class="container" id="container">
-      <div id="breadcrumbs">{>"navigation/breadcrumbs"/}</div>
-      <div class="row"><div class="span8" id="title">{+title}<h1>{title}</h1>{/title}</div></div>
-      <div class="row"><div class="span8 error">{error}</div></div>
-      <div id="beforeContent">{+beforeContent/}</div>
-      <div id="content">{+content}_content_{/content}</div>
-      {+contentBottom/}
+        {+container}
+          <div id="breadcrumbs">{>"navigation/breadcrumbs"/}</div>
+          <div class="row"><div class="span8" id="title">{+title}<h1>{title}</h1>{/title}</div></div>
+          <div id="beforeContent">{+beforeContent/}</div>
+          <div id="content">{+content}_content_{/content}</div>
+          {+contentBottom/}
+       {/container}
     </div>
     {>mainPageScripts/}
     {+pageBottom /}

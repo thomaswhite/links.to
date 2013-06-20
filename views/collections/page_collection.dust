@@ -2,16 +2,6 @@
 
 {<bodyClass}collection{/bodyClass}
 {<pageTitle}Collection {title}{/pageTitle}
-{<title}
-  <h1 class="eip" id="title">Collection {title}</h1>
-  {?canDelete}
-    {#grid.length}
-       <a class="btn btn-danger btn-mini"  href="/coll/{collection._id}/delete?back=/coll/mine"><i class="icon-trash icon-white"></i> Delete</a>
-    {/grid.length}
-  {/canDelete}
-{/title}
-
-{<error}{.}{/error}
 
 {<pageBottom}
     <div class="eipBase" data-url="/coll/{collection._id}/eip"><br/></div>
@@ -27,7 +17,6 @@
     </script>
 {/pageBottom}
 
-{<content}
-{>"collections/collection"/}
-{/content}
-
+{<container}
+   {>"collections/collection_container"/}
+{/container}

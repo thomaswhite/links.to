@@ -1,0 +1,12 @@
+{>"main"/}
+
+{<bodyClass}collection-list{/bodyClass}
+{<pageTitle}My collections in Links.to{/pageTitle}
+
+{! , route:'collection:list', param:{param|js|s}, filter: {filter|js|s} !}
+
+{<container}
+   {>"collections/collection_list_container"/}
+{/container}
+
+

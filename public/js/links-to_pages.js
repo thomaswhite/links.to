@@ -7,32 +7,32 @@
 var pages = {
     '/coll':{
         routeIO: 'collection:list',
-        tempateID:'collections/collections-list',
-        containerID:'#content',
+        tempateID:'collections/collection_list_container',
+        containerID:'#container',
         contentID:''
     },
     '/coll/mine': {
         routeIO:'collection:mine',
-        tempateID:'collections/collections-list',
-        containerID:'#content',
+        tempateID:'collections/collection_list_container',
+        containerID:'#container',
         contentID:''
     },
     '/coll/new':{
         routeIO:'collection:add',
-        tempateID:'collections/collection-list',
-        containerID:'#content',
+        tempateID:'collections/collection_list_container',
+        containerID:'#container',
         contentID:''
     },
     '/coll/:id':{
         routeIO:'collection:get',
-        tempateID:'collections/collection',
-        containerID:'#content',
+        tempateID:'collections/collection_container',
+        containerID:'#container',
         contentID:''
     },
     '/coll/:id/delete': {
         routeIO:'collection:delete',
         tempateID:'collections/collections-list',
-        containerID:'#content',
+        containerID:'#container',
         contentID:''
     }
 };
@@ -107,7 +107,7 @@ function render(model, data, target, append) {
     if (!model) { return; }
     dust.render(model, data, function(err, out) {
         if (err) {
-            console.log(err);
+            console.error(err);
         }else if( !target ){
             console.log( out );
         } else {
