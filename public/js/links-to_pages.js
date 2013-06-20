@@ -37,8 +37,6 @@ var pages = {
     }
 };
 
-var pagesData = {};
-
 function index(){
     dust.render("main", {}, function(err, out) {
         if( err ) {
@@ -49,27 +47,16 @@ function index(){
     });
 }
 
-socket.on('data', function( param, data ){
-    console.log ('data', param, data);
-    socketData[param.path] = data;
-    //TODO: add data under [search].data and append rows when paginate
-    //TODO: trigger update event to refresh the target Area.
-    page.show(param.route); // navigate to the route and now there will be data for it.
-});
-
 function getData( context, next){
-    var p = context._page,
-        savedData = pagesData[ context.pathname ];
+    var p = context.pageDef;
 
-    if( savedData ){
-        context.data = savedData;
+    if( context.pageData ){
         next();
     }else{
-        // TODO refine pagaParam usage
         socket.emit( p.routeIO, context.pageParam, function(data){
-            // save pageParam somehow
-            pagesData[ context.pathname ] = data;
-            context.data = data;
+            // TODO: when there are pages append the data, not replace
+            context.pageData = data.result;
+            context.save();
             console.log ('getData:',  data);
             next();
         });
@@ -77,26 +64,24 @@ function getData( context, next){
 }
 
 function processRoute(context){
-    var p = context._page;
-    render(p.tempateID, context.data , p.containerID, false);
+    var p = context.pageDef;
+    render(p.tempateID, context.pageData , p.containerID, false);
 }
 
 function page_not_found(context){
    $('#content').html( context.pathname + ' not found');
 }
 
-function bindPage( path ){
-    var pg =  pages[path];
-    page(path, getData, processRoute  );
-}
-
-
-
 function pageAddRoutes(){
     //page.base('/');
     page('/coll',
         function(context, next){
-            context._page = pages['/coll'];
+            context.pageDef = context.pageDef || pages['/coll'];
+            context.pageParam = {
+                filter:{},
+                param:{ page:1 }
+            };
+            context.save();
             next();
         },
         getData,
@@ -104,8 +89,10 @@ function pageAddRoutes(){
     );
     page('/coll/:id',
         function(context, next){
-            context._page = pages['/coll/:id'];
-            context.pageParam = {coll_id: context.params.id};
+            context.pageDef = context.pageDef || pages['/coll/:id'];
+            context.pageParam = {
+                coll_id: context.params.id
+            };
             next();
         },
         getData,

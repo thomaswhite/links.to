@@ -41,8 +41,16 @@ function newCollection  (owner, name, description){
     }
 }
 
+function collectionList_defaultParam(filter, param){
+    return {
+        filter : _.merge( {}, filter),
+        param  :  _.merge(  {page:1, limit:24, sort:{updated:-1, created:-1} }, param)
+    }
+}
+
 function collectionList_data( filter, param, user, callBack ){
-    box.parallel('collections.list', filter, param.limit, param.sort, function( err, result ){
+    var Parameters =  collectionList_defaultParam(filter, param);
+    box.parallel('collections.list', Parameters.filter, Parameters.param.limit, Parameters.param.sort, function( err, result ){
         callBack( err, {
             button_action:{action:'collection:add'},
             title: 'All collection',
@@ -60,23 +68,21 @@ function collectionList_data( filter, param, user, callBack ){
     });
 }
 
-function collectionList( req, res, next, filter, param ){
-    filter = filter || {};
-    param = param || {page:1};
-    param.limit = param.limit || 48;
-    param.sort = param.sort || {updated:-1, created:-1};
 
+
+function collectionList( req, res, next, filter, param ){
+    var Parameters =  collectionList_defaultParam(filter, param);
     var user  =  req.session && req.session.passport && req.session.passport.user ? JSON.parse(req.session.passport.user):'';
     var base = box.dust.makeBase({
         user:user,
         pageParam:{
-            filter:filter,
-            param:param,
+            filter: Parameters.filter,
+            param: Parameters.param,
             route:'collection:list'
         }
     });
 
-    collectionList_data( filter, param, user, function(err, displayBlock ){
+    collectionList_data( Parameters.filter, Parameters.param, user, function(err, displayBlock ){
         console.log( displayBlock );
         box.dust.render(res, 'collections/collections-list', base.push(displayBlock));
     });
@@ -215,14 +221,17 @@ box.on('init.attach', function (app, config,  done) {
        get:  function(req) {
            box.emit( 'collection.get.one', req.data.coll_id, function( err, collection ){
                 req.io.respond({
-                   route:'collection:get',
-                   collection: collection
+                   result:{
+                       collection: collection
+                   },
+                   error:err
                });
            });
        },
        list: function(req){
            var User = req.session && req.session.passport && req.session.passport.user ?  JSON.parse( req.session.passport.user ):null;
-           collectionList_data( req.data.filter, req.data.param, User, function(err, displayBlock){
+           var Parameters =  collectionList_defaultParam(req.data.filter, req.data.param);
+           collectionList_data( Parameters.filter, Parameters.param, User, function(err, displayBlock){
                req.io.respond({
                    req:req.data,
                    result: displayBlock,
