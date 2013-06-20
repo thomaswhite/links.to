@@ -8,31 +8,31 @@ var pages = {
     '/coll':{
         routeIO: 'collection:list',
         tempateID:'collections/collections-list',
-        containerID:'',
+        containerID:'#content',
         contentID:''
     },
     '/coll/mine': {
         routeIO:'collection:mine',
         tempateID:'collections/collections-list',
-        containerID:'',
+        containerID:'#content',
         contentID:''
     },
     '/coll/new':{
         routeIO:'collection:add',
         tempateID:'collections/collection-list',
-        containerID:'',
+        containerID:'#content',
         contentID:''
     },
     '/coll/:id':{
         routeIO:'collection:get',
         tempateID:'collections/collection',
-        containerID:'',
+        containerID:'#content',
         contentID:''
     },
     '/coll/:id/delete': {
         routeIO:'collection:delete',
         tempateID:'collections/collections-list',
-        containerID:'',
+        containerID:'#content',
         contentID:''
     }
 };
@@ -66,7 +66,7 @@ function getData( context, next){
         next();
     }else{
         // TODO refine pagaParam usage
-        socket.emit( p.routeIO, pageParam, function(data){
+        socket.emit( p.routeIO, context.pageParam, function(data){
             // save pageParam somehow
             pagesData[ context.pathname ] = data;
             context.data = data;
@@ -77,7 +77,7 @@ function getData( context, next){
 }
 
 function processRoute(context){
-    var p = context._page; //  pages[context.pathname];
+    var p = context._page;
     render(p.tempateID, context.data , p.containerID, false);
 }
 
@@ -85,27 +85,35 @@ function page_not_found(context){
    $('#content').html( context.pathname + ' not found');
 }
 
+function bindPage( path ){
+    var pg =  pages[path];
+    page(path, getData, processRoute  );
+}
+
+
+
 function pageAddRoutes(){
     //page.base('/');
-    for(var i in pages){
-        var pg = pages[i];
-        page(i,
-            function(context, next){
-                context._page = pg;
-                getData(context,next);
-            },
-            processRoute
-        );
-    }
+    page('/coll',
+        function(context, next){
+            context._page = pages['/coll'];
+            next();
+        },
+        getData,
+        processRoute
+    );
+    page('/coll/:id',
+        function(context, next){
+            context._page = pages['/coll/:id'];
+            context.pageParam = {coll_id: context.params.id};
+            next();
+        },
+        getData,
+        processRoute
+    );
 
     page('*', page_not_found);
     page.start({dispatch:false});
-
-    // data for the first loaded page are in socketContext
-
-//    page('/', index);
-//    page(['/coll','/coll/mine'], coll_list);
-//    page(['/coll/:id', '/w/c/:id'], coll_get);
 }
 
 function render(model, data, target, append) {

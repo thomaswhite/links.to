@@ -92,13 +92,22 @@
     if (running) return;
     running = true;
     if (false === options.dispatch) dispatch = false;
-    if (false !== options.popstate) window.addEventListener('popstate', onpopstate, false);
-    if (false !== options.click) {
-        window.addEventListener('click', onclick, true );
-    }
+    if (false !== options.popstate) bindEvent( window, 'popstate', onpopstate  ); // window.addEventListener('popstate', onpopstate, false);
+    if (false !== options.click)    bindEvent( window, 'click', onclick, true );     // window.addEventListener('click', onclick, true
+
     if (!dispatch) return;
     page.replace(location.pathname + location.search, null, true, dispatch);
   };
+
+    function bindEvent(el, eventName, eventHandler, firstThis ) {
+        if (el.addEventListener){
+            el.addEventListener(eventName, eventHandler, firstThis);
+        } else if (el.attachEvent){
+            el.attachEvent('on'+eventName, eventHandler);
+        }
+    };
+
+
 
   /**
    * Unbind click and popstate event handlers.
@@ -108,9 +117,18 @@
 
   page.stop = function(){
     running = false;
-    removeEventListener('click', onclick, false);
-    removeEventListener('popstate', onpopstate, false);
+    removeEvent(window, 'click', onclick, true);         //removeEventListener('click', onclick, false);
+    removeEvent(window, 'popstate', onpopstate, false); //removeEventListener('popstate', onpopstate, false);
   };
+
+  function removeEvent (el, ev, fn, firstThis) {
+    if (window.removeEventListener)  { // Standard
+        el.removeEventListener(ev, fn, firstThis)
+    } else if (window.detachEvent) { // IE
+        el.detachEvent('on' + ev, fn)
+    } else { return false };
+  };
+
 
   /**
    * Show `path` with optional `state` object.
@@ -397,6 +415,7 @@
     page.show(orig);
   }
 
+  page.onclick = onclick;
   /**
    * Event button.
    */

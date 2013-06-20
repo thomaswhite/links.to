@@ -187,7 +187,7 @@ function Get_One (req, res) {
 
             Get_One_data( collID, user, function(err, displayBlock ){
                 console.log( displayBlock );
-                box.dust.render(res, 'collections/collection', base.push(displayBlock));
+                box.dust.render(res, 'collections/collection_page', base.push(displayBlock));
             });
         }
     });
