@@ -1,3 +1,4 @@
+/*jshint bitwise:true, curly:true, forin:true, immed:true, noarg:true, noempty:true, nonew:true, trailing:true, lastsemic:true, laxbreak:true, laxcomma:true, browser:true, jquery:true, node:true, onevar:true, maxerr:100 */
 
 /*
  * GET home page.
@@ -14,6 +15,9 @@ var box = require('../box.js')
     ;
 
 
+/**
+ * @return {string}
+ */
 function ShorterID(){
     return  ShortId.generate().substr(0, config.db.short_id_length);
 }
@@ -38,14 +42,14 @@ function newCollection  (owner, name, description){
         created : new Date(),
         updated:  new Date(),
         links:[]
-    }
+    };
 }
 
 function collectionList_defaultParam(filter, param){
     return {
         filter : _.merge( {}, filter),
         param  :  _.merge(  {page:1, limit:24, sort:{updated:-1, created:-1} }, param)
-    }
+    };
 }
 
 function collectionList_data( filter, param, user, callBack ){
@@ -71,16 +75,17 @@ function collectionList_data( filter, param, user, callBack ){
 
 
 function collectionList( req, res, next, filter, param ){
-    var Parameters =  collectionList_defaultParam(filter, param);
-    var user  =  req.session && req.session.passport && req.session.passport.user ? JSON.parse(req.session.passport.user):'';
-    var base = box.dust.makeBase({
-        user:user,
-        pageParam:{
-            filter: Parameters.filter,
-            param: Parameters.param,
-            route:'collection:list'
-        }
-    });
+    var Parameters =  collectionList_defaultParam(filter, param)
+        , user  =  req.session && req.session.passport && req.session.passport.user ? JSON.parse(req.session.passport.user):''
+        , base = box.dust.makeBase({
+                user:user,
+                pageParam:{
+                    filter: Parameters.filter,
+                    param: Parameters.param,
+                    route:'collection:list'
+                }
+          })
+        ;
 
     collectionList_data( Parameters.filter, Parameters.param, user, function(err, displayBlock ){
         console.log( displayBlock );
@@ -89,7 +94,7 @@ function collectionList( req, res, next, filter, param ){
 }
 
 
-
+/*
 function Favorite  (req, res, next ){
     if( !app.locals.user || app.locals.user._id ){
         next();
@@ -97,7 +102,7 @@ function Favorite  (req, res, next ){
         next();
     }
 }
-
+*/
 function Mine (req, res, next ){
     if( !app.locals.user || !app.locals.user._id ){
         next();
@@ -111,14 +116,15 @@ function All ( req, res, next  ){
 }
 
 function Add(req, res) {
-    var referer = req.headers.referer;
-    var coll_name = req.body.collectionName || 'New collection';
+    var referer = req.headers.referer
+        , coll_name = req.body.collectionName || 'New collection'
+        , coll;
     if( !req.user ){
         context.Page2(req, res, 'add-button', {
             add_link: '/coll/new'
         });
     }else{
-        var coll = newCollection(req.user._id, coll_name.trim());
+        coll = newCollection(req.user._id, coll_name.trim());
         box.emit('collection.add', coll, function(err, collection ) {
             if (err) {
                 context.notFound(res, 'db error while creating new collection.');
@@ -132,8 +138,9 @@ function Add(req, res) {
 }
 
 function Delete (req, res) {
-    var referer = req.headers.referer;
-    var coll_id = req.params.id;
+    var referer = req.headers.referer
+        , coll_id = req.params.id
+        ;
     box.parallel('collection.delete', coll_id, function(err, aResult){
         res.redirect( req.query.back );
     });
@@ -141,18 +148,17 @@ function Delete (req, res) {
 }
 
 
-function Get_One_data (collID, user, callBack) {
+function Get_One_data (collID, callBack) {
     box.emit( 'collection.get.one', collID, function( err, collection ){
-        var isOwner =  user._id ==  collection.owner ? true : '';
+//        var isOwner = collection.owner == user._id ? true : '';
         callBack(err, {
             button_action:{action:'link:add', coll_id: collID },
             title: (collection && collection.title ? collection.title : 'Collection not found' ) + '"',
-            user: user,
-            canEdit: isOwner,
-            canDelete: isOwner,
+//            canEdit: isOwner,
+//            canDelete: isOwner,
             collection: collection,
             crumbs : breadcrumbs.make({
-                owner:isOwner,
+//                owner:isOwner,
                 coll:{id:collection._id, title:collection.title }
             }),
             addButton:{
@@ -167,7 +173,7 @@ function Get_One_data (collID, user, callBack) {
             }
         });
     });
-};
+}
 
 function Get_One (req, res) {
     var referer = req.headers.referer,
@@ -181,8 +187,8 @@ function Get_One (req, res) {
             res.redirect( '/coll' );
         }else{
             var user  =  req.session && req.session.passport && req.session.passport.user ? JSON.parse(req.session.passport.user):''
-                , isOwner =  user._id ==  collection.owner ? true : ''
-                base = box.dust.makeBase({
+    //            , isOwner =  user._id ==  collection.owner ? true : ''
+                , base = box.dust.makeBase({
                     user:user,
                     pageParam:{
                         route:'collection:get',
@@ -190,9 +196,8 @@ function Get_One (req, res) {
                     }
                 })
                 ;
-
-            Get_One_data( collID, user, function(err, displayBlock ){
-                console.log( displayBlock );
+            Get_One_data( collID, function(err, displayBlock ){
+//                console.log( displayBlock );
                 box.dust.render(res, 'collections/page_collection', base.push(displayBlock));
             });
         }
@@ -219,18 +224,18 @@ box.on('init.attach', function (app, config,  done) {
 
     app.io.route('collection', {
        get:  function(req) {
-           box.emit( 'collection.get.one', req.data.coll_id, function( err, collection ){
-                req.io.respond({
-                   result:{
-                       collection: collection
-                   },
+           Get_One_data( req.data.coll_id, function(err, displayBlock ){
+               req.io.respond({
+                   result:displayBlock,
                    error:err
                });
            });
+
        },
        list: function(req){
-           var User = req.session && req.session.passport && req.session.passport.user ?  JSON.parse( req.session.passport.user ):null;
-           var Parameters =  collectionList_defaultParam(req.data.filter, req.data.param);
+           var User = req.session && req.session.passport && req.session.passport.user ?  JSON.parse( req.session.passport.user ):null
+               , Parameters =  collectionList_defaultParam(req.data.filter, req.data.param)
+               ;
            collectionList_data( Parameters.filter, Parameters.param, User, function(err, displayBlock){
                req.io.respond({
                    req:req.data,
@@ -268,7 +273,7 @@ box.on('init.attach', function (app, config,  done) {
                req.io.respond({
                    result:err ? 'error':'ok',
                    error:err
-               })
+               });
            });
        }
     });

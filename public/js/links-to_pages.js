@@ -48,15 +48,15 @@ function index(){
 }
 
 function getData( context, next){
-    var p = context.pageDef;
+    var p = context.state.pageDef;
 
-    if( context.pageData ){
+    if( context.state.pageData ){
         next();
     }else{
-        socket.emit( p.routeIO, context.pageParam, function(data){
+        socket.emit( p.routeIO, context.state.pageParam, function(data){
             // TODO: when there are pages append the data, not replace
-            context.pageData = data.result;
-            context.save();
+            context.state.pageData = data.result;
+            //context.save();
             console.log ('getData:',  data);
             next();
         });
@@ -64,8 +64,8 @@ function getData( context, next){
 }
 
 function processRoute(context){
-    var p = context.pageDef;
-    render(p.tempateID, context.pageData , p.containerID, false);
+    var p = context.state.pageDef;
+    render(p.tempateID, context.state.pageData , p.containerID, false);
 }
 
 function page_not_found(context){
@@ -76,12 +76,12 @@ function pageAddRoutes(){
     //page.base('/');
     page('/coll',
         function(context, next){
-            context.pageDef = context.pageDef || pages['/coll'];
-            context.pageParam = {
+            context.state.pageDef = context.pageDef || pages['/coll'];
+            context.state.pageParam = {
                 filter:{},
                 param:{ page:1 }
             };
-            context.save();
+            //context.save();
             next();
         },
         getData,
@@ -89,10 +89,11 @@ function pageAddRoutes(){
     );
     page('/coll/:id',
         function(context, next){
-            context.pageDef = context.pageDef || pages['/coll/:id'];
-            context.pageParam = {
+            context.state.pageDef = context.pageDef || pages['/coll/:id'];
+            context.state.pageParam = {
                 coll_id: context.params.id
             };
+            //context.save();
             next();
         },
         getData,
