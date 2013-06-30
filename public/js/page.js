@@ -99,13 +99,13 @@
     page.replace(location.pathname + location.search, null, true, dispatch);
   };
 
-    function bindEvent(el, eventName, eventHandler, firstThis ) {
-        if (el.addEventListener){
-            el.addEventListener(eventName, eventHandler, firstThis);
-        } else if (el.attachEvent){
-            el.attachEvent('on'+eventName, eventHandler);
-        }
-    };
+  function bindEvent(el, eventName, eventHandler, firstThis ) {
+    if (el.addEventListener){
+        el.addEventListener(eventName, eventHandler, firstThis);
+    } else if (el.attachEvent){
+        el.attachEvent('on'+eventName, eventHandler);
+    }
+  }
 
 
 
@@ -123,11 +123,11 @@
 
   function removeEvent (el, ev, fn, firstThis) {
     if (window.removeEventListener)  { // Standard
-        el.removeEventListener(ev, fn, firstThis)
+        el.removeEventListener(ev, fn, firstThis);
     } else if (window.detachEvent) { // IE
-        el.detachEvent('on' + ev, fn)
-    } else { return false };
-  };
+        el.detachEvent('on' + ev, fn);
+    } else { return false }
+  }
 
 
   /**
@@ -368,7 +368,7 @@
       .replace(/([\/.])/g, '\\$1')
       .replace(/\*/g, '(.*)');
     return new RegExp('^' + path + '$', sensitive ? '' : 'i');
-  };
+  }
 
   /**
    * Handle "populate" events.
@@ -411,6 +411,11 @@
     path = path.replace(base, '');
     if (base && orig == path) return;
 
+    for(var parent = el.parentNode; parent; parent = parent.parentNode){
+        if( parent.className && parent.className.indexOf('noPage') > -1 ){
+            return;
+        }
+    }
     e.preventDefault();
     page.show(orig);
   }

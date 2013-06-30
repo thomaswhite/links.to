@@ -72,8 +72,6 @@ function collectionList_data( filter, param, user, callBack ){
     });
 }
 
-
-
 function collectionList( req, res, next, filter, param ){
     var Parameters =  collectionList_defaultParam(filter, param)
         , user  =  req.session && req.session.passport && req.session.passport.user ? JSON.parse(req.session.passport.user):''
@@ -104,10 +102,13 @@ function Favorite  (req, res, next ){
 }
 */
 function Mine (req, res, next ){
-    if( !app.locals.user || !app.locals.user._id ){
-        next();
+    var session = req.session,
+        user  = session && session.passport && session.passport.user ? JSON.parse(session.passport.user):null;
+    //            , isOwner =  user._id ==  collection.owner ? true : ''
+    if( user && user._id ){
+        collectionList(  req, res, next, {owner:  user._id });
     }else{
-        collectionList(  req, res, next, {owner: '' + app.locals.user._id || 0});
+        next();
     }
 }
 

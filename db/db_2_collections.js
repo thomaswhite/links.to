@@ -68,7 +68,7 @@ box.on('db.init', function( monk, Config, done ){
     });
 
     box.on('collections.list', function( filter, limit, sort, callback){
-        Collections.find( filter || {}, {limit:limit || 64, sort:sort || {updated:-1, created:-1}}, function(err, result){
+        Collections.find( filter , {limit:limit || 64, sort:sort || {updated:-1, created:-1}}, function(err, result){
             if( result ){
                 result.type = 'collections-list';
             }

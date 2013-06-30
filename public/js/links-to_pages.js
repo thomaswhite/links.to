@@ -40,7 +40,7 @@ var pages = {
 function index(){
     dust.render("main", {}, function(err, out) {
         if( err ) {
-            console.error(err)
+            console.error(err);
         }else{
             $('#content').html( err || out );
         }
@@ -56,7 +56,7 @@ function getData( context, next){
         socket.emit( p.routeIO, context.state.pageParam, function(data){
             // TODO: when there are pages append the data, not replace
             context.state.pageData = data.result;
-            //context.save();
+            context.save();
             console.log ('getData:',  data);
             next();
         });
@@ -69,10 +69,14 @@ function processRoute(context){
 }
 
 function page_not_found(context){
-   $('#content').html( context.pathname + ' not found');
+    console.log( 'page.js: missing path - ' + context.pathname );
+    location.href = context.pathname;
+    // $('#content').html( context.pathname + ' not found');
 }
 
 function pageAddRoutes(){
+    return;
+
     //page.base('/');
     page('/coll',
         function(context, next){
@@ -81,7 +85,7 @@ function pageAddRoutes(){
                 filter:{},
                 param:{ page:1 }
             };
-            //context.save();
+            context.save();
             next();
         },
         getData,
@@ -93,7 +97,7 @@ function pageAddRoutes(){
             context.state.pageParam = {
                 coll_id: context.params.id
             };
-            //context.save();
+            context.save();
             next();
         },
         getData,
@@ -120,3 +124,4 @@ function render(model, data, target, append) {
         }
     });
 }
+

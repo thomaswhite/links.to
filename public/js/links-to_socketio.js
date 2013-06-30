@@ -44,6 +44,7 @@ socket.emit('loaded', pageParam, function(data){
     socketContext = data;
     console.log ('loaded:',  data);
 });
+
 socket.on('user', function( data, x ){
     socketContext.user = data;
     console.log ('socketContext', socketContext);
@@ -56,6 +57,8 @@ socket.on('data', function( param, data ){
     //TODO: trigger update event to refresh the target Area.
     page.show(param.route); // navigate to the route and now there will be data for it.
 });
+
+
 
 
 

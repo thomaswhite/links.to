@@ -23,7 +23,7 @@
                     <li><a href="/tags/mine">My Tags</a></li>
                     <li><a href="/favorites/mine">My Favorites</a></li>
                   {/user}
-                    <li class="dropdown">
+                    <li class="dropdown noPage">
                   {?user}
                         <a href="#" class="dropdown-toggle logged-user"  data-toggle="dropdown" >
                           {?gravatarURL}
