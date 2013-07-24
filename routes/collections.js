@@ -199,6 +199,11 @@ function Get_One (req, res) {
                 ;
             Get_One_data( collID, function(err, displayBlock ){
 //                console.log( displayBlock );
+
+//        var isOwner = collection.owner == user._id ? true : '';
+//            canEdit: isOwner,
+//            canDelete: isOwner,
+
                 box.dust.render(res, 'collections/page_collection', base.push(displayBlock));
             });
         }

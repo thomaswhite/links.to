@@ -1,5 +1,6 @@
 {^noAdd}
-    {!  #user}user:{.|js|s}{/user !}
+    {#user}user:{.|js|s}{/user}
+    {#collection}{_id}{/collection}
     {?canEdit}
       {?user}
         {@select key="{buttonType}"}
