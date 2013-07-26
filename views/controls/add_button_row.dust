@@ -1,5 +1,14 @@
-<div class="row">
-    <div class="span12 button">
-        {>"controls/add_button"/}
+{#user Collection="{collection}"}
+    <div class="row">
+        <div class="span12 button">
+                {@eq value="collection:list" key="{pageParam.route}"}
+                    {>"controls/add_button_{addButton.type}"/}
+                {/eq}
+                {@eq value="collection:get" key="{pageParam.route}"}
+                    {@eq value="{user._id}" key="{collection.owner}"}
+                        {>"controls/add_button_{addButton.type}"/}
+                    {/eq}
+                {/eq}
+        </div>
     </div>
-</div>
+{/user}

@@ -1,0 +1,4 @@
+<div class="input-append">
+    <textarea class="input-xxlarge autoGrow" name="{name}" placeholder="{placeholder}" title="{placeholder}" rows="1"></textarea>
+    <button type="submit" class="btn btn-primary btn-mall" href=""><i class="icon-plus icon-white"></i> {buttonText}</button>
+</div>

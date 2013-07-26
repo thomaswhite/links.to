@@ -63,6 +63,7 @@ function collectionList_data( filter, param, user, callBack ){
             canEdit:true,
             crumbs : breadcrumbs.make({ }),
             addButton:{
+                type:'input',
                 link: '/coll/new',
                 name: 'collectionName',
                 placeholder:'New collection name',
@@ -198,7 +199,7 @@ function Get_One (req, res) {
                 })
                 ;
             Get_One_data( collID, function(err, displayBlock ){
-//                console.log( displayBlock );
+                console.log( displayBlock );
 
 //        var isOwner = collection.owner == user._id ? true : '';
 //            canEdit: isOwner,
