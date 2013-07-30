@@ -1,7 +1,7 @@
 {>"main"/}
 
 {<bodyClass}collection{/bodyClass}
-{<pageTitle}Collection {title}{/pageTitle}
+{<pageTitle}Collection: {title}{/pageTitle}
 
 {<pageBottom}
     <div class="eipBase" data-url="/coll/{collection._id}/eip"><br/></div>

@@ -1,7 +1,7 @@
 <div id="breadcrumbs">{>"navigation/breadcrumbs"/}</div>
 <div class="row">
     <div class="span8" id="title">
-        <h1 class="eip" id="title">Collection {title}</h1>
+        <h1 class="eip" id="title"><span class="coll-title-prefix">Collection </span> {title}</h1>
         {?canDelete}
         {#grid.length}
         <a class="btn btn-danger btn-mini"  href="/coll/{collection._id}/delete?back=/coll/mine"><i class="icon-trash icon-white"></i> Delete</a>

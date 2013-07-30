@@ -72,7 +72,6 @@ box.on('db.init', function( monk, Config, done ){
             if( result ){
                 result.type = 'collections-list';
             }
-            box.utils.formatUpdated( result );
             callback(err, result);
         });
     });

@@ -9,6 +9,13 @@
         <span>{desciption}</span>
       </div>
       <div class="span1 coll-e">{links.length}</div>
-      <div class="span2 coll-e">{>"date_time/updated"/}</div>
+      <div class="span2 coll-e">
+        {#updated}
+          <span class="updated"  title='{@timeStamp time="{updated}" format="YYYY-MM-DD HH:mm" /}' >
+              <i class="icon-calendar"></i>
+              <span>{@timeFromNow time="{updated}"/}</span>
+          </span>
+        {/updated}
+      </div>
   </div>
 

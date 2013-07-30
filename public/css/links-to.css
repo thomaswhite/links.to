@@ -458,6 +458,9 @@ body.collection h1 {
 .my-collection {
   color: #ff0000;
 }
+.coll-title-prefix {
+  font-size: 60%;
+}
 .edit-label {
   padding: 4px 5px 4px 20px;
   margin-left: 10px;

@@ -9,10 +9,11 @@ var box = require('../box.js')
     , debug = require('debug')('linksTo:view.collections')
     , breadcrumbs = require('./breadcrumbs.js')
     , ShortId  = require('shortid').seed(96715)
-
+    , moment = require('moment')
     , config
     , app
-    ;
+
+ ;
 
 
 /**
@@ -72,7 +73,9 @@ function collectionList_data( filter, param, user, callBack ){
 }
 
 function collectionList( req, res, next, filter, param ){
-    var Parameters =  collectionList_defaultParam(filter, param)
+    var helpers = box.kleiDust.getDust().helpers
+
+        , Parameters =  collectionList_defaultParam(filter, param)
         , user  =  req.session && req.session.passport && req.session.passport.user ? JSON.parse(req.session.passport.user):''
         , base = box.dust.makeBase({
                 user:user,
@@ -81,6 +84,17 @@ function collectionList( req, res, next, filter, param ){
                     param: Parameters.param,
                     route:'collection:list'
                 }
+/*                , timeFromNow: function(chunk, ctx, bodies, params) {
+                    var value = helpers.tap(params.time, chunk, ctx);
+                    if( value ){
+                        return chunk.write( moment(value).fromNow() );
+                    }else{
+                        return chunk;
+                    }
+                    //chunk.write( value );
+                    //chunk.write(':' + ctx.current().value );
+                }
+*/
           })
         ;
 
@@ -152,8 +166,8 @@ function Get_One_data (collID, callBack) {
     box.emit( 'collection.get.one', collID, function( err, collection ){
 //        var isOwner = collection.owner == user._id ? true : '';
         callBack(err, {
-            button_action:{action:'link:add', coll_id: collID },
-            title: (collection && collection.title ? collection.title : 'Collection not found' ) + '"',
+            button_action:{route:'/link/new', coll_id: collID },
+            title: (collection && collection.title ? collection.title: 'Collection not found' ),
 //            canEdit: isOwner,
 //            canDelete: isOwner,
             collection: collection,
@@ -162,8 +176,6 @@ function Get_One_data (collID, callBack) {
                 coll:{id:collection._id, title:collection.title }
             }),
             addButton:{
-                link: '/link/new/' + collID,
-                name: 'links',
                 placeholder:'Paste links',
                 type:'input',
                 buttonText:'Add Link',

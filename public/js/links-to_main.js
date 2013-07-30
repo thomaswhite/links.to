@@ -65,22 +65,19 @@ function fnBtnAdd(event){
 function page_init() {
     $('body').on('click', 'button.btnAdd', fnBtnAdd);
 
-    socket.on('collection-adding', function( param, data ){
-        // display waiting sign
-    });
-    socket.on('collection-added', function( param, data ){
-        // if the current page is /collections/mine, just replace the waiting sign with the new collection name
-        // else go to /collections/mine
-    });
+    var helpers = dust.helpers;
+    helpers.timeFromNow = function(chunk, ctx, bodies, params) {
+        var time = helpers.tap(params.time, chunk, ctx);
+        return time ? chunk.write( moment(time).fromNow() )
+            : chunk;
+    };
+    helpers.timeStamp = function(chunk, ctx, bodies, params) {
+        var time  = helpers.tap(params.time, chunk, ctx),
+            format = helpers.tap(params.format, chunk, ctx) || 'YYYY-MM-DD HH:mm';
 
-    socket.on('link-failure', function( param, data ){
-        // display error message about the link
-    });
-    socket.on('link-adding', function( param, data ){
-        // display waiting sign
-    });
-    socket.on('link-added', function( param, data ){
-        // replace the waiting sign with the new link content
-    });
+        return time ? chunk.write( moment(time).format(format) )
+                    : chunk;
+    };
+
 
 }

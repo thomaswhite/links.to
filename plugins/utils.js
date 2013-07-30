@@ -61,6 +61,12 @@ function formatUpdated (arr){
     });
 }
 
+function updatedFromNow (s){
+    return  moment(s).fromNow();
+}
+
+
+
 box.on('init', function (app, conf, done) {
     box.utils = {
         _ : _,

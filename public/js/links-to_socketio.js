@@ -20,6 +20,17 @@ socket.on('error',          function (data ) {     console.log('socket.io error'
 socket.on('reconnect_failed', function () {     console.log('socket.io reconnect failed');});
 socket.on('connect_failed', function () {       console.log('socket.io connect failed');}); // "connect_failed" is emitted when socket.io fails to establish a connection to the server and has no more transports to fallback to.
 
+socket.on('collection-adding', function( param, data ){
+    console.log ('collection-adding', data);
+    // display waiting sign
+});
+socket.on('collection-added', function( param, data ){
+    console.log ('collection-added', data);
+    // if the current page is /collections/mine, just replace the waiting sign with the new collection name
+    // else go to /collections/mine
+});
+
+
 socket.on('pageScrape.image', function( data, x ){
     console.log ('pageScrape.image:', data);
 });
@@ -30,10 +41,23 @@ socket.on('pageScrape.head', function( data, x ){
 
 socket.on('link.ready', function( data, x ){
     console.log ('link.ready', data);
-    render("links/link", data.data.link, null, 0);
+    //render("links/link", data.data.link, null, 0);
 });
 socket.on('link.saved', function( data, x ){
     console.log ('link.saved', data);
+});
+
+socket.on('link-failure', function( param, data ){
+    console.log ('link-failure', data);
+    // display error message about the link
+});
+socket.on('link-adding', function( param, data ){
+    console.log ('link-adding', data);
+    // display waiting sign
+});
+socket.on('link-added', function( param, data ){
+    console.log ('link-added', added);
+    // replace the waiting sign with the new link content
 });
 
 // ============================================================

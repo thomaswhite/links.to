@@ -2,11 +2,15 @@ var box = require('../box.js')
     , path = require('path')
     , kleiDust = require('klei-dust')
     , helpers = require('dustjs-helpers')
+    , moment = require('moment')
     , util = require('util')
     , debug = require('debug')('linksTo:plugin:kleiDust')
     , config;
 
 box.kleiDust = kleiDust;
+
+
+
 
 box.on('init', function (App, Config, done) {
     config = Config;
@@ -62,5 +66,18 @@ box.on('init.attach', function(app, config, done){
         }
     };
 
+    var hlp = kleiDust.getDust().helpers;
+    hlp.timeFromNow = function(chunk, ctx, bodies, params) {
+        var time = hlp.tap(params.time, chunk, ctx);
+        return time ? chunk.write( moment(time).fromNow() )
+                     : chunk;
+    };
+    hlp.timeStamp = function(chunk, ctx, bodies, params) {
+        var time  = hlp.tap(params.time, chunk, ctx),
+            format = hlp.tap(params.format, chunk, ctx) || 'YYYY-MM-DD HH:mm';
+        return time ? chunk.write( moment(time).format(format) )
+            : chunk;
+    };
+
     done(null, 'plugin kleiDust initialised');
-})
+});

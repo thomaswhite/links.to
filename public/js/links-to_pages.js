@@ -35,6 +35,12 @@ var pages = {
         tempateID:'collections/collection_list_add_line',
         containerID:'#coll-list-rows',
         contentPos:'prepend'
+    },
+    '/link/new':{
+        routeIO:'link:add',
+        tempateID:'collections/collection_list_add_line',
+        containerID:'#grid',
+        contentPos:'prepend'
     }
 
 
