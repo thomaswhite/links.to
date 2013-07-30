@@ -2,7 +2,7 @@
       <div class="span5 coll-title">
         <a href="/coll/{_id}" title="{description}" >{title}</a>
         {#user}
-            {@eq key="{owner}" value="{_id}" }
+            {@eq key="{owner}" value="{user._id}" }
                <span class="icon-user my-collection" title="This collection is mine"></span>
             {/eq}
         {/user}

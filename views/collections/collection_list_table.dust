@@ -5,11 +5,13 @@
         <div class="span2 coll-e">Last updated</div>
     </div>
     {! <pre>{user|js|s}</pre>  !}
-    {#grid}
-    {>"collections/collection_list_line" /}
-    {:else}
-    <div class="row">
-        <div class="span8">No collections available yet.</div>
+    <div id="coll-list-rows">
+        {#grid}
+            {>"collections/collection_list_line" /}
+        {:else}
+            <div class="row">
+                <div class="span8">No collections available yet.</div>
+            </div>
+        {/grid}
     </div>
-    {/grid}
 </div>

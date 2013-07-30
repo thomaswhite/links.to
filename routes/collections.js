@@ -56,7 +56,7 @@ function collectionList_data( filter, param, user, callBack ){
     var Parameters =  collectionList_defaultParam(filter, param);
     box.parallel('collections.list', Parameters.filter, Parameters.param.limit, Parameters.param.sort, function( err, result ){
         callBack( err, {
-            button_action:{action:'collection:add'},
+            button_action:{route:'/coll/new'},
             title: 'All collection',
             grid: box.utils.pickUpFromAsyncResult( result, 'collections-list' ),
             user: user,
@@ -64,8 +64,6 @@ function collectionList_data( filter, param, user, callBack ){
             crumbs : breadcrumbs.make({ }),
             addButton:{
                 type:'input',
-                link: '/coll/new',
-                name: 'collectionName',
                 placeholder:'New collection name',
                 buttonText:'Add'
             }

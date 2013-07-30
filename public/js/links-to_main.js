@@ -4,20 +4,66 @@
  * Time: 21:01
  */
 
-function page_init() {
-    $('body').on('click', 'button.btnAdd', function(event){
-        var $this = $(this).attr('disabled', true ),
-            context = $this.data('context'),
-            $addInput = $('input.addInput')
-            ;
 
-        context.value =  $addInput.val();
-        socket.emit(context.action, context, function(dataDone){
-            $this.removeAttr('disabled');
-            console.log ('button.btnAdd', dataDone);
-        });
+/**
+ *
+ * @param model
+ * @param data
+ * @param target
+ * @param contentPos: 1 or append, -1 or prepend, 0 or replace
+ */
+function myRender(model, data, target, contentPos) {
+    if (!model) { return; }
+
+    var base = dust.makeBase({
+        user:socketContext.user,
+        pageParam:pageParam
     });
 
+    data.user =   socketContext.user;
+    dust.render(model,  base.push(data), function(err, out) {
+        if (err) {
+            console.error(err);
+        }else if( !target ){
+            console.log( out );
+        } else {
+            switch( contentPos ){
+                case 'append' :
+                case 1 :
+                    $(target).append(out);
+                    break;
+
+                case 'prepend' :
+                case -1:
+                    $(target).prepend(out);
+                    break;
+
+                case 'replace':
+                default:
+                    $(target).html(out);
+                    break;
+            }
+        }
+    });
+}
+
+function fnBtnAdd(event){
+    var $this = $(this).attr('disabled', true ),
+        context = $this.data('context'),
+        $addInput = $('input.addInput'),
+        page = pages[context.route]
+        ;
+
+    context.value =  $addInput.val();
+    socket.emit(page.routeIO, context, function(dataDone){
+        $this.removeAttr('disabled');
+        console.log ('button.btnAdd', dataDone);
+        myRender( page.tempateID, dataDone, page.containerID, page.contentPos);
+    });
+}
+
+function page_init() {
+    $('body').on('click', 'button.btnAdd', fnBtnAdd);
 
     socket.on('collection-adding', function( param, data ){
         // display waiting sign

@@ -1,0 +1,3 @@
+{#collection userID="{user._id}"}
+    {>"collections/collection_list_line" /}
+{/collection}

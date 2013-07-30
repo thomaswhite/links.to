@@ -9,16 +9,10 @@ var pages = {
         routeIO: 'collection:list',
         tempateID:'collections/collection_list_container',
         containerID:'#container',
-        contentID:''
+        contentID:'#coll-list-rows'
     },
     '/coll/mine': {
         routeIO:'collection:mine',
-        tempateID:'collections/collection_list_container',
-        containerID:'#container',
-        contentID:''
-    },
-    '/coll/new':{
-        routeIO:'collection:add',
         tempateID:'collections/collection_list_container',
         containerID:'#container',
         contentID:''
@@ -34,7 +28,16 @@ var pages = {
         tempateID:'collections/collections-list',
         containerID:'#container',
         contentID:''
+    },
+
+    '/coll/new':{
+        routeIO:'collection:add',
+        tempateID:'collections/collection_list_add_line',
+        containerID:'#coll-list-rows',
+        contentPos:'prepend'
     }
+
+
 };
 
 function index(){
@@ -65,7 +68,7 @@ function getData( context, next){
 
 function processRoute(context){
     var p = context.state.pageDef;
-    render(p.tempateID, context.state.pageData , p.containerID, false);
+    myRender(p.tempateID, context.state.pageData , p.containerID, 0);
 }
 
 function page_not_found(context){
@@ -107,21 +110,3 @@ function pageAddRoutes(){
     page('*', page_not_found);
     page.start({dispatch:false});
 }
-
-function render(model, data, target, append) {
-    if (!model) { return; }
-    dust.render(model, data, function(err, out) {
-        if (err) {
-            console.error(err);
-        }else if( !target ){
-            console.log( out );
-        } else {
-            if( append ){
-                $(target).append(out);
-            }else{
-                $(target).html(out);
-            }
-        }
-    });
-}
-

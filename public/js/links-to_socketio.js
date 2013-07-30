@@ -41,7 +41,7 @@ socket.on('link.saved', function( data, x ){
 // This will bootstrap resources from the server
 // and data for 'pageParam.route'
 socket.emit('loaded', pageParam, function(data){
-    socketContext = data;
+    socketContext.loaded = data;
     console.log ('loaded:',  data);
 });
 
