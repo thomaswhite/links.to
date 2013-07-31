@@ -571,3 +571,19 @@ h5 {
   float: left;
   margin-right: .5em;
 }
+a.deleteIcon:link,
+a.deleteIcon:visited,
+a.deleteIcon:hover,
+a.deleteIcon:active {
+  text-decoration: none;
+  padding-left: 2px;
+  padding-right: 2px;
+}
+a.deleteIcon:hover {
+  color: white;
+  background-color: blue;
+}
+.deleting .link-content,
+.deleting .coll-title {
+  background-color: #888;
+}

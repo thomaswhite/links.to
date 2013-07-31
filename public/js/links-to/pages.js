@@ -36,6 +36,14 @@ var pages = {
         containerID:'#coll-list-rows',
         contentPos:'prepend'
     },
+    '/coll/delete':{
+        routeIO:'collection:remove',
+        deleteClosest:'.row'
+    },
+    '/link/delete':{
+        routeIO:'link:remove',
+        deleteClosest:'.blocked-link'
+    },
     '/link/new':{
         routeIO:'link:add',
         tempateID:'collections/collection_list_add_line',

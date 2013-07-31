@@ -4,7 +4,7 @@
             {@eq key="{owner}" value="{user._id}" }
                <a class="btn btn-success btn-mini "  href="#" >Edit</a>
                <a class="btn btn-warning btn-mini edit-btn " href="/link/{_id}/refresh" title="refresh"><i class="icon-refresh"></i></a>
-               <a class="btn btn-danger btn-mini "  href="/link/{_id}/delete/{collection}" >Delete</a>
+               <a class="btn btn-danger btn-mini linkDelete" data-context='{~lb}"route":"/link/delete", "coll_id":"{collection}", "link_id":"{_id}"{~rb}' >Delete</a>
             {/eq}
           <span>{@timeFromNow time="{updated}"/}</span>
         </span>

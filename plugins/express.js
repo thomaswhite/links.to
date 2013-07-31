@@ -5,7 +5,6 @@ var box = require('../box.js')
     , path = require('path')
 
     , cons = box.cons = require('consolidate')
-    , swig = require('swig')
 
 //    , http = require('http')
     , config;
@@ -36,11 +35,7 @@ box.on('init', function (App, Config, done) {
             app.engine('dust', box.kleiDust.dust);
             app.set('view engine', 'dust');
             app.set('view options', {layout: false});
-    /*
-            app.engine('html', cons.swig );
-            app.set('view engine', 'html');
-            swig.init( config.swig );
-    */
+
             app.use( box.cookieParser );
             app.use(express.session({
                 secret: config.common.session.secret

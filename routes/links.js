@@ -235,8 +235,19 @@ box.on('init.attach', function (app, config,  done) {
            .handler
     );
 
-
     app.io.route('link', {
+
+        remove: function(req){
+            var link_id = req.data.link_id;
+            var coll_id = req.data.coll_id;
+            box.parallel('link.delete', link_id, coll_id, function(err, aResult){
+                req.io.respond({
+                    result:err ? 'error':'ok',
+                    error:err
+                });
+            });
+        },
+
         add:function(req){
             var url = req.data.value.trim(),
                 request_options = _.merge( {}, config.request, {uri:url }),

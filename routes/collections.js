@@ -49,7 +49,7 @@ function newCollection  (owner, name, description){
 function collectionList_defaultParam(filter, param){
     return {
         filter : _.merge( {}, filter),
-        param  :  _.merge(  {page:1, limit:24, sort:{updated:-1, created:-1} }, param)
+        param  :  _.merge(  {page:1, limit:40, sort:{updated:-1, created:-1} }, param)
     };
 }
 

@@ -3,7 +3,7 @@
   <div class="row">
     <div class="span8 {?canEdit}eip{/canEdit} ta wrap coll_description" >{description}</div>
   </div>
-  {! >"collections/collection_toolbox.dust"/ !}
+  {>"collections/collection_toolbox.dust"/}
   {>"controls/add_button_row"/}
   <div id="grid">
     {#links collection_id="{_id}"}

@@ -62,8 +62,26 @@ function fnBtnAdd(event){
     });
 }
 
+function fnDelete(event){
+    var $this = $(this),
+        context = $this.data('context'),
+        page = pages[context.route],
+        $row  = $this.closest( page.deleteClosest ).addClass('deleting')
+        ;
+
+    socket.emit(page.routeIO, context, function(dataDone){
+        console.log ('fnCollDelete', dataDone);
+        if( dataDone.result == 'ok' ){
+            $row.slideUp(400, function(){$row.remove()});
+        }
+    });
+}
+
+
 function page_init() {
-    $('body').on('click', 'button.btnAdd', fnBtnAdd);
+    $('body').on('click', 'button.btnAdd',     fnBtnAdd);
+    $('body').on('click', 'a.deleteIcon.coll', fnDelete);
+    $('body').on('click', 'a.linkDelete', fnDelete);
 
     var helpers = dust.helpers;
     helpers.timeFromNow = function(chunk, ctx, bodies, params) {
