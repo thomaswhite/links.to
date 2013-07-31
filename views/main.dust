@@ -14,8 +14,8 @@
     <script>
       head.js(
           {socket_io_core:"/socket.io/socket.io.js"},
-          {socket_main:"/js/links-to_socketio.js"}, function(){
-             console.log( 'socket has loaded');
+          {socket_main:"/js/links-to/socket-io.js"}, function(){
+             console.log( 'linksTo socket-io has loaded');
           }
       );
       head.load(

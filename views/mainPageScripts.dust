@@ -5,9 +5,9 @@
       {dust_helpers:"/js/dust-helpers.js"},
       {moment:"/js/moment.js"},
       {dust_templates: "/templates/all.js"},
-      {main:"/js/links-to_main.js"},
       {page:"/js/page.js"},
-      {pages:"/js/links-to_pages.js"},
+      {main: "/js/links-to/main.js"},
+      {pages:"/js/links-to/pages.js"},
       function(){
           pageAddRoutes();
           page_init();
