@@ -250,8 +250,9 @@ box.on('init.attach', function (app, config,  done) {
 
         add:function(req){
             var url = req.data.value.trim(),
-                request_options = _.merge( {}, config.request, {uri:url }),
-                token = ShortId.generate();
+                token = ShortId.generate(),
+                request_options = _.merge( {}, config.request, {uri:url, token: token })
+                ;
 
             req.data.token = token;
 
@@ -267,12 +268,11 @@ box.on('init.attach', function (app, config,  done) {
             });
 
 
-            ping_a_link( request_options, function( found ){
-                if( found.state == 'not-found' ){
-                    found.result = 'error';
-                    found.value = url;
-                    found.msg   = 'URL can not be found';
-                    req.io.respond( found );
+            ping_a_link( request_options, function( err, found ){
+                if( err ){
+                    err.url    = url;
+                    err.result = 'error';
+                    req.io.respond( err );
                 }else{
                     req.io.respond( found );
                     request_options.token = token;
