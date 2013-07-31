@@ -345,9 +345,14 @@ exports.init = function ( requestOptions ) {
         }else{
             request(request_options, function (err, response, body) {
                 if (err) {
+                    err.state = 'not-found';
+                    err.statusCode = response ? response.statusCode : -1;
                     callback( err );
                 } else if ( !response || response.statusCode !== 200 ) {
-                    callback(new  Error('Request to '+options['uri']+' ended with status code: '+(typeof response !== 'undefined' ? response.statusCode : 'unknown')));
+                    callback( {
+                        state : 'not-found',
+                        statusCode: response ? response.statusCode : -1
+                    });
                 } else{
 
                     var SCRIPT_REGEX2= /<script\b[^>]*>(.*?)<\/script>/ig;
@@ -366,7 +371,7 @@ exports.init = function ( requestOptions ) {
                         if( err ){
                             callback(err);
                         }else{
-                            var Results = { type:'scraped-page', url: request_options.uri }, type, part;
+                            var Results = { type:'scraped-page', url: request_options.uri, token: request_options.token }, type, part;
                             for( var i = 0; i<pageParts.length; i++){
                                 if( !(part = pageParts[i]) || part.type == 'none'  ) continue;
                                 type = part.type;
