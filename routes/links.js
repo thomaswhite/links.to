@@ -176,11 +176,13 @@ function ping_a_link( request_options, callback ){
                     found.headers[i] = h[i];
                 }
             }
+            callback( null, found );
         }else{
             found.state = 'not-found';
             found.title = "Page not found";
-        };
-        callback( found );
+            callback( found );
+        }
+
     });
 }
 
