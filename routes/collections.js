@@ -281,16 +281,18 @@ box.on('init.attach', function (app, config,  done) {
                            collection: collection,
                            extra: result
                        });
+                       req.io.emit('collection.added', req.data, result, collection );
                    });
                }
            });
        },
        remove:function(req){
-           box.parallel('collection.delete', req.data.coll_id, function(err, aResult){
+           box.parallel('collection.delete', req.data.coll_id, function(err, result){
                req.io.respond({
                    result:err ? 'error':'ok',
                    error:err
                });
+               req.io.emit('collection.deleted', req.data, result );
            });
        }
     });

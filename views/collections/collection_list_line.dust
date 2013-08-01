@@ -1,4 +1,4 @@
-  <div class="row">
+  <div class="row" id="coll_{_id}">
       <div class="span5 coll-title">
         <a href="/coll/{_id}" title="{description}" >{title}</a>
             {@eq key="{owner}" value="{user._id}" }

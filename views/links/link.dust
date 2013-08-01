@@ -1,4 +1,4 @@
-<div class="blocked-link">
+<div class="blocked-link" id="link_{_id}">
     {?display}
         {>"links/link_content" /}
         {>"links/link_tag_row" /}

@@ -39,12 +39,14 @@ var pages = {
     },
     '/coll/delete':{
         routeIO:'collection:remove',
-        closest:'.row'
+        closest:'.row',
+        id_prefix:'coll_'
     },
 
     '/link/delete':{
         routeIO:'link:remove',
-        closest:'.blocked-link'
+        closest:'.blocked-link',
+        id_prefix:'link_'
     },
     '/link/new':{
         routeIO:'link:add',
@@ -57,25 +59,29 @@ var pages = {
 
 // =========================================
 
-function page_context(that, event){
-    var $this = $(that),
-        context = $this.data('context'),
-        page    = pages[context.route],
-        o =  {
-            $this      : $this,
-            $closest   : page.closest     ? $this.closest(page.closest) : null,
-            $container : page.containerID ? $(page.containerID)         : null,
-            data       : context,
-            page       : page
-        }
-        ;
+function page_context(that, event, context, route ){
+    var o,
+        page,
+        $this = that ? $(that) : null;
+
+    context = context || ($this ? $this.data('context'): null);
+    route   = route   || (context ? context.route : 'missing');
+    if( !context ){
+        context = {route:route};
+    }
+    page    = pages[route];
+    o =  {
+        $this      : $this,
+        $closest   : page.closest && $this ? $this.closest(page.closest) : null,
+        $container : page.containerID      ? $(page.containerID)         : null,
+        data       : context,
+        page       : page,
+        param      : event && event.data ? event.data : null
+    };
 
     if(page.value) {
         var $input = o.$input = $(page.value);
         o.data.value = $input.val();
-    }
-    if( event || event.data ){
-        o.param = event.data;
     }
     return o;
 }
