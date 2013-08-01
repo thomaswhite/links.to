@@ -34,25 +34,51 @@ var pages = {
         routeIO:'collection:add',
         tempateID:'collections/collection_list_add_line',
         containerID:'#coll-list-rows',
-        contentPos:'prepend'
+        contentAction:'prepend',
+        value: '.addInput'
     },
     '/coll/delete':{
         routeIO:'collection:remove',
-        deleteClosest:'.row'
+        closest:'.row'
     },
+
     '/link/delete':{
         routeIO:'link:remove',
-        deleteClosest:'.blocked-link'
+        closest:'.blocked-link'
     },
     '/link/new':{
         routeIO:'link:add',
         tempateID:'collections/collection_list_add_line',
         containerID:'#grid',
-        contentPos:'prepend'
+        // contentAction:'prepend',
+        value: '.addInput'
     }
-
-
 };
+
+// =========================================
+
+function page_context(that, event){
+    var $this = $(that),
+        context = $this.data('context'),
+        page    = pages[context.route],
+        o =  {
+            $this      : $this,
+            $closest   : page.closest     ? $this.closest(page.closest) : null,
+            $container : page.containerID ? $(page.containerID)         : null,
+            data       : context,
+            page       : page
+        }
+        ;
+
+    if(page.value) {
+        var $input = o.$input = $(page.value);
+        o.data.value = $input.val();
+    }
+    if( event || event.data ){
+        o.param = event.data;
+    }
+    return o;
+}
 
 function index(){
     dust.render("main", {}, function(err, out) {
