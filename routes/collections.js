@@ -275,13 +275,13 @@ box.on('init.attach', function (app, config,  done) {
                        msg:'Error when creating collection'
                    });
                }else {
+                   req.io.emit('collection.added', {param:req.data, collection:collection} );
                    box.parallel('collection.added',  collection, function(err, result){
                        req.io.respond({
                            result:'ok',
                            collection: collection,
                            extra: result
                        });
-                       req.io.emit('collection.added', req.data, result, collection );
                    });
                }
            });
@@ -292,7 +292,7 @@ box.on('init.attach', function (app, config,  done) {
                    result:err ? 'error':'ok',
                    error:err
                });
-               req.io.emit('collection.deleted', req.data, result );
+               req.io.emit('collection.deleted', {param:req.data, result:result} );
            });
        }
     });

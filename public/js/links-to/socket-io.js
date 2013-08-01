@@ -20,17 +20,17 @@ socket.on('error',          function (data ) {     console.log('socket.io error'
 socket.on('reconnect_failed', function () {     console.log('socket.io reconnect failed');});
 socket.on('connect_failed', function () {       console.log('socket.io connect failed');}); // "connect_failed" is emitted when socket.io fails to establish a connection to the server and has no more transports to fallback to.
 
-socket.on('collection.adding', function( param, data ){
+socket.on('collection.adding', function( data ){
     console.log ('collection-adding', data);
     // display waiting sign
 });
 
 
-socket.on('pageScrape.image', function( data, x ){
+socket.on('pageScrape.image', function( data ){
     console.log ('pageScrape.image:', data);
 });
 
-socket.on('pageScrape.head', function( data, x ){
+socket.on('pageScrape.head', function( data ){
     console.log ('pageScrape.head', data);
 });
 
@@ -38,19 +38,19 @@ socket.on('link.ready', function( data, x ){
     console.log ('link.ready', data);
     //render("links/link", data.data.link, null, 0);
 });
-socket.on('link.saved', function( data, x ){
+socket.on('link.saved', function( data ){
     console.log ('link.saved', data);
 });
 
-socket.on('link-failure', function( param, data ){
+socket.on('link-failure', function( data ){
     console.log ('link-failure', data);
     // display error message about the link
 });
-socket.on('link-adding', function( param, data ){
+socket.on('link-adding', function( data ){
     console.log ('link-adding', data);
     // display waiting sign
 });
-socket.on('link-added', function( param, data ){
+socket.on('link-added', function( data ){
     console.log ('link-added', added);
     // replace the waiting sign with the new link content
 });
@@ -64,14 +64,14 @@ socket.emit('loaded', pageParam, function(data){
     console.log ('loaded:',  data);
 });
 
-socket.on('user', function( data, x ){
+socket.on('user', function( data ){
     socketContext.user = data;
     console.log ('socketContext', socketContext);
 });
 
-socket.on('data', function( param, data ){
-    console.log ('data', param, data);
-    socketData[param.path] = data;
+socket.on('data', function( data ){
+    console.log ('data', data);
+    socketData[data.param.path] = data;
     //TODO: add data under [search].data and append rows when paginate
     //TODO: trigger update event to refresh the target Area.
     page.show(param.route); // navigate to the route and now there will be data for it.

@@ -49,19 +49,19 @@ function myRender(model, data, $target, contentAction) {
 }
 
 
-socket.on('collection.added', function( param, result, collection ){
-    console.log ('collection.added', param, result, collection );
-    var Context = page_context( null,null, null, param.route );
+socket.on('collection.added', function( data ){
+    console.log ('collection.added', data );
+    var Context = page_context( null,null, null, data.param.route );
     $('body').trigger('renderContent', [ result, null, Context] );
 
     // TODO if the current page is /collections/mine, just replace the waiting sign with the new collection name
     // else go to /collections/mine
 
 });
-socket.on('collection.deleted', function( param, result ){
-    console.log ('collection.deleted', param, result);
-    var Context = page_context( null,null, null, param.route );
-    $('#' + Context.page.id_prefix + param.coll_id).slideUp(500, function(){
+socket.on('collection.deleted', function( data ){
+    console.log ('collection.deleted', data );
+    var Context = page_context( null,null, null, data.param.route );
+    $('#' + Context.page.id_prefix + data.param.coll_id).slideUp(500, function(){
         $(this).remove();
     });
 });
