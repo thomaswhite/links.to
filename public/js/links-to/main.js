@@ -49,29 +49,16 @@ function myRender(model, data, $target, contentAction) {
 }
 
 
-socket.on('collection.added', function( data ){
-    console.log ('collection.added', data );
-    var Context = page_context( null,null, null, data.param.route );
-    $('body').trigger('renderContent', [ result, null, Context] );
-
-    // TODO if the current page is /collections/mine, just replace the waiting sign with the new collection name
-    // else go to /collections/mine
-
-});
-socket.on('collection.deleted', function( data ){
-    console.log ('collection.deleted', data );
-    var Context = page_context( null,null, null, data.param.route );
-    $('#' + Context.page.id_prefix + data.param.coll_id).slideUp(500, function(){
-        $(this).remove();
-    });
-});
-
-
-
 var pageEvents = {
     renderContent:function(event, data, routeIO, Context){
         Context = Context || page_context(null,null, routeIO);
         myRender( Context.page.tempateID, data, Context.$container, Context.page.contentAction);
+    },
+    collectionDelete:function(event, data, routeIO, Context){
+        Context = Context || page_context(null,null, routeIO);
+        $('#' + Context.page.id_prefix + data.param.id ).slideUp(500, function(){
+            $(this).remove();
+        });
     }
 };
 
@@ -85,10 +72,6 @@ function fnBtnAdd(event){
         Context.$input.removeAttr('disabled').val('');
         console.log ('btn_Add', Context.data, dataDone);
         return;
-        if( Context.page.contentAction ){
-            $('body').trigger('renderContent', [ dataDone, null, Context] );
-            // myRender( Context.page.tempateID, dataDone, Context.$container, Context.page.contentAction);
-        }
     });
 }
 
@@ -97,9 +80,9 @@ function fnBtnDelete(event){
     Context.$closest.addClass('deleting');
     socket.emit(Context.page.routeIO, Context.data, function(dataDone){
         if( dataDone.result == 'ok' ){
-            console.log ('btn_Delete', Context.data, dataDone);
+            console.log ('btn_Delete: OK, ', Context.data, dataDone);
         }else{
-            console.log ('btn_Delete: ERROR!', Context.data, dataDone);
+            console.log ('btn_Delete: ERROR, ', Context.data, dataDone);
         }
     });
 }
@@ -112,18 +95,7 @@ function inputCR(event){
     return true;
 }
 
-
-function page_init() {
-    $('body').on('click', 'button.btnAdd',     fnBtnAdd);
-    $('body').on('click', 'a.deleteIcon.coll', fnBtnDelete);
-    $('body').on('click', 'a.linkDelete',      fnBtnDelete);
-
-    $('body').on('keydown', 'input.addInput',     inputCR);
-
-    $.each(pageEvents, function(id, fn ){
-        $('body').on(id, fn);
-    });
-
+function addDustHelpers(){
     var helpers = dust.helpers;
     helpers.timeFromNow = function(chunk, ctx, bodies, params) {
         var time = helpers.tap(params.time, chunk, ctx);
@@ -135,8 +107,26 @@ function page_init() {
             format = helpers.tap(params.format, chunk, ctx) || 'YYYY-MM-DD HH:mm';
 
         return time ? chunk.write( moment(time).format(format) )
-                    : chunk;
+            : chunk;
     };
+}
+
+function page_init() {
+    addDustHelpers();
+
+    $('body').on('click', 'button.btnAdd',     fnBtnAdd);
+    $('body').on('click', 'a.deleteIcon.coll', fnBtnDelete);
+    $('body').on('click', 'a.linkDelete',      fnBtnDelete);
+    $('body').on('keydown', 'input.addInput',  inputCR);
+
+    $.each(pageEvents, function(id, fn ){
+        $('body').on(id, fn);
+    });
+
+    // TODO if the current page is /collections/mine, just replace the waiting sign with the new collection name
+// else go to /collections/mine
+    socket.on('collection.added',   socketEvent_common);
+    socket.on('collection.deleted', socketEvent_common);
 
 
 }

@@ -56,7 +56,7 @@ function page_display( page, metaTagsToJoin ){
 
     var groups = [],
         head = page.head,
-        display = page.display = page.display || {},
+        display = {},
         names = head.names,
         og    = head.og,
         fb    = head.fb,
@@ -152,7 +152,7 @@ function page_display( page, metaTagsToJoin ){
     }
     // display.collection = page.collection;
     // display.shortID    = page.shortID;
-    return page;
+    return { display: display};
 }
 
 
@@ -166,16 +166,16 @@ function ShorterID(){
 function ping_a_link( request_options, callback ){
     request.head(request_options, function (err, response, body) {
         var h,
-            found = {url:request_options.uri, headers:{}, token:request_options.token, state: 'pinged'},
+            found = {
+                url:request_options.uri,
+                token:request_options.token,
+                headers:{},
+                state: 'found'
+            },
             oURL = url.parse( request_options.uri )
             ;
         if( response ){
-            h = response.headers;
-            for( var i in headers_to_watch ){
-                if( h[i] ){
-                    found.headers[i] = h[i];
-                }
-            }
+            found.headers = response.headers;
             callback( null, found );
         }else{
             found.state = 'not-found';
@@ -186,12 +186,11 @@ function ping_a_link( request_options, callback ){
     });
 }
 
-
 function Delete (req, res) {
     var referer = req.headers.referer;
     var link_id = req.params.id;
     var coll_id = req.params.coll;
-    box.parallel('link.delete', link_id, coll_id, function(err, aResult){
+    box.parallel('link.delete', link_id, url_id, coll_id, function(err, aResult){
         if( err ){
             throw err;
         }else{
@@ -240,13 +239,20 @@ box.on('init.attach', function (app, config,  done) {
     app.io.route('link', {
 
         remove: function(req){
-            var link_id = req.data.link_id;
-            var coll_id = req.data.coll_id;
-            box.parallel('link.delete', link_id, coll_id, function(err, aResult){
+            var id = req.data.id;
+            box.db.coll.links.findById(id, function(err, Link ){
                 req.io.respond({
                     result:err ? 'error':'ok',
-                    error:err
+                    error:err,
+                    link:Link
                 });
+                if( !Link ){
+                    req.io.emit('link.delete.missing', { param:req.data } );
+                }else{
+                    box.parallel('link.delete', id, Link.url_id, Link.collection, function(err, aResult){
+                        req.io.emit('link.deleted', { param:req.data, error:err } );
+                    });
+                }
             });
         },
 
@@ -259,14 +265,10 @@ box.on('init.attach', function (app, config,  done) {
             req.data.token = token;
 
             box.on('pageScrape.images', function(event_token, image ){
-               if( event_token == token ){
-                   req.io.emit('pageScrape.image', {url: url, image:image});
-               }
+                req.io.emit('pageScrape.image', {url: url, image:image, token: token });
             });
             box.on( 'pageScrape.head', function( event_token, head ){
-                if( event_token == token ){
-                    req.io.emit( 'pageScrape.head', {url: url, head:head});
-                }
+                req.io.emit( 'pageScrape.head',  {url: url, head:head, token: token });
             });
 
 
@@ -275,19 +277,22 @@ box.on('init.attach', function (app, config,  done) {
                     err.url    = url;
                     err.result = 'error';
                     req.io.respond( err );
+                    req.io.emit( 'link-not-found',  {param:req.data, error:err });
                 }else{
                     req.io.respond( found );
                     request_options.token = token;
-                    box.parallel( 'pageScrape', request_options, function(err, Results){
+                    box.invoke( 'pageScrape', request_options, function(err, scrapResult){
                         if (err) {
                             throw err;
                         }else {
-                            var scrapResult = Results[0]
-                                , user = JSON.parse(req.session.passport.user)
-                                , link2add = newLink( scrapResult, req.data.coll_id, user._id, user.screen_name, token  )
+                            var  user = JSON.parse(req.session.passport.user)
+                                , display = page_display( scrapResult, metaTagsToJoin )
+                                , link2add = newLink( display, req.data.coll_id, user._id, user.screen_name, token  )
                                 ;
 
-                            page_display( link2add, metaTagsToJoin );
+
+                             // TODO save URL
+                            // update url_id
 
                             req.data.link = link2add;
                             req.io.emit( 'link.ready', {

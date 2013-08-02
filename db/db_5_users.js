@@ -39,7 +39,7 @@ function newUser  ( OpenID ){
 box.on('db.init', function( monk, Config, done ){
     var   settings = Config.db
         , common_config = Config.common
-        , Users = monk.get('users')
+        , Users = box.db.coll.users = monk.get('users')
         ;
 
 

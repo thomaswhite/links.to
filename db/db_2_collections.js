@@ -14,7 +14,7 @@ var   box = require('../box.js')
 box.on('db.init', function( monk, Config, done ){
     var   settings = Config.db
         , common_config = Config.common
-        , Collections = monk.get('collections')
+        , Collections = box.db.coll.collections = monk.get('collections')
         ;
 
     box.on('collection.add', function( oColl, callback){
@@ -88,15 +88,16 @@ box.on('db.init', function( monk, Config, done ){
         );
     });
 
-    box.on('link.delete', function(link_id, coll_id, callback){
+    box.on('link.delete', function(link_id, url_id, coll_id, callback){
         Collections.updateById(
             coll_id,
             {  $pull: {  "links" : Collections.id(link_id) } },
             callback
         );
     });
-    box.on('link.tag.updated', function( Tag, link_id, callback){
 
+    box.on('link.tag.updated', function( Tag, link_id, callback){
+       callback(null,1);
     });
 
 /*

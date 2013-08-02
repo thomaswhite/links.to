@@ -26,8 +26,8 @@ socket.on('collection.adding', function( data ){
 });
 
 
-socket.on('pageScrape.image', function( data ){
-    console.log ('pageScrape.image:', data);
+socket.on('pageScrape.images', function( data ){
+    console.log ('pageScrape.images:', data);
 });
 
 socket.on('pageScrape.head', function( data ){
@@ -40,6 +40,11 @@ socket.on('link.ready', function( data, x ){
 });
 socket.on('link.saved', function( data ){
     console.log ('link.saved', data);
+});
+
+socket.on('link-not-found', function( data ){
+    console.log ('link-not-found', data);
+    // display error message about the link
 });
 
 socket.on('link-failure', function( data ){

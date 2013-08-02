@@ -456,7 +456,7 @@ body.collection h1 {
   float: right;
 }
 .my-collection {
-  color: #ff0000;
+  color: cornflowerblue;
 }
 .coll-title-prefix {
   font-size: 60%;
@@ -578,6 +578,7 @@ a.deleteIcon:active {
   text-decoration: none;
   padding-left: 2px;
   padding-right: 2px;
+  color: red;
 }
 a.deleteIcon:hover {
   color: white;

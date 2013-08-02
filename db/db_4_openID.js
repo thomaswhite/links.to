@@ -14,7 +14,7 @@ var   box = require('../box.js')
 box.on('db.init', function( monk, Config, done ){
     var   settings = Config.db
         , common_config = Config.common
-        , OpenIDs = monk.get('openID')
+        , OpenIDs = box.db.coll.openIDs = monk.get('openID')
         , AuthTemp   = monk.get('auth_temp')
         ;
 

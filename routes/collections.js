@@ -287,7 +287,7 @@ box.on('init.attach', function (app, config,  done) {
            });
        },
        remove:function(req){
-           box.parallel('collection.delete', req.data.coll_id, function(err, result){
+           box.parallel('collection.delete', req.data.id, function(err, result){
                req.io.respond({
                    result:err ? 'error':'ok',
                    error:err

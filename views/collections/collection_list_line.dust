@@ -4,7 +4,7 @@
             {@eq key="{owner}" value="{user._id}" }
                <span class="icon-user my-collection" title="This collection is mine"></span>
                     {@lt key="{links.length}" value="1"}
-                      <a href="#" data-context='{~lb}"route":"/coll/delete", "coll_id":"{_id}"{~rb}' title="Delete" class="deleteIcon coll">
+                      <a href="#" data-context='{~lb}"route":"/coll/delete", "id":"{_id}"{~rb}' title="Delete" class="deleteIcon coll">
                         <i class="icon-trash"></i>
                       </a>
                     {/lt}

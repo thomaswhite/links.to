@@ -299,7 +299,7 @@ function scrape_head_links($head, baseURL){
 
 function scrape_head( $, uri, token,  callback ){
     var $head = $('head'),
-        result = { head:{ title: $($head.find('title')).text() ,fb:{}, og:{} }, display:{} },
+        result = { head:{ title: $($head.find('title')).text() ,fb:{}, og:{} } },
         head = result.head,
         display = result.display,
         aURL =  _.pick(URL.parse(uri), 'protocol', 'host', 'port'),
@@ -371,7 +371,7 @@ exports.init = function ( requestOptions ) {
                         if( err ){
                             callback(err);
                         }else{
-                            var Results = { type:'scraped-page', url: request_options.uri, token: request_options.token }, type, part;
+                            var Results = { url: request_options.uri }, type, part;
                             for( var i = 0; i<pageParts.length; i++){
                                 if( !(part = pageParts[i]) || part.type == 'none'  ) continue;
                                 type = part.type;

@@ -14,7 +14,7 @@ var   box = require('../box.js')
 box.on('db.init', function( monk, Config, done ){
     var   settings = Config.db
         , common_config = Config.common
-        , Pages = monk.get('pages')
+        , Pages = box.db.coll.pages = monk.get('pages')
         ;
 
     box.on('page.save', function( sBody, uri, callback){

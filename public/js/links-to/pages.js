@@ -35,18 +35,21 @@ var pages = {
         tempateID:'collections/collection_list_add_line',
         containerID:'#coll-list-rows',
         contentAction:'prepend',
-        value: '.addInput'
+        value: '.addInput',
+        eventDone:'renderContent'
     },
     '/coll/delete':{
         routeIO:'collection:remove',
         closest:'.row',
-        id_prefix:'coll_'
+        id_prefix:'coll_',
+        eventDone:'collectionDelete'
     },
 
     '/link/delete':{
         routeIO:'link:remove',
         closest:'.blocked-link',
-        id_prefix:'link_'
+        id_prefix:'link_',
+        eventDone:'collectionDelete'
     },
     '/link/new':{
         routeIO:'link:add',
@@ -66,17 +69,17 @@ function page_context(that, event, context, route ){
 
     context = context || ($this ? $this.data('context'): null);
     route   = route   || (context ? context.route : 'missing');
-    if( !context ){
-        context = {route:route};
-    }
+    if( !context ){      context = {route:route};    }
+
     page    = pages[route];
+
     o =  {
+        page       : page,
+        data       : context,
+        param      : event && event.data ? event.data : null,
         $this      : $this,
         $closest   : page.closest && $this ? $this.closest(page.closest) : null,
-        $container : page.containerID      ? $(page.containerID)         : null,
-        data       : context,
-        page       : page,
-        param      : event && event.data ? event.data : null
+        $container : page.containerID      ? $(page.containerID)         : null
     };
 
     if(page.value) {
@@ -156,3 +159,10 @@ function pageAddRoutes(){
     page('*', page_not_found);
     page.start({dispatch:false});
 }
+
+function socketEvent_common(data){
+    var Context = page_context( null,null, null, data.param.route );
+    console.log ( 'socketEvent_common, data:', data, ' context:', Context );
+    $('body').trigger(Context.page.eventDone, [ data, data.param.route, Context] );
+}
+

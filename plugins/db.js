@@ -27,7 +27,8 @@ box.on('init', function (App, Config, initDone) {
 
     box.db = {
         monk :  monk,
-        Dummy : monk.get('dummy')
+        Dummy : monk.get('dummy'),
+        coll:{}
     }
     var AuthTemp   = monk.get('auth_temp');
     AuthTemp.index({expires: 1}, { expireAfterSeconds: 60 });

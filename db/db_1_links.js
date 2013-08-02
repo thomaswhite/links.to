@@ -14,7 +14,7 @@ var   box = require('../box.js')
 box.on('db.init', function( monk, Config, done ){
     var   settings = Config.db
         , common_config = Config.common
-        , Links = monk.get('links')
+        , Links = box.db.coll.links = monk.get('links')
         ;
 
     // Returns an array of the links for a collection
@@ -60,7 +60,7 @@ box.on('db.init', function( monk, Config, done ){
         });
     });
 
-    box.on('link.delete', function(link_id, coll_id, callback){
+    box.on('link.delete', function(link_id, url_id, coll_id, callback){
         if( !link_id ){
             throw "Link ID expected!";
         }else{
