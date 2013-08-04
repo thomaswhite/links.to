@@ -27,7 +27,7 @@ function myRender(model, data, $target, contentAction) {
         }else if( !$target ){
             console.log( out );
         } else {
-            var $out = $(out)
+            var $out = $(out);
             switch( contentAction ){
                 case 'append' :
                 case 1 :
@@ -54,6 +54,7 @@ var pageEvents = {
         Context = Context || page_context(null,null, routeIO);
         myRender( Context.page.tempateID, data, Context.$container, Context.page.contentAction);
     },
+
     collectionDelete:function(event, data, routeIO, Context){
         Context = Context || page_context(null,null, routeIO);
         $('#' + Context.page.id_prefix + data.param.id ).slideUp(500, function(){
@@ -111,6 +112,12 @@ function addDustHelpers(){
     };
 }
 
+function socketEvent_common(data){
+    var Context = page_context( null,null, null, data.param.route );
+    console.log ( 'socketEvent_common, data:', data, ' context:', Context );
+    $('body').trigger(Context.page.eventDone, [ data, data.param.route, Context] );
+}
+
 function page_init() {
     addDustHelpers();
 
@@ -127,6 +134,7 @@ function page_init() {
 // else go to /collections/mine
     socket.on('collection.added',   socketEvent_common);
     socket.on('collection.deleted', socketEvent_common);
-
+    socket.on('link.deleted',       socketEvent_common);
+    socket.on('link.saved',         socketEvent_common);
 
 }

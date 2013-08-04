@@ -53,10 +53,11 @@ var pages = {
     },
     '/link/new':{
         routeIO:'link:add',
-        tempateID:'collections/collection_list_add_line',
+        value: '.addInput',
+        tempateID:'links/link_add_one',
         containerID:'#grid',
-        // contentAction:'prepend',
-        value: '.addInput'
+        contentAction:'prepend',
+        eventDone:'renderContent'
     }
 };
 
@@ -158,11 +159,5 @@ function pageAddRoutes(){
 
     page('*', page_not_found);
     page.start({dispatch:false});
-}
-
-function socketEvent_common(data){
-    var Context = page_context( null,null, null, data.param.route );
-    console.log ( 'socketEvent_common, data:', data, ' context:', Context );
-    $('body').trigger(Context.page.eventDone, [ data, data.param.route, Context] );
 }
 

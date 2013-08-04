@@ -218,7 +218,7 @@ function newLink (data, collection_id, owner, user_screen_name, token ){
     };
     _.merge( link, data);
     return link;
-};
+}
 
 box.on('init', function (App, Config, done) {
     app = App;
@@ -264,12 +264,10 @@ box.on('init.attach', function (app, config,  done) {
 
             req.data.token = token;
 
-            box.on('pageScrape.images', function(event_token, image ){
-                req.io.emit('pageScrape.image', {url: url, image:image, token: token });
+            box.on('pageScrape.part', function(event_token, data ){
+                req.io.emit('link.in-progress', {url: url, data:data, token: token });
             });
-            box.on( 'pageScrape.head', function( event_token, head ){
-                req.io.emit( 'pageScrape.head',  {url: url, head:head, token: token });
-            });
+
 
 
             ping_a_link( request_options, function( err, found ){
@@ -294,25 +292,45 @@ box.on('init.attach', function (app, config,  done) {
                              // TODO save URL
                             // update url_id
 
-                            req.data.link = link2add;
-                            req.io.emit( 'link.ready', {
-                                result:'ok',
-                                data: req.data
+                            box.invoke( 'url.add', scrapResult, function(err, URL ){
+                                if( err ){
+                                    req.io.emit( 'link-failure', {
+                                        result:'error',
+                                        param: req.data,
+                                        error:err,
+                                        explain:'Error saving URL'
+                                    });
+                                }else{
+                                    link2add.url_id = URL._id;
+                                    req.io.emit( 'link.ready', {
+                                        result:'ok',
+                                        param: req.data,
+                                        link: link2add
+                                    });
+
+                                    box.parallel('link.add', link2add, function(err, result){
+                                        var link = result[0];
+                                        link.display.id = link._id;
+                                        if( err ){
+                                            req.io.emit( 'link-failure', {
+                                                result:'error',
+                                                param: req.data,
+                                                error:err,
+                                                explain:'Error saving link'
+                                            });
+                                        }else{
+                                            req.io.emit( 'link.saved', {
+                                                result:'ok',
+                                                param: req.data,
+                                                link: link
+                                            });
+                                        }
+                                    });
+                                }
+
                             });
  //                           box.utils.inspect(link2add, { showHidden: true, depth: null, colors:true })
 
-                            box.parallel('link.add', link2add, function(err, result){
-                                var link = result[0];
-                                link.display.id = link._id;
-                                if( err ){
-                                    throw err;
-                                }else{
-                                    req.io.emit( 'link.saved', {
-                                        result:'ok',
-                                        link: link.display
-                                    });
-                                }
-                            });
                         }
                     });
 

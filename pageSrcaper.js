@@ -163,7 +163,7 @@ function scrape_images( $, uri, token,  callback ){
         }
     });
 
-    emitter.emit('pageScrape.images', token, images[0] );
+    emitter.emit('pageScrape.part', token, images[0] );
     callback( null, {images:images, type:'body'} );
 }
 
@@ -315,7 +315,7 @@ function scrape_head( $, uri, token,  callback ){
 //    if( result.title.indexOf('|') > -1 ){
 //        result.title = result.title.split('|')[0];
 //    }
-    emitter.emit('pageScrape.head', token, result );
+    emitter.emit('pageScrape.part', token, result );
     callback( null, result );
 }
 
@@ -398,8 +398,8 @@ exports.init = function ( requestOptions ) {
 
 
     emitter.on( 'pageScrape.process', scrape_head );
-    emitter.on( 'pageScrape.process', scrape_body );
     emitter.on( 'pageScrape.process', scrape_images  );
+    emitter.on( 'pageScrape.process', scrape_body );
     emitter.on( 'pageScrape.process', scrape_tags  );
     emitter.on( 'pageScrape.process', page_save );
     return emitter;

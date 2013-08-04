@@ -26,12 +26,8 @@ socket.on('collection.adding', function( data ){
 });
 
 
-socket.on('pageScrape.images', function( data ){
-    console.log ('pageScrape.images:', data);
-});
-
-socket.on('pageScrape.head', function( data ){
-    console.log ('pageScrape.head', data);
+socket.on('link.in-progress', function( data ){
+    console.log ('link.in-progress:', data);
 });
 
 socket.on('link.ready', function( data, x ){
