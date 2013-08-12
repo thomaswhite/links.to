@@ -461,6 +461,9 @@ body.collection h1 {
 .coll-title-prefix {
   font-size: 60%;
 }
+.coll-links-list {
+  padding-left: 1em;
+}
 .edit-label {
   padding: 4px 5px 4px 20px;
   margin-left: 10px;
