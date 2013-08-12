@@ -12,8 +12,8 @@
  * @param target
  * @param contentAction: 1 or append, -1 or prepend, 0 or replace
  */
-function myRender(model, data, $target, contentAction) {
-    if (!model) { return; }
+function myRender(tempateID, data, $target, contentAction) {
+    if (!tempateID) { return; }
 
     var base = dust.makeBase({
         user:socketContext.user,
@@ -21,7 +21,7 @@ function myRender(model, data, $target, contentAction) {
     });
 
     data.user =   socketContext.user;
-    dust.render(model,  base.push(data), function(err, out) {
+    dust.render(tempateID,  base.push(data), function(err, out) {
         if (err) {
             console.error(err);
         }else if( !$target ){
@@ -37,6 +37,10 @@ function myRender(model, data, $target, contentAction) {
                 case 'prepend' :
                 case -1:
                     $out.prependTo($target).hide().slideDown(400);
+                    break;
+
+                case 'replace-slide':
+                    $target.html(out).hide().slideDown(250);
                     break;
 
                 case 'replace':
@@ -60,6 +64,10 @@ var pageEvents = {
         $('#' + Context.page.id_prefix + data.param.id ).slideUp(500, function(){
             $(this).remove();
         });
+    },
+    insertLink:function(event, data, routeIO, Context){
+        Context = Context || page_context(null,null, routeIO);
+        myRender( Context.page.tempateID, data, $("#token_" + data.param.token  ) , 'replace-slide'); // Context.page.contentAction
     }
 };
 
@@ -71,7 +79,15 @@ function fnBtnAdd(event){
     socket.emit(Context.page.routeIO, Context.data, function(dataDone){
         Context.$this.removeAttr('disabled');
         Context.$input.removeAttr('disabled').val('');
-        console.log ('btn_Add', Context.data, dataDone);
+        console.log ('btn_Add', dataDone);
+
+        if( Context.page.routeIO == "link:add" ){
+            var param = Context.page.adding;
+            myRender( param.tempateID, dataDone, $(param.containerID), param.contentAction  );
+            if( dataDone.state != 'found'){
+                setTimeout('$("#token_"' + dataDone.token + '" ).slideUp(400)', 1000);
+            }
+        }
         return;
     });
 }

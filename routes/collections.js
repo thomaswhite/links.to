@@ -32,11 +32,12 @@ function ShorterID(){
  * @param description
  * @returns {{type: string, shortID: *, owner: *, title: *, description: (*|string), linksCount: number, links: Array}}
  */
-function newCollection  (owner, name, description){
+function newCollection  (user, name, description){
     return {
         type:'collection',
         shortID : ShorterID(),
-        owner: owner,
+        owner: user._id,
+        author_screen_name: user.screen_name,
         title: name.trim(),
         description: description || 'Description...',
         linksCount:0,
@@ -138,7 +139,7 @@ function Add(req, res) {
             add_link: '/coll/new'
         });
     }else{
-        coll = newCollection(req.user._id, coll_name.trim());
+        coll = newCollection(req.user, coll_name.trim());
         box.emit('collection.add', coll, function(err, collection ) {
             if (err) {
                 context.notFound(res, 'db error while creating new collection.');
@@ -264,7 +265,7 @@ box.on('init.attach', function (app, config,  done) {
        add:function(req){
            var user = JSON.parse(req.session.passport.user)
                , name = req.data.value.trim()
-               , coll = newCollection( user._id, name )
+               , coll = newCollection( user, name )
                ;
            // TODO: verify the name
            box.emit('collection.add', coll, function(err, collection ) {

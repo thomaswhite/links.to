@@ -57,7 +57,13 @@ var pages = {
         tempateID:'links/link_add_one',
         containerID:'#grid',
         contentAction:'prepend',
-        eventDone:'renderContent'
+
+        eventDone:'insertLink',
+        adding:{
+            tempateID:'links/link_adding',
+            containerID:'#grid',
+            contentAction:'prepend'
+        }
     }
 };
 

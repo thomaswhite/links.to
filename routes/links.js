@@ -55,7 +55,7 @@ function pick_meta_field(groups, tag){
 function page_display( page, metaTagsToJoin ){
 
     var groups = [],
-        head = page.head,
+        head = page.head || {},
         display = {},
         names = head.names,
         og    = head.og,
@@ -82,9 +82,13 @@ function page_display( page, metaTagsToJoin ){
             case 'description':
                 value = pick_meta_field(groups, tag);
                 if( value ){
-                    delete page.body.summary;
+                    if( page.body && page.body.summary ){
+                        delete page.body.summary;
+                    }
                 }else{
-                    value = page.body.summary;
+                    if( page.body && page.body.summary ){
+                        value = page.body.summary;
+                    }
                 }
                 break;
 
@@ -265,12 +269,17 @@ box.on('init.attach', function (app, config,  done) {
             req.data.token = token;
 
             box.on('pageScrape.part', function(event_token, data ){
-                req.io.emit('link.in-progress', {url: url, data:data, token: token });
+                req.io.emit('link.in-progress', {
+                    url: url,
+                    data:data,
+                    token: token
+                });
             });
 
 
 
             ping_a_link( request_options, function( err, found ){
+                delete found.headers;
                 if( err ){
                     err.url    = url;
                     err.result = 'error';

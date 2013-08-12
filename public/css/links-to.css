@@ -335,8 +335,8 @@ span.updated i {
 }
 ul.imgDropdown {
   list-style: none;
-  float: right;
-  margin: 0 0 0 6px;
+  float: left;
+  margin: 0 .7em 0 0;
 }
 .iddCont {
   position: relative;
@@ -416,7 +416,7 @@ body.collection h1 {
   margin-bottom: 0;
 }
 .link-title {
-  font-size: 120%;
+  font-size: 110%;
   margin-top: 0.8em;
 }
 .link-summary,

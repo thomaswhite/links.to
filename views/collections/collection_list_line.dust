@@ -2,7 +2,6 @@
       <div class="span5 coll-title">
         <a href="/coll/{_id}" title="{description}" >{title}</a>
             {@eq key="{owner}" value="{user._id}" }
-               <span class="icon-user my-collection" title="This collection is mine"></span>
                     {@lt key="{links.length}" value="1"}
                       <a href="#" data-context='{~lb}"route":"/coll/delete", "id":"{_id}"{~rb}' title="Delete" class="deleteIcon coll">
                         <i class="icon-trash"></i>
@@ -19,6 +18,23 @@
               <span>{@timeFromNow time="{updated}"/}</span>
           </span>
         {/updated}
+      </div>
+      <div class="span2 coll-e">
+          <a href="/author/{owner}">
+            {@select key="{owner}"}
+             {@eq value="{user._id}" }
+                <span>me</span>
+                <span class="icon-user my-collection" title="This collection is mine"></span>
+             {/eq}
+             {@default}
+              {#author_screen_name}
+                  {.}
+                {:else}
+                 author
+              {/author_screen_name}
+            {/default}
+           {/select}
+          </a>
       </div>
   </div>
 

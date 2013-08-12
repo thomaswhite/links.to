@@ -3,6 +3,7 @@
         <div class="span5 table-header">Collection Name</div>
         <div class="span1 coll-e">Links</div>
         <div class="span2 coll-e">Last updated</div>
+        <div class="span2  coll-e">Author</div>
     </div>
     {! <pre>{user|js|s}</pre>  !}
     <div id="coll-list-rows">
