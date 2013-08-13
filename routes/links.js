@@ -23,9 +23,11 @@ var  box = require('../box.js')
 
    , config
    ,  app
+   , SCRIPT_REGEX = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi
+   , SCRIPT_REGEX2= /<script\b[^>]*>(.*?)<\/script>/ig
+
+
     ;
-
-
 
 
 var metaTagsToJoin = [
@@ -60,7 +62,8 @@ function page_display( page, metaTagsToJoin ){
         names = head.names,
         og    = head.og,
         fb    = head.fb,
-        twetter = head.twetter
+        twetter = head.twetter,
+        pos
         ;
     groups.push( head.names );
     groups.push( head.og);
@@ -75,8 +78,15 @@ function page_display( page, metaTagsToJoin ){
             case 'title':
                 value = pick_meta_field(groups, tag);
                 if( !value ){
-                    value = head.title || (page.body.h1 ? page.body.h1[0] : null );
+                    value = head.title || (page.body.h1 ? page.body.h1[0] : '' );
                 }
+                if( (pos = value.indexOf('|')) > -1){
+                    value = value.split('|')[0];
+                }
+
+                value = box.utils.removeAll( value, SCRIPT_REGEX, SCRIPT_REGEX2);
+
+                // value = value.split('&#8211;').join('-').split('&#8217;').join("'");
                 break;
 
             case 'description':
@@ -90,6 +100,7 @@ function page_display( page, metaTagsToJoin ){
                         value = page.body.summary;
                     }
                 }
+                value = box.utils.removeAll( value, SCRIPT_REGEX, SCRIPT_REGEX2);
                 break;
 
             case 'url':

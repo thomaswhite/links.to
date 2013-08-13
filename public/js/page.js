@@ -99,16 +99,6 @@
     page.replace(location.pathname + location.search, null, true, dispatch);
   };
 
-  function bindEvent(el, eventName, eventHandler, firstThis ) {
-    if (el.addEventListener){
-        el.addEventListener(eventName, eventHandler, firstThis);
-    } else if (el.attachEvent){
-        el.attachEvent('on'+eventName, eventHandler);
-    }
-  }
-
-
-
   /**
    * Unbind click and popstate event handlers.
    *
@@ -130,7 +120,17 @@
   }
 
 
-  /**
+    function bindEvent(el, eventName, eventHandler, firstThis ) {
+        if (el.addEventListener){
+            el.addEventListener(eventName, eventHandler, firstThis);
+        } else if (el.attachEvent){
+            el.attachEvent('on'+eventName, eventHandler);
+        }
+    }
+
+
+
+    /**
    * Show `path` with optional `state` object.
    *
    * @param {String} path

@@ -65,6 +65,16 @@ function updatedFromNow (s){
     return  moment(s).fromNow();
 }
 
+// multiple RegEx can be passes as second, third etc argument
+function removeAll(s, regEx ){
+    for(var i=1; i< arguments.length; i++){
+        var REx = arguments[i];
+        while (REx.test(s)) {
+            s = s.replace(REx, "");
+        }
+    }
+    return s;
+}
 
 
 box.on('init', function (app, conf, done) {
@@ -77,7 +87,8 @@ box.on('init', function (app, conf, done) {
         shorterID: ShorterID,
         async : async,
         pickUpFromAsyncResult: pickUpFromAsyncResult,
-        formatUpdated:formatUpdated
+        formatUpdated:formatUpdated,
+        removeAll: removeAll
      };
     done(null, 'plugin utils initialised');
 });

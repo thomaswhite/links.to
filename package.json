@@ -59,7 +59,8 @@
     "readdirp": "~0.2.4",
     "moment": "~2.0.0",
     "page": "~1.3.6",
-    "gzippo": "~0.2.0"
+    "gzippo": "~0.2.0",
+    "socketio-file-upload": "~0.2.5"
   },
   "devDependencies": {
     "nodelint": "~0.6",

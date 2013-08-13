@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload Files</title>
+    <script src="/siofu/client.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+
+    <script type="text/javascript">
+
+        function removeEvent (el, ev, fn, firstThis) {
+            if (window.removeEventListener)  { // Standard
+                el.removeEventListener(ev, fn, firstThis);
+            } else if (window.detachEvent) { // IE
+                el.detachEvent('on' + ev, fn);
+            } else { return false }
+        }
+
+
+        function bindEvent(el, eventName, eventHandler, firstThis ) {
+            if (el.addEventListener){
+                el.addEventListener(eventName, eventHandler, firstThis);
+            } else if (el.attachEvent){
+               return  el.attachEvent('on'+eventName, eventHandler);
+            }
+        }
+
+
+        bindEvent( window, 'load', function(){
+            // Initialize instances:
+            var socket = io.connect();
+            var siofu = new SocketIOFileUpload(socket);
+
+            // Configure the three ways that SocketIOFileUpload can read files:
+            bindEvent(document.getElementById("upload_btn"), "click", siofu.prompt, false);
+
+            siofu.listenOnInput(document.getElementById("upload_input"));
+            siofu.listenOnDrop(document.getElementById("file_drop"));
+
+            // Do something when a file is uploaded:
+            siofu.addEventListener("complete", function(event){
+                console.log(event.success);
+                console.log(event.file);
+            });
+
+        }, false);
+
+    </script>
+
+</head>
+<body>
+
+<p><button id="upload_btn">Prompt for File</button></p>
+<p><label>Choose File: <input type="file" id="upload_input"/></label></p>
+<div id="file_drop" dropzone="copy" title="drop files for upload">Drop File</div>
+
+</body>
+</html>

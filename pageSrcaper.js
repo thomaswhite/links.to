@@ -48,6 +48,24 @@ var requestDefaults = {
     }
 };
 
+var NON_CLOSENG_TAGS = /<(sourse|hr|br|embed|command|input)[^>]*>/gi // link
+    , SCRIPT_REGEX = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi
+    , SCRIPT_REGEX2= /<script\b[^>]*>(.*?)<\/script>/ig
+    , SCRIPT_REGEX3 = /<(script|object|frameset|frame|iframe|style)[^>]*>((.|\n)*?)<\/\\1>/gi
+;
+
+// multiple RegEx can be passes as second, third etc argument
+function removeAll(s, regEx ){
+    for(var i=1; i< arguments.length; i++){
+        var REx = arguments[i];
+        while (REx.test(s)) {
+            s = s.replace(REx, "");
+        }
+    }
+    return s;
+}
+
+
 function prop_or_array( o, prop, value ){
     if( prop.indexOf('.') > -1 ){
         prop = prop.split('.').join('_');
@@ -312,9 +330,6 @@ function scrape_head( $, uri, token,  callback ){
     _.extend(head.og, scrape_ogTags( $head, baseURL ));
     head.links = scrape_head_links($head, baseURL);
 
-//    if( result.title.indexOf('|') > -1 ){
-//        result.title = result.title.split('|')[0];
-//    }
     emitter.emit('pageScrape.part', token, result );
     callback( null, result );
 }
@@ -355,14 +370,19 @@ exports.init = function ( requestOptions ) {
                     });
                 } else{
 
-                    var SCRIPT_REGEX2= /<script\b[^>]*>(.*?)<\/script>/ig;
-                    var SCRIPT_REGEX = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi;
-                    while (SCRIPT_REGEX.test(body)) {
+                    var NON_CLOSENG_TAGS = /<(link|sourse|hr|br|embed|command|input)[^>]*>/gi
+                        , SCRIPT_REGEX = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi
+                        , SCRIPT_REGEX2= /<script\b[^>]*>(.*?)<\/script>/ig
+                        , SCRIPT_REGEX3 = /<(script|object|frameset|frame|iframe|style)[^>]*>((.|\n)*?)<\/\\1>/gi
+
+                    body = removeAll(body, NON_CLOSENG_TAGS, SCRIPT_REGEX, SCRIPT_REGEX2,SCRIPT_REGEX3  );
+/*                    while (SCRIPT_REGEX.test(body)) {
                         body = body.replace(SCRIPT_REGEX, "");
                     }
                     while (SCRIPT_REGEX2.test(body)) {
                         body = body.replace(SCRIPT_REGEX2, "");
                     }
+*/
                     // /<script\ .*?<\/.*?script>/i
                     // body = body.replace(/<(\/?)script/g, '<$1nobreakage');
 
