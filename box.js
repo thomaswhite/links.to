@@ -19,4 +19,4 @@
 
 
 module.exports = new( require('eventflow') );
-//module.exports.setMaxListeners(0);
+module.exports.setMaxListeners(50);

@@ -28,7 +28,10 @@ box.on('init', function (App, Config, done) {
     app.configure(function () {
             app.use(express.logger('dev'));
             app.use(express.favicon());
-            app.use(express.bodyParser());
+            app.use(express.bodyParser({ keepExtensions: true, uploadDir: Config.__dirname + Config.upload.dir }));
+            app.use(express.json());
+            app.use(express.urlencoded());
+
             app.use(express.methodOverride());
             app.set('views',  config.views );
 
