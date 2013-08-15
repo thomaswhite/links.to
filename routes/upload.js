@@ -8,6 +8,7 @@
 
 
 var box = require('../box.js')
+    , formidable = require('formidable')
     ,  util = require('util')
     , debug = require('debug')('linksTo:view.collections')
     , config
@@ -17,27 +18,34 @@ var box = require('../box.js')
 
 
 function upload (req, res) {
-/*    var form = new formidable.IncomingForm;
+    var form = new formidable.IncomingForm();
     form.keepExtensions = true;
-    form.uploadDir = 'tmp/';
-*/
-    req.form.on('error', function(err) {
-        res.writeHead(200, {'content-type': 'text/plain'});
-        res.end('error:\n\n'+util.inspect(err));
-    });
+    form.uploadDir =  config.__dirname + config.upload.dir;
 
-    req.form.parse(req, function(err, fields, files){
+
+
+
+    form.parse(req, function(err, fields, files){
         if (err) return res.end('You found error');
         // do something with files.image etc
         console.log(files.image);
         console.log("parse:\n" + util.inspect( fields, false, 7, true ) + "\n" + util.inspect( files, false, 7, true )  );
     });
 
-    req.form.on('progress', function(bytesReceived, bytesExpected){
+/*
+    form.progress( function(bytesReceived, bytesExpected){
         var percent = (bytesReceived / bytesExpected * 100) | 0;
         process.stdout.write('Uploading: %' + percent + '\r');
     });
 
+
+
+ form.error(req,  function(err) {
+ res.writeHead(200, {'content-type': 'text/plain'});
+ res.end('error:\n\n'+util.inspect(err));
+ });
+
+*/
     req.form.complete(function(err, fields, files){
         if (err) {
             next(err);
@@ -48,6 +56,8 @@ function upload (req, res) {
             res.redirect('back');
         }
     });
+
+    // console.log("uploaded:\n" + util.inspect(  req.files.inputTypeFile , false, 7, true )  );
 
     res.end('Done');
     return;
@@ -64,7 +74,6 @@ box.on('init', function (App, Config, done) {
 box.on('init.attach', function (app, config,  done) {
 
     app.post('/upload', upload);
-
     app.io.route('upload',  function(req) {
         req.io.respond({
             result:'not implemented yet'

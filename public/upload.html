@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload Files</title>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <script src="/js/jquery.iframe-post-form.js"></script>
+    <script src="/js/_example_iframe-post-form.js"></script>
+
+
+    <script type="text/javascript">
+
+    </script>
+
+</head>
+<body>
+<h2 id="demonstrations">Demo</h2>
+<form action="/upload" method="post" enctype="multipart/form-data">
+    <fieldset>
+        <legend>File upload form demo</legend>
+        <p>This file upload demo will only allow images.</p>
+
+        <dl>
+
+            <dt><label for="inputTypeFile">Input type file</label></dt>
+            <dd><input type="file" name="inputTypeFile" id="inputTypeFile" /></dd>
+
+            <dt><label for="inputTypeCheckbox">Input type checkbox</label></dt>
+            <dd><input type="checkbox" name="inputTypeCheckbox" id="inputTypeCheckbox" value="Maecenas a enim arcu." checked="checked" /></dd>
+        </dl>
+
+        <input type="submit" value="Submit" />
+        <input type="reset" value="Reset" />
+    </fieldset>
+</form>
+
+</body>
+</html>

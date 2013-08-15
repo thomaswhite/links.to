@@ -1,8 +1,8 @@
 var box = require('../box.js')
-    , express = box.express =  require('express.io')
-    , app     = box.app = express()
+    , express    = box.express =  require('express.io')
+    , app        = box.app = express()
     , mongoStore = require('connect-mongo')(express)
-    , path = require('path')
+    , path       = require('path')
 
     , cons = box.cons = require('consolidate')
 
@@ -28,7 +28,13 @@ box.on('init', function (App, Config, done) {
     app.configure(function () {
             app.use(express.logger('dev'));
             app.use(express.favicon());
-            app.use(express.bodyParser({ keepExtensions: true, uploadDir: Config.__dirname + Config.upload.dir }));
+            app.use(
+                express.bodyParser({
+                    keepExtensions: true,
+                    uploadDir: Config.__dirname + Config.upload.dir,
+                    limit: '10mb'
+                })
+            );
             app.use(express.json());
             app.use(express.urlencoded());
 
@@ -40,11 +46,13 @@ box.on('init', function (App, Config, done) {
             app.set('view options', {layout: false});
 
             app.use( box.cookieParser );
-            app.use(express.session({
-                secret: config.common.session.secret
-                , cookie: { maxAge: 1000 * config.common.session.maxAgeSeconds}
-                , store: box.sessionStore
-            }));
+            app.use(
+                express.session({
+                    secret: config.common.session.secret
+                    , cookie: { maxAge: 1000 * config.common.session.maxAgeSeconds}
+                    , store: box.sessionStore
+                })
+            );
     });
 
     app.io.configure(function() {
