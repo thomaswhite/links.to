@@ -10,6 +10,8 @@ var box = require('../box.js')
 
 require('./collections');
 require('./links');
+require('./imports');
+
 require('./upload');
 
 

@@ -10,6 +10,7 @@
             <div class="nav-collapse">
               <ul class="nav">
                     <li><a href="/coll">Collections</a></li>
+                    <li><a href="/authors">Authors</a></li>
                     <li><a href="/tags">Tags</a></li>
                     <li><a href="/favorites">Favorites</a></li>
               </ul>
@@ -18,18 +19,22 @@
                </form -->
 
                 <ul class="nav pull-right">
-                  {?user}
-                    <li><a href="/coll/mine">My collections</a></li>
-                    <li><a href="/tags/mine">My Tags</a></li>
-                    <li><a href="/favorites/mine">My Favorites</a></li>
-                  {/user}
-                    <li class="dropdown noPage">
-                  {?user}
+                  {#user}
+                     <li class="dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">My Links <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/coll/mine">My collections</a></li>
+                            <li><a href="/tags/mine">My Tags</a></li>
+                            <li><a href="/favorites/mine">My Favorites</a></li>
+                            <li class="divider"></li>
+                            <li><a href="/imports" id="importFav">Import Favorites</a></li>
+                        </ul>
+                     </li>
+                     <li class="dropdown noPage">
                         <a href="#" class="dropdown-toggle logged-user"  data-toggle="dropdown" >
-                          {?gravatarURL}
-                              <img class="user-img27"  src="{{ user.gravatarURL }}" height="27" width="27" title="{user.user_name}">
-                          {/gravatarURL}
-                          {^gravatarURL}
+                          {#gravatarURL}
+                              <img class="user-img27"  src="{.}" height="27" width="27" title="{user.user_name}">
+                            {:else}
                               <div class="missing-user27"></div>
                           {/gravatarURL}
                           <b class="caret"></b>
@@ -38,10 +43,12 @@
                       <ul class="dropdown-menu icons32">
                         <li>{>"navigation/user_badge"/}</li>
                      </ul>
-                  {/user}
-                  {^user}
+
+                     {:else}
+                      <li>
                       <a href="#" class="dropdown-toggle" data-toggle="dropdown">Login <b class="caret"></b></a>
                       {>"navigation/openIDs_login_list"/}
+                      </li>
                   {/user}
                   </li>
                 </ul>

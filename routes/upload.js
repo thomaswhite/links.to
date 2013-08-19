@@ -17,13 +17,11 @@ var box = require('../box.js')
 
     ;
 
-
 var cherioParam = {
     ignoreWhitespace: false,
     xmlMode: true,
     lowerCaseTags: true
 };
-
 
 function deleteAfterUpload (path) {
     setTimeout( function(){
@@ -37,7 +35,7 @@ function deleteAfterUpload (path) {
 function getAttr_and_Name( $s, dest, lowerCase ){
     var o = $s[0],
         href = o.attribs ? o.attribs.HREF : null,
-        hrefOK = href &&  href.indexOf('http') == 0;
+        hrefOK = href &&  href.indexOf('http') === 0;
 
     if( href ) {
         if( hrefOK ){
@@ -60,21 +58,28 @@ function parseDL( $DL, $ ){
             $H3 = $DT.children('>h3'),
             $A  = $DT.children('>a'),
             $next = $DT.next ? $DT.next() : null,
-            step = {};
+            step = {},
+            $DL;
 
         if( $H3.length ){      // folder
-            var $dd = $next ? $next.next() : null;
-            if( $dd && $dd.filter('dd').length ){
-                step.description = $next_next.text();
-            }
+            $DL = $next;
             getAttr_and_Name( $H3, step );
-            if( $next ){
-                step.children = parseDL( $next, $, true );
+            if( $next.filter('dd').length ){
+                step.description = $next.text().replace(/(\n|\r)/g,'').trim();
+                if( $next.next ){
+                    $DL = $next.next();
+                }else{
+                    $DL = null;
+                }
             }
+            if( $DL ){
+                step.links = parseDL( $DL, $, true );
+            }
+
         }else if( $A.filter('>a').length ){ // link
             getAttr_and_Name( $A, step, true );
             if( $next && $next.filter('dd').length ){
-                step.description = $next.text();
+                step.description = $next.text().replace(/(\n|\r)/g,'').trim();
             }
         }
         return step;
@@ -89,8 +94,12 @@ function upload (req, res) {
         s = s.replace(/<\/A>/gi, '</a></dt>');
         s = s.replace(/<\/h3>/gi, '</h3></dt>');
 
-        s = s.replace(  /(<DD>[^<]*)?<\/DL>/gi, "\$1</DD>");
-    //    s = s.replace(  /(<DD>[^<]*)?<DT>/gi, "\$1</DD>");
+        s = s.replace(  /<DD>([^<]*)?<\/DL>/gi,"<DD>$1</DD></DL>"); // description at the end of DL
+        s = s.replace(  /<DD>([^<]*)?<DT>/gi, "<DD>$1</DD><DT>");
+        s = s.replace(  /<DD>([^<]*)?<DL>/gi, "<DD>$1</DD><DL>");
+//        s = s.replace(  /<DD>([^<]*)?<DL>/gi,"<DD>\$1</DD>");
+
+        console.info( s );
 
         s = s.substring( s.indexOf( '<DL>' ) - 1);
         var result, $ = cheerio.load( '<body>' + s + '</body>', cherioParam);
@@ -101,7 +110,8 @@ function upload (req, res) {
     });
 
     deleteAfterUpload( req.files.favorites.path );
-    res.end('Done');
+    req.io.emit('upload.received', { result:'ok' } );
+    res.end('done');
     return;
 }
 

@@ -5,16 +5,45 @@ span.updated{
 }
 
 
+
 .tags a {
   float: left;
-  background: lightgoldenrodyellow; /*#c5c5c5; */
+  background: #ccc; /*#c5c5c5; */
+  color: black;
+  text-decoration: none;
+  margin: 0 5px 0px 0;
+  padding: 0px 4px;
+  position: relative;
+  /*  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4); */
+  white-space: nowrap;
+
+  .rounded(3px);
+/*  box-shadow: 5px 3px 10px rgba(50, 50, 50, 0.45);
+  -webkit-box-shadow: 5px 3px 10px rgba(50, 50, 50, 0.45);
+  -moz-box-shadow: 5px 3px 10px rgba(50, 50, 50, 0.45);
+*/
+  transition: all .25s linear;
+}
+
+.tags a:hover {
+  background-color: #39F;
+}
+
+.tag-row{
+  margin-top:10px;
+}
+
+/*
+.tags a {
+  float: left;
+  background: lightgoldenrodyellow;
   color: black;
   text-decoration: none;
   margin: 0 0 10px 18px;
   padding: 1px 10px 1px;
   position: relative;
   transition: all .25s linear;
-/*  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4); */
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
   white-space: nowrap;
   line-height: 1.5em;
 
@@ -55,3 +84,4 @@ span.updated{
   width: 5px;
 }
 
+*/

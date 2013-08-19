@@ -1,0 +1,16 @@
+{#collection}
+<div id="{contentID}">
+  <div class="row">
+    <div class="span8 {?canEdit}eip{/canEdit} ta wrap coll_description" >{description}</div>
+  </div>
+  {>"collections/collection_toolbox.dust"/}
+  {>"controls/add_button_row"/}
+  <div id="grid">
+    {#links collection_id="{_id}"}
+    {>"links/link" /}
+    {:else}
+    <div class="row"><div class="span6">No links in this collection yet.</div></div>
+    {/links}
+  </div>
+</div>
+{/collection}

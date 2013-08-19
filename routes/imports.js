@@ -6,7 +6,7 @@
 
 var box = require('../box.js')
     , _ = require('lodash')
-    , debug = require('debug')('linksTo:view.collections')
+    , debug = require('debug')('linksTo:view.import')
     , breadcrumbs = require('./breadcrumbs.js')
     , ShortId  = require('shortid').seed(96715)
     , moment = require('moment')
@@ -32,22 +32,23 @@ function ShorterID(){
  * @param description
  * @returns {{type: string, shortID: *, owner: *, title: *, description: (*|string), linksCount: number, links: Array}}
  */
-function newCollection  (user, name, description){
+function newImport  (user, name, json_data){
+    var now_ms = moment(),
+        now = moment(now_ms, "YYYY-MM-DD HH:mm")
+        ;
     return {
-        type:'collection',
-        shortID : ShorterID(),
+        type:'import',
         owner: user._id,
-        author_screen_name: user.screen_name,
-        title: name.trim(),
-        description: description || 'Description...',
+        title: 'Import made on ' + now,
         linksCount:0,
-        created : new Date(),
-        updated:  new Date(),
-        links:[]
+        collsCount:0,
+        created : now_ms,
+        updated:  now_ms,
+        data: json_data
     };
 }
 
-function collectionList_defaultParam(filter, param){
+function import_defaultParam(filter, param){
     return {
         filter : _.merge( {}, filter),
         param  :  _.merge(  {page:1, limit:40, sort:{updated:-1, created:-1} }, param)
@@ -55,7 +56,7 @@ function collectionList_defaultParam(filter, param){
 }
 
 function collectionList_data( filter, param, user, callBack ){
-    var Parameters =  collectionList_defaultParam(filter, param);
+    var Parameters =  import_defaultParam(filter, param);
     box.parallel('collections.list', Parameters.filter, Parameters.param.limit, Parameters.param.sort, function( err, result ){
         callBack( err, {
             button_action:{route:'/coll/new'},
@@ -76,7 +77,7 @@ function collectionList_data( filter, param, user, callBack ){
 function collectionList( req, res, next, filter, param ){
     var helpers = box.kleiDust.getDust().helpers
 
-        , Parameters =  collectionList_defaultParam(filter, param)
+        , Parameters =  import_defaultParam(filter, param)
         , user  =  req.session && req.session.passport && req.session.passport.user ? JSON.parse(req.session.passport.user):''
         , base = box.dust.makeBase({
                 user:user,
@@ -115,19 +116,15 @@ function Favorite  (req, res, next ){
     }
 }
 */
-function Mine (req, res, next ){
+function All (req, res, next ){
     var session = req.session,
         user  = session && session.passport && session.passport.user ? JSON.parse(session.passport.user):null;
     //            , isOwner =  user._id ==  collection.owner ? true : ''
     if( user && user._id ){
         collectionList(  req, res, next, {owner:  user._id });
     }else{
-        next();
+        res.redirect( '/coll'  );
     }
-}
-
-function All ( req, res, next  ){
-    collectionList(  req, res, next );
 }
 
 function Add(req, res) {
@@ -226,17 +223,16 @@ function Get_One (req, res) {
 box.on('init', function (App, Config, done) {
     app = App;
     config = Config;
-    done(null, 'route collections.js initialised');
+    done(null, 'route imports.js initialised');
 });
 
 box.on('init.attach', function (app, config,  done) {
     app.use(
         box.middler()
-            .get('/coll/mine',       Mine)
-            .get('/coll',            All)
-            .post('/coll/new',       Add)
-            .get(['/coll/:id', '/w/c/:id'], Get_One)
-            .get('/coll/:id/delete', Delete)
+            .get('/imports',            All)
+            .post('/imports/new',       Add)
+            .get('/imports/:id',        Get_One)
+            .get('/imports/:id/delete', Delete)
             .handler
     );
 
@@ -252,7 +248,7 @@ box.on('init.attach', function (app, config,  done) {
        },
        list: function(req){
            var User = req.session && req.session.passport && req.session.passport.user ?  JSON.parse( req.session.passport.user ):null
-               , Parameters =  collectionList_defaultParam(req.data.filter, req.data.param)
+               , Parameters =  import_defaultParam(req.data.filter, req.data.param)
                ;
            collectionList_data( Parameters.filter, Parameters.param, User, function(err, displayBlock){
                req.io.respond({
@@ -299,14 +295,5 @@ box.on('init.attach', function (app, config,  done) {
     });
 
 
-//    app.get('/favorites',        routes.collections.favorites);
-//    app.get('/favorites/mine',   routes.collections.favorites_mine);
-
-    //    app.get('/favorites',        routes.collections.favorites);
-    //    app.get('/favorites/mine',   routes.collections.favorites_mine);
-
-    //    app.get('/tags',        routes.collections.tags);
-    //    app.get('/tags/mine',   routes.collections.tags_mine);
-
-    done(null, 'route collections attached'  );
+    done(null, 'route "imports.js" attached'  );
 });

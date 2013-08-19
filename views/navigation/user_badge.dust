@@ -1,31 +1,39 @@
+{#user}
 <table width="300px" cellpadding="5" class="user-badge-box">
   <tr align="left" valign="top">
     <td>
-      {?user.gravatarURL96}<img class="user-img96"  src="{{ user.gravatarURL96 }}">{/user.gravatarURL96}
-      {^user.gravatarURL96}<div class="missing-user96"></div>{/user.gravatarURL96}
+      {#gravatarURL96}
+         <img class="user-img96" src="{.}">
+         {:else}
+         <div class="missing-user96"></div>
+      {/gravatarURL96}
     </td>
     <td>
-      <div class="user-name">{#user}{screen_name}{/user} </div>
+      <div class="user-name">{screen_name}</div>
       <div class="user-email">
-        {?user}{email}{/user}
-        {^user}No email{/user}
+        {#email}
+          {.}
+         {:else}
+          No email
+        {/email}
       </div>
     </td>
   </tr>
   <tr valign="top">
     <td>
       <a class="btn" href="/user/profile">
-        {#user.active_provider}
+        {#active_provider}
         <span class="auth-icon auth-{.}" height="40px" ></span>
-        {/user.active_provider}
+        {/active_provider}
         <span>Edit profile</span>
       </a>
     </td>
     <td align="right">
-      <a class="btn logout " href="/logout" title="{{ title }}">
+      <a class="btn logout " href="/logout" title="{title}">
         <span>Log Out</span>
         <i class="icon-play"></i>
       </a>
     </td>
   </tr>
 </table>
+{/user}

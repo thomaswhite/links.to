@@ -28,4 +28,45 @@
 
 .dropdown-toggle{   white-space: nowrap;}
 .logged-user b.caret{    margin-top: 14px;}
+/*
+li.dropdown.open>.dropdown-toggle .caret, .navbar .nav li.dropdown.active>.dropdown-toggle .caret, .navbar .nav li.dropdown.open.active>.dropdown-toggle .caret {
+  border-top-color: #555555;
+  border-bottom-color: #555555;
+}
+*/
+.navbar .nav li.dropdown.open>.dropdown-toggle, .navbar .nav li.dropdown.active>.dropdown-toggle, .navbar .nav li.dropdown.open.active>.dropdown-toggle {
+  background-color: transparent !important;
+  color:blue;
+  text-shadow: 0px 0px 15px yellow;
+}
 
+.dropdown{
+ // color: white;
+}
+
+#navbar{
+  color:white;
+}
+
+.navbar .nav li.dropdown>.dropdown-toggle .caret{
+  color: yellow;
+}
+
+.navbar .nav>li>a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  text-shadow: 0px 0px 15px #ddd;
+}
+
+.dropdown.open {
+  line-height: 18px;
+  margin-top: 1px;
+}
+
+/*
+.dropdown-toggle .caret{
+  margin-right: 4px;
+  margin-left: -4px;
+}
+*/

@@ -20,6 +20,8 @@
             {?autor}<span class="author">Author:<span class="author_name">{author}</span></span>{/autor}
             {?description}<span title="description" class="description wrap {?canEdit}eip ta{/canEdit}">{description|s}</span>{/description}
             {^description}<span title="Summary" class="description wrap ta summary">summary:{summary}</span>{/description}
+
+            {>"links/link_tag_row" /}
         </div>
     {/display}
 </div>
