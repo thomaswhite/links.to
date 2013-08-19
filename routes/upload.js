@@ -12,10 +12,21 @@ var box = require('../box.js')
     , debug = require('debug')('linksTo:view.collections')
     , fs = require('fs')
     , cheerio = require('cheerio')
+    , ShortId  = require('shortid').seed(96715)
     , config
     , app
 
-    ;
+;
+
+
+/**
+ * @return {string}
+ */
+function ShorterID(){
+    return  ShortId.generate().substr(0, config.db.short_id_length);
+}
+
+
 
 var cherioParam = {
     ignoreWhitespace: false,
@@ -52,7 +63,8 @@ function getAttr_and_Name( $s, dest, lowerCase ){
 }
 
 
-function parseDL( $DL, $ ){
+function parseDL( $DL, $, fullPath ){
+    fullPath = fullPath || '';
     return $DL.children('>DT').map(function(pos, element){
         var $DT = $(this),
             $H3 = $DT.children('>h3'),
@@ -72,8 +84,24 @@ function parseDL( $DL, $ ){
                     $DL = null;
                 }
             }
+            step.full_path = fullPath + '/' + step.folder;
+            step.parent = fullPath || '/';
             if( $DL ){
-                step.links = parseDL( $DL, $, true );
+                step.child_links = 0;
+                step.child_folders = 0;
+                step.links = parseDL( $DL, $, step.full_path  );
+                for(var x=0; x < step.links.length; x++ ){
+                   var item = step.links[x];
+                   if( item.folder ){
+                       step.child_folders += 1 + item.child_folders;
+                       step.child_links   += item.child_links;
+                   }else{
+                       step.child_links++;
+                   }
+                }
+                if( step.child_folders || step.child_links ){
+                    step.id = ShorterID();
+                }
             }
 
         }else if( $A.filter('>a').length ){ // link
@@ -97,13 +125,13 @@ function upload (req, res) {
         s = s.replace(  /<DD>([^<]*)?<\/DL>/gi,"<DD>$1</DD></DL>"); // description at the end of DL
         s = s.replace(  /<DD>([^<]*)?<DT>/gi, "<DD>$1</DD><DT>");
         s = s.replace(  /<DD>([^<]*)?<DL>/gi, "<DD>$1</DD><DL>");
-//        s = s.replace(  /<DD>([^<]*)?<DL>/gi,"<DD>\$1</DD>");
+//        s = s.replace(  /<DD>([^<]*)?<DL>/gi,"<DD>$1</DD>");
 
-        console.info( s );
+//        console.info( s );
 
         s = s.substring( s.indexOf( '<DL>' ) - 1);
         var result, $ = cheerio.load( '<body>' + s + '</body>', cherioParam);
-        console.info($.html() );
+//        console.info($.html() );
 
         result = parseDL( $(' body > dl' ), $ );
         console.log("parse:\n" + util.inspect( result, false, 7, true ));

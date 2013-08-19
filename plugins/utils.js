@@ -9,11 +9,7 @@
 var box = require('../box.js')
 
     , ShortId  = require('shortid').seed(96715)
-
     , _ = require('lodash')
-    , path = require('path')
-    , fs = require('fs')
-    , colors = require('colors')
     , inspect = require('eyes').inspector({
         styles: {                 // Styles applied to stdout
             all:     'cyan',      // Overall style applied to everything
@@ -31,7 +27,6 @@ var box = require('../box.js')
         stream: process.stdout,   // Stream to write to, or null
         maxLength: 32000           // Truncate output if longer
     })
-    , async = require('async')
     , moment = require('moment')
     ;
 
@@ -65,11 +60,12 @@ function updatedFromNow (s){
     return  moment(s).fromNow();
 }
 
+// http://stackoverflow.com/questions/432493/how-do-you-access-the-matched-groups-in-a-javascript-regex?rq=1
 // multiple RegEx can be passes as second, third etc argument
 function removeAll(s, regEx ){
     for(var i=1; i< arguments.length; i++){
-        var REx = arguments[i];
-        while (REx.test(s)) {
+        var REx = arguments[i], match;
+        while ( match = REx.test(s)) {
             s = s.replace(REx, "");
         }
     }
@@ -80,12 +76,13 @@ function removeAll(s, regEx ){
 box.on('init', function (app, conf, done) {
     box.utils = {
         _ : _,
-        path : path,
-        fs : fs,
-        colors : colors,
+        path : require('path'),
+        fs :  require('fs'),
+        colors : require('colors'),
+        async : require('async'),
+        moment : moment,
         inspect : inspect,
         shorterID: ShorterID,
-        async : async,
         pickUpFromAsyncResult: pickUpFromAsyncResult,
         formatUpdated:formatUpdated,
         removeAll: removeAll

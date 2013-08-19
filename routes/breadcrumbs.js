@@ -33,6 +33,14 @@ module.exports = {
                 title: param.link.title
             });
         }
+
+        if( param.imports ){
+            crumbs.push = [{
+                href:'/imports',
+                title: 'Imports'
+            }];
+
+        }
         return crumbs;
     }
 };

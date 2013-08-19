@@ -5,6 +5,12 @@
  */
 
 var pages = {
+    '/imports':{
+        routeIO: 'imports',
+        tempateID:'collections/collection_list_container',
+        containerID:'#container',
+        contentID:'#coll-list-rows'
+    },
     '/coll':{
         routeIO: 'collection:list',
         tempateID:'collections/collection_list_container',

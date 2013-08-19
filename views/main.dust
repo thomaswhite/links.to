@@ -19,9 +19,10 @@
           }
       );
       head.load(
-          "//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.no-icons.min.css",
-          "//netdna.bootstrapcdn.com/font-awesome/3.1.1/css/font-awesome.css",
+          "//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.no-icons.min.css",
+          "//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css",
           "/css/links-to.css"
+          , "/css/hide.css"
       );
     </script>
     {+headLinks/}

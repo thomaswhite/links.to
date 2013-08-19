@@ -1,0 +1,4 @@
+<div class="input-append">
+    <input type="file" class="addInput input-xxlarge" name="{name}" id="{name}" placeholder="{placeholder}" title="{placeholder}" />
+    <button class="btn btn-primary btnAdd" type="button"  data-context='{button_action|js|s}'>{ addButton.buttonText }</button>
+</div>

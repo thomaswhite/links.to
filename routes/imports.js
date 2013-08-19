@@ -16,32 +16,16 @@ var box = require('../box.js')
  ;
 
 
-/**
- * @return {string}
- */
-function ShorterID(){
-    return  ShortId.generate().substr(0, config.db.short_id_length);
-}
-
-
-
-/**
- *
- * @param owner
- * @param name
- * @param description
- * @returns {{type: string, shortID: *, owner: *, title: *, description: (*|string), linksCount: number, links: Array}}
- */
 function newImport  (user, name, json_data){
-    var now_ms = moment(),
-        now = moment(now_ms, "YYYY-MM-DD HH:mm")
+    var now_ms = box.moment(),
+        now = box.moment(now_ms, "YYYY-MM-DD HH:mm")
         ;
     return {
         type:'import',
         owner: user._id,
         title: 'Import made on ' + now,
         linksCount:0,
-        collsCount:0,
+        foldersCount:0,
         created : now_ms,
         updated:  now_ms,
         data: json_data
@@ -55,26 +39,26 @@ function import_defaultParam(filter, param){
     };
 }
 
-function collectionList_data( filter, param, user, callBack ){
+function importLists_data( filter, param, user, callBack ){
     var Parameters =  import_defaultParam(filter, param);
-    box.parallel('collections.list', Parameters.filter, Parameters.param.limit, Parameters.param.sort, function( err, result ){
+    box.parallel('imports.list', Parameters.filter, Parameters.param.limit, Parameters.param.sort, function( err, result ){
         callBack( err, {
-            button_action:{route:'/coll/new'},
-            title: 'All collection',
-            grid: box.utils.pickUpFromAsyncResult( result, 'collections-list' ),
+            button_action:{route:'/import/new'},
+            title: 'Imports',
+            grid: box.utils.pickUpFromAsyncResult( result, 'imports-list' ),
             user: user,
             canEdit:true,
-            crumbs : breadcrumbs.make({ }),
+            crumbs : breadcrumbs.make({ imports:true }),
             addButton:{
-                type:'input',
-                placeholder:'New collection name',
-                buttonText:'Add'
+                type:'file',
+                placeholder:'Select a bookmark file',
+                buttonText:'Import'
             }
         });
     });
 }
 
-function collectionList( req, res, next, filter, param ){
+function importLists( req, res, next, filter, param ){
     var helpers = box.kleiDust.getDust().helpers
 
         , Parameters =  import_defaultParam(filter, param)
@@ -84,46 +68,26 @@ function collectionList( req, res, next, filter, param ){
                 pageParam:{
                     filter: Parameters.filter,
                     param: Parameters.param,
-                    route:'collection:list'
+                    route:'imports:list'
                 }
-/*                , timeFromNow: function(chunk, ctx, bodies, params) {
-                    var value = helpers.tap(params.time, chunk, ctx);
-                    if( value ){
-                        return chunk.write( moment(value).fromNow() );
-                    }else{
-                        return chunk;
-                    }
-                    //chunk.write( value );
-                    //chunk.write(':' + ctx.current().value );
-                }
-*/
           })
         ;
 
-    collectionList_data( Parameters.filter, Parameters.param, user, function(err, displayBlock ){
+    importLists_data( Parameters.filter, Parameters.param, user, function(err, displayBlock ){
+        console.log('importsLists: ---------------------');
         console.log( displayBlock );
-        box.dust.render(res, 'collections/page_collections-list', base.push(displayBlock));
+        box.dust.render(res, 'imports/page_imports-list', base.push(displayBlock));
     });
 }
 
-
-/*
-function Favorite  (req, res, next ){
-    if( !app.locals.user || app.locals.user._id ){
-        next();
-    }else{
-        next();
-    }
-}
-*/
 function All (req, res, next ){
     var session = req.session,
         user  = session && session.passport && session.passport.user ? JSON.parse(session.passport.user):null;
     //            , isOwner =  user._id ==  collection.owner ? true : ''
     if( user && user._id ){
-        collectionList(  req, res, next, {owner:  user._id });
+        importLists(  req, res, next, {owner:  user._id });
     }else{
-        res.redirect( '/coll'  );
+        res.redirect( '/coll'  );  // not logged in
     }
 }
 
@@ -236,7 +200,7 @@ box.on('init.attach', function (app, config,  done) {
             .handler
     );
 
-    app.io.route('collection', {
+    app.io.route('imports', {
        get:  function(req) {
            Get_One_data( req.data.coll_id, function(err, displayBlock ){
                req.io.respond({
@@ -250,7 +214,7 @@ box.on('init.attach', function (app, config,  done) {
            var User = req.session && req.session.passport && req.session.passport.user ?  JSON.parse( req.session.passport.user ):null
                , Parameters =  import_defaultParam(req.data.filter, req.data.param)
                ;
-           collectionList_data( Parameters.filter, Parameters.param, User, function(err, displayBlock){
+           importLists_data( Parameters.filter, Parameters.param, User, function(err, displayBlock){
                req.io.respond({
                    req:req.data,
                    result: displayBlock,

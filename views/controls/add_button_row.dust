@@ -10,6 +10,9 @@
                         {>"controls/add_button_{addButton.type}"/}
                     {/eq}
                 {/eq}
+                {@eq value="imports:list" }
+                    {>"controls/add_button_{addButton.type}"/}
+                {/eq}
             {/select}
         </div>
     </div>

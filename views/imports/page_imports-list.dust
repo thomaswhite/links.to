@@ -1,0 +1,10 @@
+{>"main"/}
+
+{<bodyClass}imports-list{/bodyClass}
+{<pageTitle}My Imporst in Links.to{/pageTitle}
+
+{<container}
+   {>"imports/imports_list_container"/}
+{/container}
+
+

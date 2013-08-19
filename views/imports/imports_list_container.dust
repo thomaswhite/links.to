@@ -1,0 +1,8 @@
+<div id="breadcrumbs">{>"navigation/breadcrumbs"/}</div>
+<div class="row">
+    <div class="span8" id="title"><h1>{title2}</h1></div>
+</div>
+<div id="beforeContent">{>"controls/add_button_row"/}</div>
+<div id="content">
+    {>"imports/imports_list_table"/}
+</div>
