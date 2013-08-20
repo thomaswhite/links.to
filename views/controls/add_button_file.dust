@@ -1,4 +1,9 @@
 <div class="input-append">
-    <input type="file" class="addInput input-xxlarge" name="{name}" id="{name}" placeholder="{placeholder}" title="{placeholder}" />
-    <button class="btn btn-primary btnAdd" type="button"  data-context='{button_action|js|s}'>{ addButton.buttonText }</button>
+    <span class="fakeFileCont">
+      <input type="file" name="uploaded_file" class="fileHidden farAway"  name="{name}" id="{name}" />
+      <input type="text" class="input-xxlarge fakeName" readonly="readonly" value='No File Selected'>
+      <button class="fakeButton btn btn-success noBrdRadius">Select file</button>
+    </span>
+
+    <button class="btn btn-primary btnAdd" type="button"  data-context='{button_action|js|s}'>{addButton.buttonText}</button>
 </div>

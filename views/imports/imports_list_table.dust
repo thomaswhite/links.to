@@ -3,7 +3,7 @@
         <div class="span5 table-header">Import Name</div>
         <div class="span1 coll-e">Folders</div>
         <div class="span1 coll-e">Links</div>
-        <div class="span2 coll-e">Last updated</div>
+        <div class="span2 coll-e">Imported on</div>
     </div>
     {! <pre>{user|js|s}</pre>  !}
     <div id="coll-list-rows">
