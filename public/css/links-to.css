@@ -257,6 +257,8 @@ span.updated i {
 
   white-space: nowrap;
   -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  -khtml-border-radius: 3px;
   border-radius: 3px;
   /*  box-shadow: 5px 3px 10px rgba(50, 50, 50, 0.45);
   -webkit-box-shadow: 5px 3px 10px rgba(50, 50, 50, 0.45);
@@ -458,6 +460,8 @@ body.collection h1 {
   padding: .6em;
   margin-bottom: 4px;
   -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  -khtml-border-radius: 5px;
   border-radius: 5px;
   /* for multi values */
 
@@ -654,4 +658,15 @@ a.deleteIcon:hover {
 .deleting .link-content,
 .deleting .coll-title {
   background-color: #888;
+}
+.noBrdRadius {
+  -moz-border-radius: 0 !important;
+  -webkit-border-radius: 0 !important;
+  -khtml-border-radius: 0 !important;
+  border-radius: 0 !important;
+}
+.farAway {
+  position: absolute !important;
+  left: -10000px;
+  top: -1000px;
 }
