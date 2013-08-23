@@ -6,14 +6,19 @@
 
 var box = require('../box.js')
     , _ = require('lodash')
+    ,  util = require('util')
     , debug = require('debug')('linksTo:view.import')
     , breadcrumbs = require('./breadcrumbs.js')
     , ShortId  = require('shortid').seed(96715)
     , moment = require('moment')
+    , favorites = require('../lib/parse-favorites')
     , config
     , app
 
  ;
+
+
+
 
 
 function newImport  (user, name, json_data){
@@ -52,7 +57,9 @@ function importLists_data( filter, param, user, callBack ){
             addButton:{
                 type:'file',
                 placeholder:'Select a bookmark file',
-                buttonText:'Import'
+                buttonText:'Import',
+                action:'/imports/new',
+                form_id:'upload'
             }
         });
     });
@@ -92,25 +99,9 @@ function All (req, res, next ){
 }
 
 function Add(req, res) {
-    var referer = req.headers.referer
-        , coll_name = req.body.collectionName || 'New collection'
-        , coll;
-    if( !req.user ){
-        context.Page2(req, res, 'add-button', {
-            add_link: '/coll/new'
-        });
-    }else{
-        coll = newCollection(req.user, coll_name.trim());
-        box.emit('collection.add', coll, function(err, collection ) {
-            if (err) {
-                context.notFound(res, 'db error while creating new collection.');
-            }else {
-                box.parallel('collection.added',  collection, function(err, result){
-                    res.redirect( referer  );
-                });
-            }
-        });
-    }
+    var User = req.session && req.session.passport && req.session.passport.user ?  JSON.parse( req.session.passport.user ):null;
+
+    req.io.route('imports:add');
 }
 
 function Delete (req, res) {
@@ -224,10 +215,26 @@ box.on('init.attach', function (app, config,  done) {
        },
        add:function(req){
            var user = JSON.parse(req.session.passport.user)
-               , name = req.data.value.trim()
-               , coll = newCollection( user, name )
+//               , name = req.data.value.trim()
+//               , coll = newCollection( user, name )
                ;
            // TODO: verify the name
+           req.io.respond({
+               success:true,
+               upload:'OK',
+               file: req.files.uploaded_file.name,
+               size: req.files.uploaded_file.size
+           });
+           favorites.parse( req.files.uploaded_file.path, false, function(err, result, flatOutput ){
+               console.log("\nresult:\n" + util.inspect( result, false, 7, true ));
+               console.log("\nflatOutput:\n" + util.inspect( flatOutput, false, 7, true ));
+
+           });
+
+
+
+           return;
+
            box.emit('collection.add', coll, function(err, collection ) {
                if (err) {
                    req.io.respond({

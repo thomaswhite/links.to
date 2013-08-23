@@ -22,10 +22,10 @@ box.on('init.attach', function (app, config, cb) {
             session: req.session,
             user: req.session && req.session.passport && req.session.passport.user ? JSON.parse( req.session.passport.user ) : {}
         });
-*/
         if( req.data.route){
             req.io.route(req.data.route);
         }
+  */
     });
     cb(null,   'io.rutes attached' );
 

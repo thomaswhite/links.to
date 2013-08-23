@@ -7,4 +7,12 @@
    {>"imports/imports_list_container"/}
 {/container}
 
+{<pageScripts}
+   <script>
+     head.js(
+         { imports:    "/js/links-to/imports.js"},
+         { iframe_post:"/js/jquery.iframe-post-form.js"}
+     );
 
+   </script>
+ {/pageScripts}

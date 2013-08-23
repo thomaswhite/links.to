@@ -58,7 +58,7 @@
 					
 					if (options.json)
 					{
-						returnReponse = $.parseJSON(response.html());
+						returnReponse = $.parseJSON(response.text());
 					}
 					
 					else

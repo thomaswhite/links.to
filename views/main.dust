@@ -40,6 +40,7 @@
        {/container}
     </div>
     {>mainPageScripts/}
+    {+pageScripts/}
     {+pageBottom /}
   </body>
 </html>

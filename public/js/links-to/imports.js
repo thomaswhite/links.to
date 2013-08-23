@@ -7,14 +7,38 @@
 
 
 $(document).ready(function() {
+    $('body')
+        .on('change', '.fakeFileCont input:file', function(){
+            var $this = $(this);
+            $this.closest('.fakeFileCont').find('input:text').val($this.val());
+        })
+        .on('click', '.fakeFileCont input:button, .fakeFileCont button', function(event){
+          $(this).closest('.fakeFileCont').find('input:file').trigger('click');
+        });
 
-    $('.fakeFileCont input:file').change(function(){
-        var $this = $(this);
-        $this.closest('.fakeFileCont').find('input:text').val($this.val());
+    $('.fakeFileCont input:file')
+        .css('position','absolute')
+        .css('top','-10000px')
+    ;
+
+
+    $('form#upload').iframePostForm({
+        json : true,
+        post : function ()	{
+            console.info('Uploading..');
+        },
+        error:  function (response,desc){
+           console.error('Bad upload', response, desc);
+        },
+        complete : function (response){
+            if (!response.success){
+                console.error('Bad upload');
+                console.info(response);
+            }else{
+                console.info('Upload OK', response);
+            }
+        }
     });
 
-    $('.fakeFileCont input:button, .fakeFileCont button').click(function(event){
-        $(this).closest('.fakeFileCont').find('input:file').trigger('click');
-    });
 
 });
