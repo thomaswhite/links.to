@@ -40,11 +40,5 @@ $(document).ready(function() {
         }
     });
 
-    socket.on('import.processing', function(data){
-        console.log ( 'import.processing, data:', data );
-    });
-    socket.on('import.root', function(data){
-        console.log ( 'import.root, data:', data );
-    });
 
 });

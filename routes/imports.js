@@ -99,28 +99,8 @@ function All (req, res, next ){
 }
 
 function Add(req, res) {
-    var User = req.session && req.session.passport && req.session.passport.user ?  JSON.parse( req.session.passport.user ):null,
-        user = req.user;
-/*
-    req.on('complete', function(err, fields, files){
-        if (err) {
-            next(err);
-        } else {
-            console.log('\nuploaded %s to %s'
-                ,  files.uploaded_file.filename
-                , files.uploaded_file.path);
+    var User = req.session && req.session.passport && req.session.passport.user ?  JSON.parse( req.session.passport.user ):null;
 
-            req.io.route('imports:add');
-        }
-    });
-
-    // We can add listeners for several form
-    // events such as "progress"
-    req.on('progress', function(bytesReceived, bytesExpected){
-        var percent = (bytesReceived / bytesExpected * 100) | 0;
-        process.stdout.write('Uploading: %' + percent + '\r');
-    });
-*/
     req.io.route('imports:add');
 }
 
@@ -212,50 +192,6 @@ box.on('init.attach', function (app, config,  done) {
     );
 
     app.io.route('imports', {
-        add:function(req){
-            var User = req.session && req.session.passport && req.session.passport.user ?  JSON.parse( req.session.passport.user ):null
-                , user = req.user
-                result = {
-                    id:  ShortId.generate(),
-                    success:true,
-                    upload:'OK',
-                    file: req.files.uploaded_file.name,
-                    size: req.files.uploaded_file.size,
-                    user_id: user ? user._id : -1
-                };
-            // TODO: verify the name
-            req.io.respond(result);
-            // req.io.emit('import.processing', result );
-            favorites.parse( req.files.uploaded_file.path, false, function(err, result, flatOutput ){
-                console.log("\nresult:\n" + util.inspect( result, false, 7, true ));
-                console.log("\nflatOutput:\n" + util.inspect( flatOutput, false, 7, true ));
-                //req.io.emit('import.root', result );
-            });
-
-
-
-            return;
-
-            box.emit('collection.add', coll, function(err, collection ) {
-                if (err) {
-                    req.io.respond({
-                        result:'error',
-                        value: name,
-                        msg:'Error when creating collection'
-                    });
-                }else {
-                    req.io.emit('collection.added', {param:req.data, collection:collection} );
-                    box.parallel('collection.added',  collection, function(err, result){
-                        req.io.respond({
-                            result:'ok',
-                            collection: collection,
-                            extra: result
-                        });
-                    });
-                }
-            });
-        },
-
        get:  function(req) {
            Get_One_data( req.data.coll_id, function(err, displayBlock ){
                req.io.respond({
@@ -277,7 +213,47 @@ box.on('init.attach', function (app, config,  done) {
                });
            });
        },
+       add:function(req){
+           var user = JSON.parse(req.session.passport.user)
+//               , name = req.data.value.trim()
+//               , coll = newCollection( user, name )
+               ;
+           // TODO: verify the name
+           req.io.respond({
+               success:true,
+               upload:'OK',
+               file: req.files.uploaded_file.name,
+               size: req.files.uploaded_file.size
+           });
+           favorites.parse( req.files.uploaded_file.path, false, function(err, result, flatOutput ){
+               console.log("\nresult:\n" + util.inspect( result, false, 7, true ));
+               console.log("\nflatOutput:\n" + util.inspect( flatOutput, false, 7, true ));
 
+           });
+
+
+
+           return;
+
+           box.emit('collection.add', coll, function(err, collection ) {
+               if (err) {
+                   req.io.respond({
+                       result:'error',
+                       value: name,
+                       msg:'Error when creating collection'
+                   });
+               }else {
+                   req.io.emit('collection.added', {param:req.data, collection:collection} );
+                   box.parallel('collection.added',  collection, function(err, result){
+                       req.io.respond({
+                           result:'ok',
+                           collection: collection,
+                           extra: result
+                       });
+                   });
+               }
+           });
+       },
        remove:function(req){
            box.parallel('collection.delete', req.data.id, function(err, result){
                req.io.respond({
