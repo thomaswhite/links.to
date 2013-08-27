@@ -214,7 +214,7 @@ box.on('init.attach', function (app, config,  done) {
            });
        },
        add:function(req){
-           var user = JSON.parse(req.session.passport.user)
+           var user = req.user
 //               , name = req.data.value.trim()
 //               , coll = newCollection( user, name )
                ;
