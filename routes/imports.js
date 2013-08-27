@@ -99,7 +99,7 @@ function All (req, res, next ){
 }
 
 function Add(req, res) {
-    var User = req.session && req.session.passport && req.session.passport.user ?  JSON.parse( req.session.passport.user ):null;
+    var user = req.user;
 
     req.io.route('imports:add');
 }
