@@ -1,0 +1,48 @@
+<html>
+<head>
+
+	<style type="text/css">
+
+    .fakeFileCont input.fileHidden{
+	   position:absolute;
+	   left:-10000px;
+	   top:-1000px;
+	}
+
+	
+	</style>
+
+
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+
+	<script type="text/javascript">
+
+	$(document).ready(function() {
+	
+		$('.fakeFileCont input:file').change(function(){
+			var $this = $(this);
+			$this.closest('.fakeFileCont').find('input:text').val($this.val());
+		});
+		
+		$('.fakeFileCont input:button, .fakeFileCont button').click(function(event){
+		    $(this).closest('.fakeFileCont').find('input:file').trigger('click');
+		});
+		
+	});
+	</script>
+
+</head>
+<body>
+
+<span class="fakeFileCont">
+  <input type="file" name="uploaded_file" class="fileHidden"/>
+  <table width="400">
+	<tr>
+	  <td width="95%"><input type="text" class="fakeName" readonly="readonly" value='No File Selected'></td>
+	  <td nowrap="nowrap" width="30"><input type="button" value="Select file" class="fakeButton" /></td>
+	</tr>
+  </table>
+</span>
+
+</body>
+</html>
