@@ -19,21 +19,14 @@ var box = require('../box.js')
 
 
 
-
-
-function newImport  (user, name, json_data){
-    var now_ms = box.moment(),
-        now = box.moment(now_ms, "YYYY-MM-DD HH:mm")
-        ;
+function newImport ( name, size, owner ){
     return {
-        type:'import',
-        owner: user._id,
-        title: 'Import made on ' + now,
-        linksCount:0,
-        foldersCount:0,
-        created : now_ms,
-        updated:  now_ms,
-        data: json_data
+        owner: owner,
+        title: name,
+        size: size,
+        created : new Date().getTime(),
+        links:0,
+        folders:0
     };
 }
 
@@ -100,7 +93,9 @@ function All (req, res, next ){
 
 function Add(req, res) {
     var user = req.user;
-
+    if( !user ){
+        res.redirect( '/coll' );
+    }
     req.io.route('imports:add');
 }
 
@@ -115,62 +110,40 @@ function Delete (req, res) {
 }
 
 
-function Get_One_data (collID, callBack) {
-    box.emit( 'collection.get.one', collID, function( err, collection ){
-//        var isOwner = collection.owner == user._id ? true : '';
+function Get_One_data (id, callBack) {
+    box.emit( 'import.get.one', id, function( err, Import ){
         callBack(err, {
-            button_action:{route:'/link/new', coll_id: collID },
-            title: (collection && collection.title ? collection.title: 'Collection not found' ),
-//            canEdit: isOwner,
-//            canDelete: isOwner,
-            collection: collection,
+            title: (Import && Import.title ? Import.title: 'Import not found' ),
+            import: Import,
             crumbs : breadcrumbs.make({
-//                owner:isOwner,
-                coll:{id:collection._id, title:collection.title }
-            }),
-            addButton:{
-                placeholder:'Paste links',
-                type:'input',
-                buttonText:'Add Link',
-                hidden:[
-                    {name:"add2coll", value : collID }
-                ]
-            }
+                  import:{id:Import._id, title:Import.title }
+            })
         });
     });
 }
 
 function Get_One (req, res) {
-    var referer = req.headers.referer,
-        collID = req.params.id;
+    var id = req.params.id;
 
-    box.emit( 'collection.get.one', collID, function( err, collection ){
-        if ( err ){
-            console.error(  'collection.get.one', err);
-        }
-        if( err || !collection ){
-            res.redirect( '/coll' );
-        }else{
-            var user  =  req.session && req.session.passport && req.session.passport.user ? JSON.parse(req.session.passport.user):''
-    //            , isOwner =  user._id ==  collection.owner ? true : ''
-                , base = box.dust.makeBase({
-                    user:user,
-                    pageParam:{
-                        route:'collection:get',
-                        coll_id : collection._id
-                    }
-                })
-                ;
-            Get_One_data( collID, function(err, displayBlock ){
-                console.log( displayBlock );
-
-//        var isOwner = collection.owner == user._id ? true : '';
-//            canEdit: isOwner,
-//            canDelete: isOwner,
-
-                box.dust.render(res, 'collections/page_collection', base.push(displayBlock));
-            });
-        }
+    Get_One_data( id, function(err, displayBlock ){
+            if ( err ){
+                console.error(  'import.get.one', err);
+            }
+            if( err || !displayBlock.import ){
+                 res.redirect( '/imports' );
+            }else{
+                 var user  =  req.session && req.session.passport && req.session.passport.user ? JSON.parse(req.session.passport.user):''
+                    , base = box.dust.makeBase({
+                        user:user,
+                        pageParam:{
+                            route:'import:get',
+                            id : id
+                        }
+                    })
+                    ;
+                    console.log(  util.inspect( displayBlock, false, 7, true ) );
+                    box.dust.render(res, 'imports/page_import', base.push(displayBlock));
+            }
     });
 }
 
@@ -218,41 +191,78 @@ box.on('init.attach', function (app, config,  done) {
 //               , name = req.data.value.trim()
 //               , coll = newCollection( user, name )
                ;
-           // TODO: verify the name
-           req.io.respond({
-               success:true,
-               upload:'OK',
-               file: req.files.uploaded_file.name,
-               size: req.files.uploaded_file.size
-           });
-           favorites.parse( req.files.uploaded_file.path, false, function(err, result, flatOutput ){
-               console.log("\nresult:\n" + util.inspect( result, false, 7, true ));
-               console.log("\nflatOutput:\n" + util.inspect( flatOutput, false, 7, true ));
+           if( !user ){
+               req.io.respond({
+                   success:false,
+                   upload:'error',
+                   error:'Session timeout.'
+               });
+           }else{
+               if( req.files.uploaded_file.type != "text/html" ||
+                   req.files.uploaded_file.mime != "text/html" ){
+                   req.io.respond({
+                       success:false,
+                       upload:'error',
+                       error:'File is not HTML file. It is type:"' + req.files.uploaded_file.type + '"',
+                       file: req.files.uploaded_file.name,
+                       size: req.files.uploaded_file.size
+                   });
+               }else{
+                   favorites.parse( req.files.uploaded_file.path, false, function(err, root, allNodes ){
+                       if( err ){
+                           req.io.respond({
+                               success:false,
+                               upload:'error',
+                               error: err,
+                               file: req.files.uploaded_file.name
+                           });
+                       }else{
 
-           });
+                           console.log("\nRoot:\n" + util.inspect( root, false, 7, true ));
+                           console.log("\nallNodes:\n" + util.inspect( allNodes, false, 7, true ));
 
+                           var Import = newImport (  req.files.uploaded_file.name, req.files.uploaded_file.size, user._id );
+                           Import = favorites.countFoldersAndLinks( root, Import );
+
+                           box.emit('import.add', Import, function(err, saved_import ) {
+                               if (err) {
+                                   req.io.respond({
+                                       success:false,
+                                       file: req.files.uploaded_file.name,
+                                       msg:'Error when adding an import',
+                                       error:err
+                                   });
+                               }else {
+                                   req.io.respond({
+                                       success:true,
+                                       upload:'ok',
+                                       id:saved_import._id,
+                                       import: saved_import,
+                                       root:root
+                                   });
+
+                                   var ID = saved_import._id;
+                                   for(var n=0; n < allNodes.length; n++){
+                                       allNodes[n].importID = ID;
+                                   }
+
+                                   box.parallel('import.added',  allNodes, function(err, result){
+                                      if( err ){
+                                          console.error('Error saving import nodes for file ' + saved_import.title, err );
+                                      }else{
+                                          console.info('Import nodes for file "' +  + saved_import.title + '" saved OK', saved_import );
+                                      }
+                                   });
+                               }
+                           });
+                       }
+                   });
+               }
+           }
 
 
            return;
 
-           box.emit('collection.add', coll, function(err, collection ) {
-               if (err) {
-                   req.io.respond({
-                       result:'error',
-                       value: name,
-                       msg:'Error when creating collection'
-                   });
-               }else {
-                   req.io.emit('collection.added', {param:req.data, collection:collection} );
-                   box.parallel('collection.added',  collection, function(err, result){
-                       req.io.respond({
-                           result:'ok',
-                           collection: collection,
-                           extra: result
-                       });
-                   });
-               }
-           });
        },
        remove:function(req){
            box.parallel('collection.delete', req.data.id, function(err, result){

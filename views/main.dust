@@ -19,11 +19,12 @@
           }
       );
       head.load(
-          "//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.no-icons.min.css",
-          "//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css",
-          "/css/links-to.css"
-          // , "/css/hide.css"
+          "//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.no-icons.min.css"
+          , "//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css"
+          , "/css/links-to.css"
+          , "/css/hide.css"
       );
+      var pageScripts=[], pageCSS=[];
     </script>
     {+headLinks/}
     {+headContent/}
@@ -41,6 +42,11 @@
     </div>
     {>mainPageScripts/}
     {+pageScripts/}
+    <script>
+        if( pageScripts.length) { head.js.applay(undefined,   pageScripts ); }
+        if( pageCSS.length)     { head.load.applay(undefined, pageCSS ); }
+    </script>
+
     {+pageBottom /}
   </body>
 </html>

@@ -22,6 +22,20 @@ box.on('db.init', function( monk, Config, done ){
         Imports.insert( oColl,  { safe: true }, callback);
     });
 
+    box.on('import.added', function( importNodes, callback){
+        Imports.insert( importNodes,  { safe: false }, callback );
+    });
+
+    box.on('import.get.one', function( id, callback){
+        Imports.findById(id, function(err, import_found ){
+            Imports.find({importID: import_found._id, parent:'/'},  { sort:{ created:-1}}, function(err, result){
+                import_found.nodes =  result;
+                callback(err, import_found);
+            });
+        });
+    });
+
+
     box.on('import.get', function( waterfall, callback){
         Imports.findById(waterfall.coll_id, function(err, found_coll ){
             if( found_coll) {
@@ -32,21 +46,6 @@ box.on('db.init', function( monk, Config, done ){
         });
     });
 
-    box.on('import.get.one', function( coll_id, callback){
-        Imports.findById(coll_id, function(err, found_coll ){
-            if( err || !found_coll) {
-                callback(err, found_coll);
-            }else{
-                found_coll.type = "collection";
-                box.emit( 'import.get.links', found_coll, {}, function(err2, links){
-                    box.utils.formatUpdated( links );
-                    found_coll.links = links;
-                    callback(err2, found_coll);
-
-                });
-            }
-        });
-    });
 
     box.on('import.delete', function(coll_id, callback){
         if( !coll_id ){
@@ -77,29 +76,6 @@ box.on('db.init', function( monk, Config, done ){
         });
     });
 
-    box.on('_link.added', function( newLink, callback){
-        var link_id =  newLink._id;
-        Imports.update(
-            { _id: newLink.collection, "links" :{ $ne : link_id }},
-            {  $push: {  "links" : link_id } },
-            // TODO: set new date for .updated
-            function(err, result){
-                callback(err, result);
-            }
-        );
-    });
-
-    box.on('_link.delete', function(link_id, url_id, coll_id, callback){
-        Imports.updateById(
-            coll_id,
-            {  $pull: {  "links" : Imports.id(link_id) } },
-            callback
-        );
-    });
-
-    box.on('link.tag.updated', function( Tag, link_id, callback){
-       callback(null,1);
-    });
 
 
 

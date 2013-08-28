@@ -1,0 +1,8 @@
+{>"main"/}
+
+{<bodyClass}import{/bodyClass}
+{<pageTitle}Import: {title}{/pageTitle}
+
+{<container}
+   {>"imports/import_container"/}
+{/container}

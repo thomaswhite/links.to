@@ -1,0 +1,10 @@
+<div id="breadcrumbs">{>"navigation/breadcrumbs"/}</div>
+<div class="row">
+    <div class="span8" id="title">
+        <h1 class="eip" id="title"><span class="coll-title-prefix">Import </span> {title}</h1>
+        <a class="btn btn-danger btn-mini"  href="/imports/{import._id}/delete?back=/imports"><i class="icon-trash icon-white"></i> Delete</a>
+    </div>
+</div>
+<div id="beforeContent">{+beforeContent/}</div>
+<div id="content">{>"imports/import"/}</div>
+

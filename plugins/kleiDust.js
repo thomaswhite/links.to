@@ -62,6 +62,7 @@ box.on('init.attach', function(app, config, done){
             }
         },
         makeBase: function( o ) {
+            o.config = config;
             return kleiDust.getDust().makeBase( o );
         }
     };
