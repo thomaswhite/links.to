@@ -36,6 +36,9 @@ $(document).ready(function() {
                 console.info(response);
             }else{
                 console.info('Upload OK', response);
+                if( response.go_to ){
+                    page( response.go_to  );
+                }
             }
         }
     });

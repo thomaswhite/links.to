@@ -1,14 +1,11 @@
-{#collection}
+{#import}
 <div id="{contentID}">
-  <div class="row">
-    <div class="span8 {?canEdit}eip{/canEdit} ta wrap coll_description" >{description}</div>
-  </div>
   <div id="grid">
-    {#links collection_id="{_id}"}
-    {>"links/link" /}
+    {#nodes}
+    {>"imports/import_line" /}
     {:else}
-    <div class="row"><div class="span6">No links in this import.</div></div>
-    {/links}
+    <div class="row"><div class="span6">Processing import data...</div></div>
+    {/nodes}
   </div>
 </div>
-{/collection}
+{/import}

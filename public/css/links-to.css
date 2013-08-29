@@ -523,6 +523,13 @@ body.collection h1 {
 .link-tools-block {
   float: right;
 }
+.link-icon {
+  height: 16px;
+  width: 16px;
+  display: inline-block;
+  position: relative;
+  top: .15em;
+}
 .my-collection {
   color: cornflowerblue;
 }
