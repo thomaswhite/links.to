@@ -4,7 +4,7 @@
       <div class="span1 coll-e">{links}</div>
       <div class="span2 coll-e">
         {#created}
-          <span class="updated"  title='{@timeStamp time="{updated}" format="YYYY-MM-DD HH:mm" /}' >
+          <span class="updated"  title='{@timeStamp time="{.}" format="YYYY-MM-DD HH:mm" /}' >
               <i class="icon-calendar"></i>
               <span>{@timeFromNow time="{.}"/}</span>
           </span>

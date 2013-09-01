@@ -1,11 +1,11 @@
 {#import}
 <div id="{contentID}">
   <div id="grid">
-    {#nodes}
+    {#root_nodes}
     {>"imports/import_line" /}
     {:else}
     <div class="row"><div class="span6">Processing import data...</div></div>
-    {/nodes}
+    {/root_nodes}
   </div>
 </div>
 {/import}

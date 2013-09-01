@@ -14,35 +14,37 @@ $(document).ready(function() {
         })
         .on('click', '.fakeFileCont input:button, .fakeFileCont button', function(event){
           $(this).closest('.fakeFileCont').find('input:file').trigger('click');
-        });
+        })
+    ;
+
 
     $('.fakeFileCont input:file')
         .css('position','absolute')
         .css('top','-10000px')
     ;
 
-
-    $('form#upload').iframePostForm({
-        json : true,
-        post : function ()	{
-            console.info('Uploading..');
-        },
-        error:  function (response,desc){
-           console.error('Bad upload', response, desc);
-        },
-        complete : function (response){
-            if (!response.success){
-                console.error('Bad upload');
-                console.info(response);
-            }else{
-                console.info('Upload OK', response);
-                if( response.go_to ){
-                    page( response.go_to  );
+    if($.isFunction( $.fn.iframePostForm) ){
+        $('form#upload').iframePostForm({
+            json : true,
+            post : function ()	{
+                console.info('Uploading..');
+            },
+            error:  function (response,desc){
+               console.error('Bad upload', response, desc);
+            },
+            complete : function (response){
+                if (!response.success){
+                    console.error('Bad upload');
+                    console.info(response);
+                }else{
+                    console.info('Upload OK', response);
+                    if( response.go_to ){
+                        page( response.go_to  );
+                    }
                 }
             }
-        }
-    });
-
+        });
+    }
     socket.on('import.processing', function(data){
         console.log ( 'import.processing, data:', data );
     });

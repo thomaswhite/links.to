@@ -1,16 +1,17 @@
 <div class="row" id="import_{_id}">
       <div class="span5 coll-title">
-          <span class="icon">
+          <span>
               {#folder}
-              <i class="icon-expand-alt"></i>
+              <i class="import-folder icon-expand-alt"></i>
               {:else}
               <span class="link-icon" style=" background-image:url({icon})"></span>
               {/folder}
           </span>
           {title}
+          {#folder}
+            <span title='{folder.folders} folders/{folder.links} links'>({folder.folders}/{folder.links})</span>
+          {/folder}
       </div>
-      <div class="span1 coll-e">{folder.folders}</div>
-      <div class="span1 coll-e">{folder.links}</div>
       <div class="span2 coll-e">
         {#add_date}
           <span class="updated"  title='{@timeStamp time="{.}" format="YYYY-MM-DD HH:mm" /}' >
@@ -19,5 +20,6 @@
           </span>
         {/add_date}
       </div>
+      <div class="links-cont span8"></div>
 </div>
 

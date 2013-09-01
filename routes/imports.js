@@ -24,7 +24,7 @@ function newImport ( name, size, owner ){
         owner: owner,
         title: name,
         size: size,
-        created : new Date().getTime(),
+        created : new Date(),
         links:0,
         folders:0
     };
@@ -91,19 +91,90 @@ function All (req, res, next ){
     }
 }
 
+
+function responseJSON(res, obj){
+    res.writeHead(200, {"Content-Type": "application/json"});
+    res.write( JSON.stringify( obj ) );
+    res.end();
+}
+
 function Add(req, res) {
     var user = req.user;
     if( !user ){
         res.redirect( '/coll' );
     }
-    req.io.route('imports:add');
+    //req.io.route('imports:add');
+
+
+    if( req.files.uploaded_file.type != "text/html" ||
+        req.files.uploaded_file.mime != "text/html" ){
+        responseJSON( res,{
+            success:false,
+            upload:'error',
+            error:'File is not HTML file. It is type:"' + req.files.uploaded_file.type + '"',
+            file: req.files.uploaded_file.name,
+            size: req.files.uploaded_file.size
+        });
+    }else{
+        favorites.parse( req.files.uploaded_file.path, false, function(err, root, allNodes ){
+            if( err ){
+                responseJSON( res,{
+                    success:false,
+                    upload:'error',
+                    error: err,
+                    file: req.files.uploaded_file.name
+                });
+            }else{
+
+                console.log("\nRoot:\n" + util.inspect( root, false, 7, true ));
+                console.log("\nallNodes:\n" + util.inspect( allNodes, false, 7, true ));
+
+                var Import = newImport (  req.files.uploaded_file.name, req.files.uploaded_file.size, user._id );
+                Import = favorites.countFoldersAndLinks( root, Import );
+
+                box.emit('import.add', Import, function(err, saved_import ) {
+                    if (err) {
+                        responseJSON( res,{
+                            success:false,
+                            file: req.files.uploaded_file.name,
+                            msg:'Error when adding an import',
+                            error:err
+                        });
+                    }else {
+                        responseJSON( res,{
+                            success:true,
+                            upload:'ok',
+                            id:saved_import._id,
+                            import: saved_import,
+                            root:root,
+                            go_to:'/imports/' + saved_import._id
+                        });
+
+                        var ID = saved_import._id;
+                        for(var n=0; n < allNodes.length; n++){
+                            allNodes[n].importID = ID;
+                        }
+
+                        box.parallel('import.added',  allNodes, function(err, result){
+                            if( err ){
+                                console.error('Error saving import nodes for file ' + saved_import.title, err );
+                            }else{
+                                console.info('Import nodes for file "' +  + saved_import.title + '" saved OK', saved_import );
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    }
+
 }
 
 function Delete (req, res) {
     var referer = req.headers.referer
-        , coll_id = req.params.id
+        , id = req.params.id
         ;
-    box.parallel('collection.delete', coll_id, function(err, aResult){
+    box.parallel('import.delete', id, function(err, aResult){
         res.redirect( req.query.back );
     });
     // todo: get the id of current collection to return back after deletion
@@ -191,85 +262,17 @@ box.on('init.attach', function (app, config,  done) {
                });
            });
        },
-       add:function(req){
-           var user = req.user
-//               , name = req.data.value.trim()
-//               , coll = newCollection( user, name )
-               ;
-           if( !user ){
+       'folder_content': function(req){
+           box.emit( 'import.folder_content', req.data.id, function( err, Import ){
                req.io.respond({
-                   success:false,
-                   upload:'error',
-                   error:'Session timeout.'
+                   req:req.data,
+                   result: Import,
+                   error:err
                });
-           }else{
-               if( req.files.uploaded_file.type != "text/html" ||
-                   req.files.uploaded_file.mime != "text/html" ){
-                   req.io.respond({
-                       success:false,
-                       upload:'error',
-                       error:'File is not HTML file. It is type:"' + req.files.uploaded_file.type + '"',
-                       file: req.files.uploaded_file.name,
-                       size: req.files.uploaded_file.size
-                   });
-               }else{
-                   favorites.parse( req.files.uploaded_file.path, false, function(err, root, allNodes ){
-                       if( err ){
-                           req.io.respond({
-                               success:false,
-                               upload:'error',
-                               error: err,
-                               file: req.files.uploaded_file.name
-                           });
-                       }else{
-
-                           console.log("\nRoot:\n" + util.inspect( root, false, 7, true ));
-                           console.log("\nallNodes:\n" + util.inspect( allNodes, false, 7, true ));
-
-                           var Import = newImport (  req.files.uploaded_file.name, req.files.uploaded_file.size, user._id );
-                           Import = favorites.countFoldersAndLinks( root, Import );
-
-                           box.emit('import.add', Import, function(err, saved_import ) {
-                               if (err) {
-                                   req.io.respond({
-                                       success:false,
-                                       file: req.files.uploaded_file.name,
-                                       msg:'Error when adding an import',
-                                       error:err
-                                   });
-                               }else {
-                                   req.io.respond({
-                                       success:true,
-                                       upload:'ok',
-                                       id:saved_import._id,
-                                       import: saved_import,
-                                       root:root,
-                                       go_to:'/imports/' + saved_import._id
-                                   });
-
-                                   var ID = saved_import._id;
-                                   for(var n=0; n < allNodes.length; n++){
-                                       allNodes[n].importID = ID;
-                                   }
-
-                                   box.parallel('import.added',  allNodes, function(err, result){
-                                      if( err ){
-                                          console.error('Error saving import nodes for file ' + saved_import.title, err );
-                                      }else{
-                                          console.info('Import nodes for file "' +  + saved_import.title + '" saved OK', saved_import );
-                                      }
-                                   });
-                               }
-                           });
-                       }
-                   });
-               }
-           }
-
-
-           return;
+           });
 
        },
+
        remove:function(req){
            box.parallel('collection.delete', req.data.id, function(err, result){
                req.io.respond({

@@ -348,9 +348,6 @@ span.updated i {
   font-weight: bold;
   color: #fff;
 }
-.navbar .nav > li > a:hover {
-  color: yellow;
-}
 .logout {
   margin-right: 0;
 }
@@ -366,24 +363,8 @@ li.dropdown.open>.dropdown-toggle .caret, .navbar .nav li.dropdown.active>.dropd
   border-bottom-color: #555555;
 }
 */
-.navbar .nav li.dropdown.open > .dropdown-toggle,
-.navbar .nav li.dropdown.active > .dropdown-toggle,
-.navbar .nav li.dropdown.open.active > .dropdown-toggle {
-  background-color: transparent !important;
-  color: blue;
-  text-shadow: 0px 0px 15px yellow;
-}
 #navbar {
   color: white;
-}
-.navbar .nav li.dropdown > .dropdown-toggle .caret {
-  color: yellow;
-}
-.navbar .nav > li > a {
-  color: white;
-  text-decoration: none;
-  font-weight: bold;
-  text-shadow: 0px 0px 15px #ddd;
 }
 .dropdown.open {
   line-height: 18px;
@@ -394,7 +375,32 @@ li.dropdown.open>.dropdown-toggle .caret, .navbar .nav li.dropdown.active>.dropd
   margin-right: 4px;
   margin-left: -4px;
 }
-*/.thumbnail > img {
+*/
+.navbar .nav li.dropdown.open > .dropdown-toggle,
+.navbar .nav li.dropdown.active > .dropdown-toggle,
+.navbar .nav li.dropdown.open.active > .dropdown-toggle {
+  background-color: transparent !important;
+  color: yellow;
+  text-shadow: 0px 0px 15px yellow;
+}
+.navbar .nav li.dropdown > .dropdown-toggle .caret {
+  color: yellow;
+}
+.navbar .nav > li > a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  text-shadow: none /* 0px 0px 15px #ddd; */
+;
+}
+.navbar .nav > li > a:hover {
+  color: yellow;
+  text-shadow: 0px 0px 15px yellow;
+}
+.breadcrumb {
+  background-color: transparent;
+}
+.thumbnail > img {
   background-color: #eee;
   height: 96px !important;
   width: 96px !important;
@@ -621,6 +627,12 @@ form .row .title {
   padding: .4em;
   vertical-align: top;
   display: inline-block;
+}
+i.import-folder {
+  font-size: 120%;
+}
+.links-cont {
+  padding-left: 15px;
 }
 .row.table-header {
   margin-top: .8em;

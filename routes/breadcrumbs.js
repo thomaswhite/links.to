@@ -33,12 +33,22 @@ module.exports = {
                 title: param.link.title
             });
         }
-
         if( param.imports ){
-            crumbs.push = [{
+            crumbs = [{
                 href:'/imports',
                 title: 'Imports'
             }];
+        }
+        if( param.import ){
+            crumbs = [{
+                href:'/imports',
+                title: 'Imports'
+                },
+                {
+                    href:'/imports/' + param.id,
+                    title: param.title
+                }
+            ];
 
         }
         return crumbs;

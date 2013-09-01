@@ -43,12 +43,18 @@ function myRender(tempateID, data, $target, contentAction) {
                     $target.html(out).hide().slideDown(250);
                     break;
 
+                case '$replace':
+                    $target.replaceWith( $out );
+
+                    break;
+
                 case 'replace':
                 default:
                     $target.html(out);
                     break;
             }
         }
+        return out;
     });
 }
 

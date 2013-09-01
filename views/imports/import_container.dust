@@ -3,7 +3,7 @@
 <div class="row">
     <div class="span8" id="title">
         <h1 class="eip" id="title"><span class="coll-title-prefix">Import </span> {title}</h1>
-        <p>Size:{import.size}, {import.folders} folders, {import.links} links</p>
+        <p>Size:{import.size}, {import.folders} folders, {import.links} links, imported on {@timeStamp time="{import.created}" format="YYYY-MM-DD HH:mm" /}, {@timeFromNow time="{import.created}"/}</p>
         <a class="btn btn-danger btn-mini"  href="/imports/{import._id}/delete?back=/imports"><i class="icon-trash icon-white"></i> Delete</a>
     </div>
 </div>

@@ -29,7 +29,7 @@ box.on('db.init', function( monk, Config, done ){
     box.on('import.get.one', function( id, callback){
         Imports.findById(id, function(err, import_found ){
             Imports.find({importID: import_found._id, parent:'/'},  { sort:{ created:-1}}, function(err, result){
-                import_found.nodes =  result;
+                import_found.root_nodes =  result;
                 callback(err, import_found);
             });
         });
@@ -47,19 +47,42 @@ box.on('db.init', function( monk, Config, done ){
     });
 
 
-    box.on('import.delete', function(coll_id, callback){
-        if( !coll_id ){
-            throw "Collection ID expected!";
+    box.on('import.delete', function(id, callback){
+        if( !id ){
+            throw "Import ID expected!";
         }else{
-            // TODO move existing links into _unassigned_links collection that every user has
-            Imports.remove( {_id: coll_id }, callback );
+            Imports.findById(id, function(err, import_found ){
+                Imports.remove( {importID: import_found._id });
+                Imports.remove( {_id: id }, callback );
+            });
+        }
+    });
+
+    box.on('import.folder_content', function(id, callback){
+        if( !id ){
+            throw "Import ID expected!";
+        }else{
+            Imports.findById(id, function(err, found ){
+                if( err ){
+                    callback(err);
+                }else{
+                    if( found.folder.this_folders || found.folder.this_links ){
+                        Imports.find( {importID: found.importID, parent: found.folder.full_path }, function(err2, nodes ){
+                            if( err2 ){
+                                callback(err2);
+                            }else{
+                                callback(null,{ nodes:nodes || [] });
+                            }
+                        });
+                    }else{
+                        callback(null,{ nodes:[] });
+                    }
+                }
+            });
         }
     });
 
 
-    box.on('import.update', function(coll_id, toUpdate, callback){
-        Imports.updateById( coll_id, {$set: toUpdate }, callback );
-    });
 
     box.on('_import.eip', function(id, field, value, callback){
         var o = {};
@@ -68,7 +91,7 @@ box.on('db.init', function( monk, Config, done ){
     });
 
     box.on('imports.list', function( filter, limit, sort, callback){
-        Imports.find( filter , {limit:limit || 64, sort:sort || {updated:-1, created:-1}}, function(err, result){
+        Imports.find( filter , {limit:limit || 64, sort:sort || {created:-1}}, function(err, result){
             if( result ){
                 result.type = 'imports-list';
             }
