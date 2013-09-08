@@ -634,6 +634,18 @@ i.import-folder {
 .links-cont {
   padding-left: 15px;
 }
+input.excluded {
+  position: relative;
+  margin-top: -0.2em !important;
+}
+.row.excluded .coll-title {
+  text-decoration: line-through !important;
+  font-style: italic;
+  color: #999;
+}
+.row .updated {
+  font-style: italic;
+}
 .row.table-header {
   margin-top: .8em;
 }

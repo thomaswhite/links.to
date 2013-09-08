@@ -42,6 +42,7 @@ box.on('db.init', function( monk, Config, done ){
         , Users = box.db.coll.users = monk.get('users')
         ;
 
+    Users.ensureIndex( { email: 1, openIDs: 1, shortID:1 }); // , {background:true}
 
     box.on('openID.authenticated', function( waterfall, callback ){
         var criterion = waterfall.openID.justAdded ? {"openIDs": waterfall.openID._id } : {"_id":  waterfall.openID.owner };

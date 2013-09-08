@@ -1,24 +1,24 @@
-<div class="row" id="import_{_id}">
+<div class="row {#excluded}excluded{/excluded}" id="import_{_id}" data-id="{_id}">
       <div class="span5 coll-title">
           <span>
               {#folder}
-              <i class="import-folder icon-expand-alt"></i>
+                {#excluded}
+                  <i class="import-folder icon-ban-circle text-error"></i>
+                {:else}
+                  <i class="import-folder icon-expand-alt"></i>
+                {/excluded}
               {:else}
-              <span class="link-icon" style=" background-image:url({icon})"></span>
+                <span class="link-icon" style=" background-image:url({icon})"></span>
               {/folder}
           </span>
           {title}
           {#folder}
             <span title='{folder.folders} folders/{folder.links} links'>({folder.folders}/{folder.links})</span>
+            {#add_date}
+              <span class="updated"  title='{@timeStamp time="{.}" format="YYYY-MM-DD HH:mm" /}' >, {@timeFromNow time="{.}"/}</span>
+            {/add_date}
+            <input type="checkbox" class="excluded" {#excluded}{:else}checked="checked"{/excluded} >
           {/folder}
-      </div>
-      <div class="span2 coll-e">
-        {#add_date}
-          <span class="updated"  title='{@timeStamp time="{.}" format="YYYY-MM-DD HH:mm" /}' >
-              <i class="icon-calendar"></i>
-              <span>{@timeFromNow time="{.}"/}</span>
-          </span>
-        {/add_date}
       </div>
       <div class="links-cont span8"></div>
 </div>

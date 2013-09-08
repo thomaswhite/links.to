@@ -270,8 +270,16 @@ box.on('init.attach', function (app, config,  done) {
                    error:err
                });
            });
-
        },
+       'folder_exclude': function(req){
+            box.emit( 'import.folder_exclude', req.data.id, req.data.excluded, function( err, Import ){
+                req.io.respond({
+                    req:req.data,
+                    result: Import,
+                    error:err
+                });
+            });
+        },
 
        remove:function(req){
            box.parallel('collection.delete', req.data.id, function(err, result){

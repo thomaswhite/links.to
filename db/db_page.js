@@ -27,7 +27,5 @@ box.on('db.init', function( monk, Config, done ){
             callback
         );
     });
-
-
     done(null, 'db:page initialised.');
 });

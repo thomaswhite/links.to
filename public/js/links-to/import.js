@@ -17,44 +17,82 @@ function disableSelection( $o ){
         }).bind('selectstart', function(){ return false; });
 }
 
+function get_import_parts(dom){
+    var $this = $(dom)
+        , $row = $this.closest('.row')
+        , $i = $row.find('> div > span > i')
+        , $excluded =  $row.find('> div > input.excluded')
+        , o = {
+            $this   : $this,
+            $row    : $row,
+            $i      : $i,
+            $linkCont : $row.find('>div.links-cont'),
+            $excluded : $excluded,
+            excluded : !$excluded.is(':checked'),
+            id      : $row.data('id'),
+            state   : $i.hasClass( 'icon-expand-alt' ) ? 'closed' : 'expanded'
+        }
+    ;
+    return o;
+}
+
+
 $(document).ready(function() {
     $('body')
-        .on('click', '.coll-title', function(){
-            var $this = $(this)
-                , $i = $this.find('i')
-                , state = $i.hasClass( 'icon-expand-alt' ) ? 'closed' : 'expanded'
-                , $row  =  $this.parent()
-                , rowID = $row.attr('id')
-                , $linkCont = $row.find('>div.links-cont')
-                , id
-             ;
-
-            if( state == 'closed'){
-                $i.removeClass( 'icon-expand-alt').addClass('icon-collapse-alt');
-                folderId = rowID.split('_')[1];
-                if( $linkCont.find('div').length ){
-                    $linkCont.stop(true,true).slideDown(400);
+        .on('click', '.coll-title', function(event){
+            var o = get_import_parts(this);
+            if(event.target.tagName == 'INPUT' || o.excluded ){
+                return;
+            }
+            if(o.state == 'closed'){
+                o.$i.removeClass( 'icon-expand-alt').addClass('icon-collapse-alt');
+                if( o.$linkCont.find('div').length ){
+                    o.$linkCont.stop(true,true).slideDown(300);
                 }else{
                     socket.emit('imports:folder_content', {
-                        id   : folderId,
-                        rowID : $row.attr('id')
+                        id   : o.id,
+                        rowID : o.$row.attr('id')
                     }, function(data){
                         console.log ('import.folder_content:',  data);
-                        $linkCont.stop(true,true).slideDown(400);
+                        o.$linkCont.stop(true,true).slideDown(300);
                         console.info( 'rendered HTML',
-                            myRender('imports/import_folder_content', data.result, $linkCont, '$replace')
+                            myRender('imports/import_folder_content', data.result, o.$linkCont, '$replace')
                         );
-
                     });
                 }
             }else{
-                $i.removeClass( 'icon-collapse-alt').addClass('icon-expand-alt');
-                $linkCont.stop(true,true).slideUp(400);
+                o.$i.removeClass( 'icon-collapse-alt').addClass('icon-expand-alt');
+                o.$linkCont.stop(true,true).slideUp(300);
             }
         })
-        .on('select', '.coll-title', function(){
+        .on('select', '.coll-title', function(event){
             return false;
         })
+        .on('change', 'input.excluded', function(event){
+            var o = get_import_parts(this);
+
+            o.$this.attr('disabled', true );
+            o.$linkCont.stop(true,true).hide();
+            o.$i.removeClass( 'icon-collapse-alt').addClass('icon-expand-alt');
+            if(o.excluded ){
+                o.$row.addClass('excluded');
+            }
+            socket.emit('imports:folder_exclude', {
+                id   : o.id,
+                excluded : o.excluded
+            }, function(data){
+                o.$this.removeAttr('disabled');
+                if(o.excluded ){
+                    o.$row.addClass('excluded');
+                    o.$i.removeClass( 'icon-collapse-alt icon-expand-alt').addClass('icon-ban-circle text-error');
+                }else{
+                    o.$row.removeClass('excluded');
+                    o.$i.removeClass( 'icon-ban-circle text-error').addClass('icon-expand-alt');
+                }
+                console.log ('import.folder_excluded:',  data);
+            });
+        })
+
     ;
 
     disableSelection( $('.coll-title'));

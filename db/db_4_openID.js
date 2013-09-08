@@ -18,6 +18,9 @@ box.on('db.init', function( monk, Config, done ){
         , AuthTemp   = monk.get('auth_temp')
         ;
 
+    OpenIDs.ensureIndex( { provider: 1, id:1, email:1 }); // , {background:true}
+    AuthTemp.ensureIndex( {session:1}, {expireAfterSeconds:1800});
+
     box.on('openID.authenticated', function( waterfall, callback ){
         var oOpenID = box.utils._.extend( { owner:''} ,waterfall.picked_openID);
         OpenIDs.findOne( {"provider":oOpenID.provider, "id":oOpenID.id }, function(err, foundOpenID) {
@@ -32,7 +35,7 @@ box.on('db.init', function( monk, Config, done ){
                     savedOpenID.justAdded = true;
                     waterfall.openID = savedOpenID;
                     callback(err, waterfall );
-                })
+                });
             }
         });
     });

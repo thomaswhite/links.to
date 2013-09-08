@@ -15,11 +15,12 @@ box.on('db.init', function( monk, Config, done ){
     var   settings = Config.db
         , common_config = Config.common
         , Tags = box.db.coll.tags = monk.get('tags')
-        , Dummy = monk.get('dummy');
+        , Dummy = monk.get('dummy')
         ;
 
     // Returns an array of the links for a collection
 
+    Tags.ensureIndex( { coll_ID:1 }); // , {background:true}
 
     box.on('link.added', function( newLink, callback){
         var link_id =  newLink._id,

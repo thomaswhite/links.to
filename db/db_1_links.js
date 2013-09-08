@@ -17,6 +17,8 @@ box.on('db.init', function( monk, Config, done ){
         , Links = box.db.coll.links = monk.get('links')
         ;
 
+    Links.ensureIndex( { updated: -1, created: -1 }, {background:true} ); // coll_id ?
+
     // Returns an array of the links for a collection
 
     box.on('collection.get', function( waterfall, callback){
