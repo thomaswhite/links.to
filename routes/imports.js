@@ -33,7 +33,7 @@ function newImport ( name, size, owner ){
 function import_defaultParam(filter, param){
     return {
         filter : _.merge( {}, filter),
-        param  :  _.merge(  {page:1, limit:40, sort:{updated:-1, created:-1} }, param)
+        param  : _.merge(  {page:1, limit:40, sort:{updated:-1, created:-1} }, param)
     };
 }
 
@@ -180,7 +180,6 @@ function Delete (req, res) {
     // todo: get the id of current collection to return back after deletion
 }
 
-
 function Get_One_data (id, callBack) {
     box.emit( 'import.get.one', id, function( err, Import ){
         callBack(err, {
@@ -215,10 +214,10 @@ function Get_One (req, res) {
                                 id : id
                             }
                         })
-                        ;
-                        console.log(  util.inspect( displayBlock, false, 7, true ) );
-                        box.dust.render(res, 'imports/page_import', base.push(displayBlock));
-                }
+                    ;
+                    console.log(  util.inspect( displayBlock, false, 7, true ) );
+                    box.dust.render(res, 'imports/page_import', base.push(displayBlock));
+            }
         });
     }
 }
