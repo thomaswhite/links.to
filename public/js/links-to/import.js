@@ -53,9 +53,9 @@ $(document).ready(function() {
                         id   : o.id,
                         rowID : o.$row.attr('id')
                     }, function(data){
-                        console.log ('import.folder_content:',  data);
+                        debug.log ('import.folder_content:',  data);
                         o.$linkCont.stop(true,true).slideDown(300);
-                        console.info( 'rendered HTML',
+                        debug.info( 'rendered HTML',
                             myRender('imports/import_folder_content', data.result, o.$linkCont, '$replace')
                         );
                     });
@@ -89,8 +89,26 @@ $(document).ready(function() {
                     o.$row.removeClass('excluded');
                     o.$i.removeClass( 'icon-ban-circle text-error').addClass('icon-expand-alt');
                 }
-                console.log ('import.folder_excluded:',  data);
+                debug.log ('import.folder_excluded:',  data);
             });
+        })
+        .on('click', '.import-btn', function(event){
+            $(this).attr('disabled', true );
+            socket.emit('imports:process', {
+                id   : pageParam.id
+            }, function( response ){
+                if (!response.success){
+                    debug.error('Bad import', response);
+                }else{
+                    debug.info('Import started', response);
+                    if( response.go_to ){
+                        page(  response.go_to  );
+                    }
+                }
+            });
+
+
+            return false;
         })
 
     ;
@@ -98,10 +116,10 @@ $(document).ready(function() {
     disableSelection( $('.coll-title'));
 
     socket.on('import.processing', function(data){
-        console.log ( 'import.processing, data:', data );
+        debug.log ( 'import.processing, data:', data );
     });
     socket.on('import.root', function(data){
-        console.log ( 'import.root, data:', data );
+        debug.log ( 'import.root, data:', data );
     });
 
 });

@@ -23,9 +23,9 @@ function myRender(tempateID, data, $target, contentAction) {
     data.user =   socketContext.user;
     dust.render(tempateID,  base.push(data), function(err, out) {
         if (err) {
-            console.error(err);
+            debug.error(err);
         }else if( !$target ){
-            console.log( out );
+            debug.log( out );
         } else {
             var $out = $(out);
             switch( contentAction ){
@@ -85,7 +85,7 @@ function fnBtnAdd(event){
     socket.emit(Context.page.routeIO, Context.data, function(dataDone){
         Context.$this.removeAttr('disabled');
         Context.$input.removeAttr('disabled').val('');
-        console.log ('btn_Add', dataDone);
+        debug.log ('btn_Add', dataDone);
 
         if( Context.page.routeIO == "link:add" ){
             var param = Context.page.adding;
@@ -103,9 +103,9 @@ function fnBtnDelete(event){
     Context.$closest.addClass('deleting');
     socket.emit(Context.page.routeIO, Context.data, function(dataDone){
         if( dataDone.result == 'ok' ){
-            console.log ('btn_Delete: OK, ', Context.data, dataDone);
+            debug.log ('btn_Delete: OK, ', Context.data, dataDone);
         }else{
-            console.log ('btn_Delete: ERROR, ', Context.data, dataDone);
+            debug.log ('btn_Delete: ERROR, ', Context.data, dataDone);
         }
     });
 }
@@ -136,7 +136,7 @@ function addDustHelpers(){
 
 function socketEvent_common(data){
     var Context = page_context( null,null, null, data.param.route );
-    console.log ( 'socketEvent_common, data:', data, ' context:', Context );
+    debug.log ( 'socketEvent_common, data:', data, ' context:', Context );
     $('body').trigger(Context.page.eventDone, [ data, data.param.route, Context] );
 }
 

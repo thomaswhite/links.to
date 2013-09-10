@@ -27,17 +27,17 @@ $(document).ready(function() {
         $('form#upload').iframePostForm({
             json : true,
             post : function ()	{
-                console.info('Uploading..');
+                debug.info('Uploading..');
             },
             error:  function (response,desc){
-               console.error('Bad upload', response, desc);
+               debug.error('Bad upload', response, desc);
             },
             complete : function (response){
                 if (!response.success){
-                    console.error('Bad upload');
-                    console.info(response);
+                    debug.error('Bad upload');
+                    debug.info(response);
                 }else{
-                    console.info('Upload OK', response);
+                    debug.info('Upload OK', response);
                     if( response.go_to ){
                         page( response.go_to  );
                     }
@@ -46,10 +46,10 @@ $(document).ready(function() {
         });
     }
     socket.on('import.processing', function(data){
-        console.log ( 'import.processing, data:', data );
+        debug.log ( 'import.processing, data:', data );
     });
     socket.on('import.root', function(data){
-        console.log ( 'import.root, data:', data );
+        debug.log ( 'import.root, data:', data );
     });
 
 });

@@ -11,48 +11,48 @@ var socket = io.connect(''),
 
 
 
-socket.on('connecting',     function() {     console.log('socket.io connecting...');});
-socket.on('reconnecting',   function() {     console.log('socket.io reconnecting...');});
-socket.on('connect',        function() {     console.log('socket.io connected!');});
-socket.on('reconnect',      function() {     console.log('socket.io reconnect');});
-socket.on('disconnect',     function () {          console.log('socket.io disconnected');});
-socket.on('error',          function (data ) {     console.log('socket.io error', data);});
-socket.on('reconnect_failed', function () {     console.log('socket.io reconnect failed');});
-socket.on('connect_failed', function () {       console.log('socket.io connect failed');}); // "connect_failed" is emitted when socket.io fails to establish a connection to the server and has no more transports to fallback to.
+socket.on('connecting',     function() {     debug.log('socket.io connecting...');});
+socket.on('reconnecting',   function() {     debug.log('socket.io reconnecting...');});
+socket.on('connect',        function() {     debug.log('socket.io connected!');});
+socket.on('reconnect',      function() {     debug.log('socket.io reconnect');});
+socket.on('disconnect',     function () {          debug.log('socket.io disconnected');});
+socket.on('error',          function (data ) {     debug.log('socket.io error', data);});
+socket.on('reconnect_failed', function () {     debug.log('socket.io reconnect failed');});
+socket.on('connect_failed', function () {       debug.log('socket.io connect failed');}); // "connect_failed" is emitted when socket.io fails to establish a connection to the server and has no more transports to fallback to.
 
 socket.on('collection.adding', function( data ){
-    console.log ('collection-adding', data);
+    debug.log ('collection-adding', data);
     // display waiting sign
 });
 
 
 socket.on('link.in-progress', function( data ){
-    console.log ('link.in-progress:', data);
+    debug.log ('link.in-progress:', data);
 });
 
 socket.on('link.ready', function( data, x ){
-    console.log ('link.ready', data);
+    debug.log ('link.ready', data);
     //render("links/link", data.data.link, null, 0);
 });
 socket.on('link.saved', function( data ){
-    console.log ('link.saved', data);
+    debug.log ('link.saved', data);
 });
 
 socket.on('link-not-found', function( data ){
-    console.log ('link-not-found', data);
+    debug.log ('link-not-found', data);
     // display error message about the link
 });
 
 socket.on('link-failure', function( data ){
-    console.log ('link-failure', data);
+    debug.log ('link-failure', data);
     // display error message about the link
 });
 socket.on('link-adding', function( data ){
-    console.log ('link-adding', data);
+    debug.log ('link-adding', data);
     // display waiting sign
 });
 socket.on('link-added', function( data ){
-    console.log ('link-added', added);
+    debug.log ('link-added', added);
     // replace the waiting sign with the new link content
 });
 
@@ -62,16 +62,16 @@ socket.on('link-added', function( data ){
 // and data for 'pageParam.route'
 socket.emit('loaded', pageParam, function(data){
     socketContext.loaded = data;
-    console.log ('loaded:',  data);
+    debug.log ('loaded:',  data);
 });
 
 socket.on('user', function( data ){
     socketContext.user = data;
-    console.log ('socketContext', socketContext);
+    debug.log ('socketContext', socketContext);
 });
 
 socket.on('data', function( data ){
-    console.log ('data', data);
+    debug.log ('data', data);
     socketData[data.param.path] = data;
     //TODO: add data under [search].data and append rows when paginate
     //TODO: trigger update event to refresh the target Area.

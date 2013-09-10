@@ -105,7 +105,7 @@ function page_context(that, event, context, route ){
 function index(){
     dust.render("main", {}, function(err, out) {
         if( err ) {
-            console.error(err);
+            debug.error(err);
         }else{
             $('#content').html( err || out );
         }
@@ -122,7 +122,7 @@ function getData( context, next){
             // TODO: when there are pages append the data, not replace
             context.state.pageData = data.result;
             context.save();
-            console.log ('getData:',  data);
+            debug.log ('getData:',  data);
             next();
         });
     }
@@ -134,7 +134,7 @@ function processRoute(context){
 }
 
 function page_not_found(context){
-    console.log( 'page.js: missing path - ' + context.pathname );
+    debug.log( 'page.js: missing path - ' + context.pathname );
     location.href = context.pathname;
     // $('#content').html( context.pathname + ' not found');
 }

@@ -4,7 +4,8 @@
     <div class="span8" id="title">
         <h1 class="eip" id="title"><span class="coll-title-prefix">Import </span> {title}</h1>
         <p>Size:{import.size}, {import.folders} folders, {import.links} links, imported on {@timeStamp time="{import.created}" format="YYYY-MM-DD HH:mm" /}, {@timeFromNow time="{import.created}"/}</p>
-        <a class="btn btn-danger btn-mini"  href="/imports/{import._id}/delete?back=/imports"><i class="icon-trash icon-white"></i> Delete</a>
+        <a class="btn btn-danger btn-small"  href="/imports/{import._id}/delete?back=/imports"><i class="icon-trash icon-white"></i> Delete</a>
+        <a class="btn btn-primary btn-small import-btn"  href="#"><i class="icon-play icon-white"></i>&nbsp;Import</a>
     </div>
 </div>
 <div id="beforeContent">{+beforeContent/}</div>

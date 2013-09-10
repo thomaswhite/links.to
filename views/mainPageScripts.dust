@@ -6,6 +6,7 @@
       {moment:"/js/moment.js"},
       {dust_templates: "/templates/all.js"},
       {page:"/js/page.js"},
+      {debug:"/js/ba-debug.min.js"},
       {main: "/js/links-to/main.js"},
       {pages:"/js/links-to/pages.js"},
       function(){
