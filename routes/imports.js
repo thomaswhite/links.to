@@ -222,6 +222,16 @@ function Get_One (req, res) {
     }
 }
 
+function process( req ){
+    var session = req.session,
+        user  = session && session.passport && session.passport.user ? JSON.parse(session.passport.user):null;
+
+    if( !user || !user._id ){
+        res.redirect( '/coll'  );  // not logged in
+    }else{
+
+    }
+}
 
 box.on('init', function (App, Config, done) {
     app = App;
@@ -288,7 +298,18 @@ box.on('init.attach', function (app, config,  done) {
                });
                req.io.emit('collection.deleted', {param:req.data, result:result} );
            });
+       },
+
+       process:function(req){
+           //box.emit( 'import.get.one', id, function( err, Import ){
+           Get_One_data( req.data.id, function(err, displayBlock ){
+               req.io.respond({
+                   result:displayBlock,
+                   error:err
+               });
+           });
        }
+
     });
 
 
