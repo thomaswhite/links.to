@@ -5,7 +5,7 @@
  * Time: 15:25
  */
 
-var   box = require('../box.js')
+var   box = require('../modules/box.js')
     , debug = require('debug')('linksTo:db')
     , Monk  = require('monk')
 
@@ -20,6 +20,7 @@ var   box = require('../box.js')
 
 box.on('init', function (App, Config, initDone) {
     var ts   = new Date().getTime();
+
     app = App;
     settings = Config.db;
     common_config = Config.common;
@@ -29,7 +30,7 @@ box.on('init', function (App, Config, initDone) {
         monk :  monk,
         Dummy : monk.get('dummy'),
         coll:{}
-    }
+    };
     var AuthTemp   = monk.get('auth_temp');
     AuthTemp.index({expires: 1}, { expireAfterSeconds: 60 });
     AuthTemp.options.safe = false;
@@ -41,8 +42,6 @@ box.on('init', function (App, Config, initDone) {
     box.on('db.init', function( monk2, Config, done ){
         var settings = Config.db
             , common_config = Config.common;
-
-
         done(null, 'db:session and db:authTemp initialised.');
     });
 

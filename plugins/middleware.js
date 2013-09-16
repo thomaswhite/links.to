@@ -1,4 +1,4 @@
-var box = require('../box.js')
+var box = require('../modules/box.js')
   , middler = require('middler')
   ;
 

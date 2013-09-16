@@ -14,7 +14,9 @@
     <script>
       head.js(
           {socket_io_core:"/socket.io/socket.io.js"},
-          {socket_main:"/js/links-to/socket-io.js"}, function(){
+          {socket_main:"/js/links-to/socket-io.js"},
+          {debug:"/js/ba-debug.min.js"},
+          function(){
              console.log( 'linksTo socket-io has loaded');
           }
       );
@@ -22,7 +24,7 @@
           "//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.no-icons.min.css"
           , "//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css"
           , "/css/links-to.css"
-          , "/css/hide.css"
+          //, "/css/hide.css"
       );
       var pageScripts=[], pageCSS=[];
     </script>

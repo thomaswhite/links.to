@@ -6,7 +6,7 @@
 
  */
 
-var box = require('../box.js')
+var box = require('../modules/box.js')
 
     , ShortId  = require('shortid').seed(96715)
     , _ = require('lodash')

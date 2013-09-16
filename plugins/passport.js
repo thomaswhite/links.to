@@ -6,7 +6,7 @@
  */
 var debug = require('debug')('linksTo:passports');
 
-var box = require('../box.js')
+var box = require('../modules/box.js')
     , passport = require('passport')
     , config
     , app

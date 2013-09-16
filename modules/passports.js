@@ -8,7 +8,7 @@ var debug = require('debug')('linksTo:passports');
 
 var box = require('./box.js')
     , passport = box.passport   // = require('passport')
-    , utils = require('./tw-utils.js')
+    , utils = require('./../lib/tw-utils.js')
     , gravatar = require('gravatar')
     , dummyStrategy = require('passport-dummy').Strategy
 

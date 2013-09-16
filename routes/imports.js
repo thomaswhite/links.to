@@ -4,14 +4,18 @@
  * GET home page.
  */
 
-var box = require('../box.js')
+var box = require('../modules/box.js')
     , _ = require('lodash')
     ,  util = require('util')
     , debug = require('debug')('linksTo:view.import')
     , breadcrumbs = require('./breadcrumbs.js')
     , ShortId  = require('shortid').seed(96715)
     , moment = require('moment')
-    , favorites = require('../lib/parse-favorites')
+    , favorites = require('../modules/parse-favorites')
+
+    , kue = require('kue')
+    , jobs = kue.createQueue()
+    , async = require('async')
     , config
     , app
 
@@ -60,7 +64,6 @@ function importLists_data( filter, param, user, callBack ){
 
 function importLists( req, res, next, filter, param ){
     var helpers = box.kleiDust.getDust().helpers
-
         , Parameters =  import_defaultParam(filter, param)
         , user  =  req.session && req.session.passport && req.session.passport.user ? JSON.parse(req.session.passport.user):''
         , base = box.dust.makeBase({
@@ -230,8 +233,72 @@ function process( req ){
         res.redirect( '/coll'  );  // not logged in
     }else{
 
+        function import_folder( oFolder, req, cb ){
+            var Job = jobs.create('import-folder', oFolder);
+            if( typeof Job.data == 'undefined' ) {
+                Job.data = {};
+            }
+            Job.data.req = req;
+            Job
+                .on('complete', function(job){
+                    job.log("Folder '" + oFolder.folder.full_path + "' imported");
+                    req.io.emit('import.collection.added', oFolder );
+                    cb( null, oFolder );
+                })
+                .on('failed', function(){
+                    job.log(" Job failed");
+                    cb( 'error', oFolder );
+                })
+                .on('progress', function(progress){
+                    process.stdout.write('\r  job #' + job.id + ' ' + progress + '% complete');
+                    req.io.emit('import.collection.process', oFolder );
+                })
+                .priority('high')
+                .save();
+        }
     }
 }
+
+jobs.process('import-folder', 8, function(job, done){
+    var frames = job.data.links;
+
+    // Create / save the folder
+    // Fetch the list of links in this folder as array
+
+    async.map(job.links, function(link, cb){
+            // save existing link data
+            // create a jobs to fetch the page on this link
+            // save the link
+            var result;
+            cb( null, result );
+        },
+        function(err, results){
+
+
+            done(null, result);
+        }
+    );
+
+
+
+});
+
+jobs.on('job complete', function(id){
+    Job.get(id, function(err, job){
+        if (err) return;
+        job.remove(function(err){
+            if (err) throw err;
+            console.log('removed completed job #%d', job.id, job );
+        });
+    });
+});
+
+
+
+
+
+
+
 
 box.on('init', function (App, Config, done) {
     app = App;
@@ -305,7 +372,8 @@ box.on('init.attach', function (app, config,  done) {
            Get_One_data( req.data.id, function(err, displayBlock ){
                req.io.respond({
                    result:displayBlock,
-                   error:err
+                   error:err,
+                   success: !err
                });
            });
        }

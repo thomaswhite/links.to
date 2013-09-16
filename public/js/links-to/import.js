@@ -53,9 +53,9 @@ $(document).ready(function() {
                         id   : o.id,
                         rowID : o.$row.attr('id')
                     }, function(data){
-                        debug.log ('import.folder_content:',  data);
+                        console.log ('import.folder_content:',  data);
                         o.$linkCont.stop(true,true).slideDown(300);
-                        debug.info( 'rendered HTML',
+                        console.info( 'rendered HTML',
                             myRender('imports/import_folder_content', data.result, o.$linkCont, '$replace')
                         );
                     });

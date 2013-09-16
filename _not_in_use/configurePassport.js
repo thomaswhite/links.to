@@ -12,7 +12,7 @@
 var _ = require('underscore');
 var passport = require('passport');
 var logger = require('nlogger').logger(module);
-var utils = require('./../tw-utils.js');
+var utils = require('./../lib/tw-utils.js');
 var gravatar = require('gravatar');
 var async = require('async');
 // var logger  = require('nlogger').logger(module);

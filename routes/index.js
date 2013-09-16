@@ -3,7 +3,7 @@
  * GET home page.
  */
 
-var box = require('../box.js')
+var box = require('../modules/box.js')
     , config
     , app
     ;
@@ -11,7 +11,6 @@ var box = require('../box.js')
 require('./collections');
 require('./links');
 require('./imports');
-
 require('./upload');
 
 

@@ -7,7 +7,7 @@
  */
 
 
-var box = require('../box.js')
+var box = require('../modules/box.js')
     ,  util = require('util')
     , debug = require('debug')('linksTo:view.collections')
     , fs = require('fs')

@@ -45,7 +45,6 @@ module.exports = {
                 title: 'Imports'
                 },
                 {
-                    href:'/imports/' + param.id,
                     title: param.title
                 }
             ];

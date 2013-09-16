@@ -3,13 +3,12 @@
  * GET home page.
  */
 
-var  box = require('../box.js')
+var  box = require('../modules/box.js')
    , _ = require('lodash')
    , debug = require('debug')('linksTo:view.links')
    , breadcrumbs = require('./breadcrumbs.js')
    , ShortId  = require('shortid').seed(96715652)
    , request = require('request')
-   , pageScraper
    , requestDefaults = {}
    , url = require('url')
 // var sanitize = require('validator').sanitize;
@@ -238,8 +237,6 @@ function newLink (data, collection_id, owner, user_screen_name, token ){
 box.on('init', function (App, Config, done) {
     app = App;
     config = Config;
-    _.defaults(requestDefaults, config.request );
-    pageScraper = require('../pageSrcaper.js').init(requestDefaults );
     done(null, 'routers links.js initialised');
 });
 
@@ -350,7 +347,6 @@ box.on('init.attach', function (app, config,  done) {
 
                             });
  //                           box.utils.inspect(link2add, { showHidden: true, depth: null, colors:true })
-
                         }
                     });
 

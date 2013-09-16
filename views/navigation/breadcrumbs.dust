@@ -3,7 +3,11 @@
     <ul class="breadcrumb">
       {#crumbs}
         <li {@math key="{$idx}" method="add" operand="1"}{@eq value="{$len}"}class="active"{/eq}{/math}>
+          {#href}
           <a href="{href}">{title}</a>
+          {:else}
+          <span>{title}</span>
+          {/href}
           {@sep}<span class="divider">&raquo;</span>{/sep}
         </li>
       {:else}
