@@ -224,20 +224,8 @@ function Get_One (req, res) {
     });
 }
 
-
 box.on( 'add_collection', function( user, name, description, done ){
-    box.emit('collection.add',
-       newCollection( user, name, description  ),
-       function(err, collection ) {
-            if (err) {
-                done(err);
-            }else {
-                box.parallel('collection.added',  collection, function(err, result){
-                    done( err, collection, result );
-                });
-            }
-       }
-    );
+    box.emit('collection.add', newCollection( user, name, description  ), done );
 });
 
 box.on('init', function (App, Config, done) {
@@ -285,9 +273,6 @@ box.on('init.attach', function (app, config,  done) {
                , coll = newCollection( user, name )
                ;
            // TODO: verify the name
-           box.emot( 'add_collection', user, name, '', function(err, collection, extra){
-
-           });
            box.emit('collection.add', coll, function(err, collection ) {
                if (err) {
                    req.io.respond({
@@ -297,12 +282,10 @@ box.on('init.attach', function (app, config,  done) {
                    });
                }else {
                    req.io.emit('collection.added', {param:req.data, collection:collection} );
-                   box.parallel('collection.added',  collection, function(err, result){
-                       req.io.respond({
-                           result:'ok',
-                           collection: collection,
-                           extra: result
-                       });
+                   req.io.respond({
+                       result:'ok',
+                       collection: collection,
+                       extra: extra
                    });
                }
            });

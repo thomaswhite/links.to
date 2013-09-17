@@ -259,24 +259,35 @@ function process( req ){
 }
 
 jobs.process('import-folder', 8, function(job, done){
-    var frames = job.data.links;
+    var links = []; //job.data.links;
 
-    // Create / save the folder
-    // Fetch the list of links in this folder as array
+    box.emit('add_collection', job.user, job.title, job.description, function(err, collection ) {
+        if( err ){
+            done(err);
+        }else{
+            // add tags ( full_path )
+            // Fetch the list of links in this folder as array
 
-    async.map(job.links, function(link, cb){
-            // save existing link data
-            // create a jobs to fetch the page on this link
-            // save the link
-            var result;
-            cb( null, result );
-        },
-        function(err, results){
+            async.map(job.links, function(link, cb){
+                    // check if page exists
+                    // else ping
+                    // save existing link data
+                    // ? how to get the page data
 
+                    // links.push(link.url)
+                    //job.progress(links.url, job.links.length );
+                    var result;
+                    cb( null, result );
+                },
+                function(err, results){
+                    // job.progress(links.url, job.links.length );
 
-            done(null, result);
+                    done(null, result);
+                }
+            );
         }
-    );
+    });
+
 
 
 
