@@ -14,7 +14,6 @@ var config
 
 exports.init = function(  env ){
     env = env || 'dev';
-    var configDir = path.join(mainDir, 'config', env);
 
     etc
         .argv()
@@ -40,7 +39,7 @@ exports.init = function(  env ){
                 dbModules: path.join(mainDir, 'db', '*.js')
             }
         })
-        .folder(configDir)
+        .folder(  path.join(mainDir, 'config', env) )
     ;
     var json = etc.toJSON();
     json.request.proxy =  json.PROXY;

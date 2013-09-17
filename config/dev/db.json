@@ -5,5 +5,5 @@
     "short_id_length":6,
     "auto_reconnect":true,
     "collection":"sessions",
-    "dbModules":"db"
+    "dbModules":"db/*.js"
 }

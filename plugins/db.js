@@ -9,7 +9,7 @@ var   box = require('../modules/box.js')
     , debug = require('debug')('linksTo:db')
     , Monk  = require('monk')
 
-    , glob = require('glob')
+    , glob = require('glob').Glob
     , path = require('path')
 
 
@@ -48,14 +48,30 @@ box.on('init', function (App, Config, initDone) {
     });
 
 
-//    var controller = that.middler;
-    var modules = [];
 
-    var search = glob( settings.dbModules );
+    new glob( settings.dbModules, { sync:true, cache:true }, function (er, files) {
+        if( er ){
+            initDone(er);
+        }else{
+            for(var i=0; i < files.length; i++){
+                 require(path.resolve(files[i]));
+            }
+             box.parallel('db.init', monk, Config, function(err, result){
+                 var ts2   = new Date().getTime();
+                 result.push( 'plugin db initialised: ' + (ts2 - ts) + ' ms')     ;
+                 initDone(null, result );
+             });
+
+        }
+    });
+
+
+
+
+/*
+    var search = new glob( settings.dbModules );
     search.on('match', function (file) {
-        var filename = path.resolve(file);
-        modules.push( filename );
-        require(filename);
+            require( path.resolve(file) );
     });
     search.once('error', initDone );
     search.once('end', function () {
@@ -65,7 +81,7 @@ box.on('init', function (App, Config, initDone) {
             initDone(null, result );
         });
     });
-
+*/
 
 });
 

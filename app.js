@@ -1,16 +1,8 @@
 var debug = require('debug')('linksTo:app')
     ,  box = require('./modules/box')
-    , glob = require('glob')
+    , glob = require('glob').Glob
     , path = require('path')
 ;
-/*
-    require('./plugins/kleiDust');
-    require('./plugins/express');
-    require('./plugins/middleware');
-    require('./plugins/passport');
-    require('./plugins/utils');
-    require('./plugins/db');
-*/
 
     new glob('./plugins/*.js' , { sync:true, cache:true, nosort :true}, function (er, plugins) {
         for(var i=0; i < plugins.length; i++){
