@@ -7,12 +7,11 @@
 var debug = require('debug')('linksTo:passports');
 
 var box = require('../modules/box.js')
-    , passport = require('passport')
+    , passport = box.passport = require('passport')
+
     , config
     , app
     ;
-
-box.passport = passport;
 
 passport.serializeUser(function(user, done) {
     done(null, JSON.stringify(user));

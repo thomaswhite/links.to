@@ -147,7 +147,7 @@ function upload (req, res) {
 box.on('init', function (App, Config, done) {
     app = App;
     config = Config;
-    done(null, 'routers upload.js initialised');
+    done(null, 'route upload.js initialised');
 });
 
 

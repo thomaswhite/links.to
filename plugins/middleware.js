@@ -1,8 +1,6 @@
 var box = require('../modules/box.js')
-  , middler = require('middler')
+  , middler = box.middler = require('middler')
   ;
-
-box.middler = middler;
 
 box.on('init', function (app, conf, done) {
   box.middleware = middler(box.app);

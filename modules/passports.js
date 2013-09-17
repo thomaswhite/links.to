@@ -7,8 +7,9 @@
 var debug = require('debug')('linksTo:passports');
 
 var box = require('./box.js')
-    , passport = box.passport   // = require('passport')
-    , utils = require('./../lib/tw-utils.js')
+    , passport = box.passport
+    , async   = require('async')
+    , utils = require('./tw-utils.js')
     , gravatar = require('gravatar')
     , dummyStrategy = require('passport-dummy').Strategy
 
@@ -91,7 +92,9 @@ function setPassport( settings, cb ){
     // debug("openID:%s ", name );
     var ts2 = new Date().getTime();
 
-    cb( null, 'OpenID ' + name + ' initialised ' + ( ts2 - ts > 5 ?(' - ' + ts2 - ts ):'' ));
+    process.nextTick(function() {
+        cb( null, 'OpenID ' + name + ' initialised ' + ( ts2 - ts > 5 ?(' - ' + ts2 - ts ):'' ));
+    });
 }
 function ping_email ( req, res){
     if( req.user && req.body.email){
@@ -207,7 +210,7 @@ box.on('init',  function( App, Config, initDone ){
     );
 
 
-    box.utils.async.map( config.passports, setPassport, function(err, result){
+    async.map( config.passports, setPassport, function(err, result){
         var ts2   = new Date().getTime();
         result.push( 'Passports initialised: ' + (ts2 - ts) + ' ms')     ;
         initDone(null, result);

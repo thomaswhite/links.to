@@ -1,19 +1,22 @@
 var debug = require('debug')('linksTo:app')
     ,  box = require('./modules/box')
     , glob = require('glob')
+    , path = require('path')
 ;
-
+/*
     require('./plugins/kleiDust');
     require('./plugins/express');
     require('./plugins/middleware');
     require('./plugins/passport');
     require('./plugins/utils');
     require('./plugins/db');
-/*
- glob( 'plugins/*.js' ).on('match', {cache:true, nosort :true }, function (file) {
-    require(box.utils.path.resolve(file));
-});
 */
+
+    new glob('./plugins/*.js' , { sync:true, cache:true, nosort :true}, function (er, plugins) {
+        for(var i=0; i < plugins.length; i++){
+            require(path.resolve(plugins[i]));
+        }
+    });
 
 var   app = box.app         //express()
     , path = require('path')

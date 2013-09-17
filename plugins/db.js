@@ -10,6 +10,8 @@ var   box = require('../modules/box.js')
     , Monk  = require('monk')
 
     , glob = require('glob')
+    , path = require('path')
+
 
     , app
     , settings
@@ -51,7 +53,7 @@ box.on('init', function (App, Config, initDone) {
 
     var search = glob( settings.dbModules );
     search.on('match', function (file) {
-        var filename = box.utils.path.resolve(file);
+        var filename = path.resolve(file);
         modules.push( filename );
         require(filename);
     });

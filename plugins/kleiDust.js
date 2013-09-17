@@ -26,7 +26,7 @@ box.on('init', function (App, Config, done) {
 
  //   done(null, 'plugin kleiDust initialised ');
  //   return;
-    require('../lib/watcher').watch(
+    require('../modules/watcher').watch(
         kleiDust.getDust(),
         path.join(config.__dirname, 'views'),
         path.join(config.__dirname, 'public/templates'),

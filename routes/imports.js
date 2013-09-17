@@ -232,7 +232,6 @@ function process( req ){
     if( !user || !user._id ){
         res.redirect( '/coll'  );  // not logged in
     }else{
-
         function import_folder( oFolder, req, cb ){
             var Job = jobs.create('import-folder', oFolder);
             if( typeof Job.data == 'undefined' ) {
