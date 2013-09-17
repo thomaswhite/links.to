@@ -130,6 +130,7 @@ function All ( req, res, next  ){
     collectionList(  req, res, next );
 }
 
+/*
 function Add(req, res) {
     var referer = req.headers.referer
         , coll_name = req.body.collectionName || 'New collection'
@@ -151,6 +152,7 @@ function Add(req, res) {
         });
     }
 }
+*/
 
 function Delete (req, res) {
     var referer = req.headers.referer
@@ -223,6 +225,21 @@ function Get_One (req, res) {
 }
 
 
+box.on( 'add_collection', function( user, name, description, done ){
+    box.emit('collection.add',
+       newCollection( user, name, description  ),
+       function(err, collection ) {
+            if (err) {
+                done(err);
+            }else {
+                box.parallel('collection.added',  collection, function(err, result){
+                    done( err, collection, result );
+                });
+            }
+       }
+    );
+});
+
 box.on('init', function (App, Config, done) {
     app = App;
     config = Config;
@@ -234,7 +251,7 @@ box.on('init.attach', function (app, config,  done) {
         box.middler()
             .get('/coll/mine',       Mine)
             .get('/coll',            All)
-            .post('/coll/new',       Add)
+//            .post('/coll/new',       Add)
             .get(['/coll/:id', '/w/c/:id'], Get_One)
             .get('/coll/:id/delete', Delete)
             .handler
@@ -268,6 +285,9 @@ box.on('init.attach', function (app, config,  done) {
                , coll = newCollection( user, name )
                ;
            // TODO: verify the name
+           box.emot( 'add_collection', user, name, '', function(err, collection, extra){
+
+           });
            box.emit('collection.add', coll, function(err, collection ) {
                if (err) {
                    req.io.respond({
