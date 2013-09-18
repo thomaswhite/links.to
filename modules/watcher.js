@@ -113,7 +113,7 @@ exports.watch = function(dust, templateDir, publicDir, templateExtension, callBa
                 }
             });
 
-            if( !changes ){
+            if( !changes && false ){
                 fs.readFile(path.join(publicDir, 'all.js'), function read(err, text) {
                     if (err) {
                         callBackWhenAllIsReady(err);

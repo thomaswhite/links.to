@@ -23,7 +23,7 @@ function myRender(tempateID, data, $target, contentAction) {
     data.user =   socketContext.user;
     dust.render(tempateID,  base.push(data), function(err, out) {
         if (err) {
-            debug.error(err);
+            debug.error(err.message);
         }else if( !$target ){
             debug.log( out );
         } else {
