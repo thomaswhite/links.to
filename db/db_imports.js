@@ -90,7 +90,17 @@ box.on('db.init', function( monk, Config, done ){
         if( !id ){
             throw "Import ID expected!";
         }else{
-            Imports.updateById( id, {$set: { excluded:excluded} }, callback );
+            Imports.updateById( id, {$set: { excluded:excluded} }, function(err, result){
+                Imports.findById(id, function(err, folder ){
+                    Imports.update(
+                        {parent: new RegExp('^' + folder.folder.full_path, 'i')},
+                        {$set: { excluded:excluded} },
+                        function(err, result2){
+                           callback(err, folder);
+                        }
+                    );
+                });
+            });
         }
     });
 
