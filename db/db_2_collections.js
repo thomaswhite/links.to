@@ -123,7 +123,8 @@ box.on('db.init', function( monk, Config, done ){
         }
     };
  */
-
-    done(null, 'db:collections initialised.');
+    process.nextTick(function() {
+        done(null, 'db:collections initialised.');
+    });
 });
 

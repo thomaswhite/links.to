@@ -32,7 +32,7 @@ box.on('init', function (App, Config, done) {
         path.join(config.__dirname, 'public/templates'),
         '.dust',
         function(err, result ){
-            done(null, 'plugin kleiDust initialised ' + util.inspect(result, { depth: null, colors:false }) );
+            done(null, 'plugin kleiDust initialised ' + util.inspect(result, { depth: null, colors:true }) );
         }
     );
 });
@@ -81,5 +81,5 @@ box.on('init.attach', function(app, config, done){
             : chunk;
     };
 
-    done(null, 'plugin kleiDust initialised');
+    done(null, 'plugin kleiDust attached');
 });

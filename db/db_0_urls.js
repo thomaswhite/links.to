@@ -38,6 +38,7 @@ box.on('db.init', function( monk, Config, done ){
             callback
         );
     });
-
-    done(null, 'db:URLs initialised.');
+    process.nextTick(function() {
+      done(null, 'db:URLs initialised.');
+    });
 });

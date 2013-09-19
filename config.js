@@ -7,12 +7,11 @@
  */
 
 var config
-    , mainDir = __dirname
     , etc = require('etc')()
     , path = require('path')
     ;
 
-exports.init = function(  env ){
+exports.init = function(  env, mainDir ){
     env = env || 'dev';
 
     etc

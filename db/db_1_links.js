@@ -69,5 +69,7 @@ box.on('db.init', function( monk, Config, done ){
             Links.remove( {_id: link_id }, callback );
         }
     });
-    done(null, 'db:links initialised.');
+    process.nextTick(function() {
+        done(null, 'db:links initialised.');
+    });
 });

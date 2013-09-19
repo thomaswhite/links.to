@@ -31,5 +31,5 @@ box.on('init', function (App, Config, done) {
     app.use(passport.initialize());
     app.use(passport.session());
     app.use(app.router);
-    done(null, 'plugin passports initiated');
+    done(null, 'plugin "Passport" initiated');
 });

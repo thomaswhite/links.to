@@ -41,8 +41,8 @@ function userGravatar ( User, Email, replace ){
 function setPassport( settings, cb ){
     var strategy = require(settings.require).Strategy,
         pick = settings.pick,
-        name = settings.name,
-        ts   = new Date().getTime();
+          name = settings.name
+    ;
 
     function save_Picked_data( originalProfile, Profile, callback ){
         Profile.provider = name;
@@ -74,7 +74,7 @@ function setPassport( settings, cb ){
             case 5: break;
             case 4: callback = oath;    break;
             case 3: callback = pape;    break;
-            case 2: callback = profile; break
+            case 2: callback = profile; break;
          }
 
         var picked  = utils.pick( profile, pick );
@@ -89,13 +89,12 @@ function setPassport( settings, cb ){
     passport.use(new strategy( settings, settings.type === 'oauth2' ? handleConnection_oauth2 : handleConnection));
     app.get('/authenticate/'+ name,         passport.authenticate(name));
     app.get('/auth/' + name + '/callback',  passport.authenticate(name,  config.passport_after));
-    // debug("openID:%s ", name );
-    var ts2 = new Date().getTime();
-
     process.nextTick(function() {
-        cb( null, 'OpenID ' + name + ' initialised ' + ( ts2 - ts > 5 ?(' - ' + ts2 - ts ):'' ));
+        cb( null, 'OpenID ' + name + ' initialised');
     });
 }
+
+
 function ping_email ( req, res){
     if( req.user && req.body.email){
         context.db.emails.ping(req.body.email, req.user._id, req.user.active_openID,  req.user.provider, function(err, email ){
@@ -124,7 +123,8 @@ function ping_email ( req, res){
     }else{
         context.notFound(res);
     }
-};
+}
+
 function confirm_email ( req, res){
 //  box.on('email.verified'
     context.db.emails.activate(req.params.emailID, function(err, Email){
@@ -135,7 +135,8 @@ function confirm_email ( req, res){
         });
         // res.redirect(context.settings.passport_after.afterEmailcallback);
     });
-};
+}
+
 function auth_after_success (req, res){
     // console.log('\n/auth-after-success', '\nUSER:', req.user );
 
@@ -159,14 +160,16 @@ function auth_after_success (req, res){
                 }
             });
         }
-    })
-};
+    });
+}
+
 function authenticate (req, res, next ){
     box.parallel('openID.beforeAuth', req, function (err, result) {
         var dummy;
     });
     next();
-};
+}
+
 function logout (req, res){
     var referer = req.headers.referer;
     req.logOut();
@@ -178,7 +181,7 @@ function logout (req, res){
     }else{
         res.redirect( '/coll' );
     }
-};
+}
 
 box.on('init',  function( App, Config, initDone ){
     var ts   = new Date().getTime();

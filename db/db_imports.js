@@ -90,7 +90,8 @@ box.on('db.init', function( monk, Config, done ){
         if( !id ){
             throw "Import ID expected!";
         }else{
-            Imports.updateById( id, {$set: { excluded:excluded} }, function(err, result){
+            Imports.updateById( id, {$set: { excluded:excluded} }, callback );
+/*                function(err, result){
                 Imports.findById(id, function(err, folder ){
                     Imports.update(
                         {parent: new RegExp('^' + folder.folder.full_path, 'i')},
@@ -101,6 +102,7 @@ box.on('db.init', function( monk, Config, done ){
                     );
                 });
             });
+*/
         }
     });
 
@@ -120,9 +122,24 @@ box.on('db.init', function( monk, Config, done ){
         });
     });
 
+    box.on('folders-in.list', function( parent, callback){
+        Imports.find(
+            {parent: parent,  folder: { $exists: true}, excluded: false },
+            filter , { sort:{ last_modified:-1, add_date:-1}},
+            callback
+        );
+    });
+    box.on('links-in.list', function( parent, callback){
+        Imports.find(
+            {parent: parent,  folder: { $exists: false} },
+            filter , { sort:{ last_modified:-1, add_date:-1}},
+            callback
+        );
+    });
 
 
-
-    done(null, 'db:Imports initialised.');
+    process.nextTick(function() {
+        done(null, 'db:Imports initialised.');
+    });
 });
 

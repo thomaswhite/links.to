@@ -62,6 +62,7 @@ box.on('db.init', function( monk, Config, done ){
         }
     });
 
-
-    done(null, 'db:tags initialised.');
+    process.nextTick(function() {
+        done(null, 'db:tags initialised.');
+    });
 });

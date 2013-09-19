@@ -2,7 +2,7 @@ var debug = require('debug')('linksTo:app')
     ,  box = require('./modules/box')
     , glob = require('glob').Glob
     , path = require('path')
-    , config = box.config = require('./config').init(  'dev' )
+    , config = box.config = require('./config').init(  'dev', __dirname )
 ;
     new glob('./plugins/*.js' , { sync:true, cache:true, nosort :true}, function (er, plugins) {
         for(var i=0; i < plugins.length; i++){
@@ -27,11 +27,11 @@ box.series('init', app, config, function(err, result){
     debug( '\n' + box.utils.inspect(result, { showHidden: true, depth: null, colors:true }) );
 
     box.series('init.attach', app, config, function(err2, result2){
-        if (err) return box.emit('error', err2);
+        if (err) { return box.emit('error', err2); }
         debug( "init.attach: %s", box.utils.inspect(result2) );
 
         box.series('init.listen', function (err, result3) {
-            debug( "server : %j", result3 );
+            debug( result3 );
             //console.log('Links.To server listening on port ' + app.get('port') );
         });
 

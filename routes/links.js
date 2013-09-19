@@ -356,5 +356,5 @@ box.on('init.attach', function (app, config,  done) {
     });
 
 
-    done(null, 'atach-paths: links.js attached'  ); //
+    done(null, 'route links.js attached'  ); //
 });

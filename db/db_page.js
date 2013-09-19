@@ -27,5 +27,7 @@ box.on('db.init', function( monk, Config, done ){
             callback
         );
     });
-    done(null, 'db:page initialised.');
+    process.nextTick(function() {
+        done(null, 'db:page initialised.');
+    });
 });
