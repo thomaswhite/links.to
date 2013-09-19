@@ -415,8 +415,6 @@ exports.init = function ( requestOptions ) {
 
         }
     });
-
-
     emitter.on( 'pageScrape.process', scrape_head );
     emitter.on( 'pageScrape.process', scrape_images  );
     emitter.on( 'pageScrape.process', scrape_body );

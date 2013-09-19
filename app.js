@@ -2,25 +2,22 @@ var debug = require('debug')('linksTo:app')
     ,  box = require('./modules/box')
     , glob = require('glob').Glob
     , path = require('path')
+    , config = box.config = require('./config').init(  'dev' )
 ;
-
     new glob('./plugins/*.js' , { sync:true, cache:true, nosort :true}, function (er, plugins) {
         for(var i=0; i < plugins.length; i++){
             require(path.resolve(plugins[i]));
         }
     });
 
-var   app = box.app         //express()
-    , path = require('path')
-    , bootstrapPath = path.join(__dirname, 'node_modules', 'bootstrap')
-    , config = app.locals.config = box.config = require('./config').init(  'dev' )
-    , pageSrcaper = require('./modules/pageSrcaper.js').init(config.request  )
+var   app = box.app
     , passports = require('./modules/passports')
     , socket = require('./modules/socket-io')
     , routes = require('./routes')
     ;
 
-config.less.paths.push ( path.join(bootstrapPath, 'less') );
+app.locals.config = config;
+config.less.paths.push ( path.join( path.join(__dirname, 'node_modules', 'bootstrap') , 'less') );
 config.__dirname = __dirname;
 
 box.series('init', app, config, function(err, result){
@@ -40,6 +37,3 @@ box.series('init', app, config, function(err, result){
 
     });
 });
-
-
-

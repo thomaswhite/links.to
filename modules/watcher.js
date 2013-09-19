@@ -19,6 +19,7 @@ exports.watch = function(dust, templateDir, publicDir, templateExtension, callBa
 	var   Templates = {}
         , Jobs = []
         , combinedTS = null
+        , combinedMs = 0
     ;
 
     function make_templateID(path, ext){
@@ -33,6 +34,7 @@ exports.watch = function(dust, templateDir, publicDir, templateExtension, callBa
                 templateID: templateID,
                 templatePath: file.fullPath.split('\\').join('/'),
                 templateTS  : file.stat.mtime,
+                templateMs  : file.stat.mtime.getTime(),
                 compiledPath: path.join(publicDir, templateID.split('/').join('~') + '.js'),
                 compiledTS : null,
                 compiled:null
@@ -46,7 +48,8 @@ exports.watch = function(dust, templateDir, publicDir, templateExtension, callBa
             if( err && err.code != 'ENOENT'){
                 console.error('Error accessing "' +  job.compiledPath + '"', err);
             }
-            if( !compiled || compiled.mtime < job.templateTS || job.compiledTS == -1){ // new file or changed
+            if( !compiled || compiled.mtimeCompiled < job.templateTS || job.compiledTS == -1 || job.changed ){ // new file or changed
+                delete job.changed;
                 fs.readFile(job.templatePath, function read(err, text) {
                     if (err) {
                         cb(err);
@@ -55,11 +58,17 @@ exports.watch = function(dust, templateDir, publicDir, templateExtension, callBa
                         job.compiled = dust.compile( job.template, job.templateID );
                         dust.loadSource( job.compiled );
                         job.compiledTS = new Date();
+                        job.type = 'compile';
                         fs.writeFile( job.compiledPath, job.compiled, function(err){
                             debug('"' + job.templateID + '.dust" has been COMPILED.');
                             cb(null, job );
                         });
                     }
+                });
+            }else if( job.compiled ){
+                job.type = 'reuse';
+                process.nextTick(function(){
+                    cb(null, job );
                 });
             }else{ // reuse the compiled file
                 job.compiledTS = compiled.mtime;
@@ -70,6 +79,7 @@ exports.watch = function(dust, templateDir, publicDir, templateExtension, callBa
                         job.compiled = '' + text;
                         dust.loadSource( job.compiled );
                         debug( '"' + job.templateID + '.js" has been reused.');
+                        job.type = 'reload';
                         cb(null, job );
                     }
                 });
@@ -78,14 +88,18 @@ exports.watch = function(dust, templateDir, publicDir, templateExtension, callBa
     }
 
     function combine_all( jobs, cb ){
-        var Compiled = [];
+        var all = [], compiled=[];
         jobs.forEach( function( job ){
-            Compiled.push(job.compiled);
+            all.push(job.compiled);
+            if( job.type == 'compile'){
+                compiled.push( job.templateID );
+            }
         });
 
-        fs.writeFile(path.join(publicDir, 'all.js'), Compiled.join('\r'), function(err){
+        fs.writeFile(path.join(publicDir, 'all.js'), all.join('\r'), function(err){
             debug('"all.js" has been updated ----------------------------------------------------------');
-            cb(err);
+            compiled.push('all.js');
+            cb(err, compiled);
         });
     }
 
@@ -94,10 +108,17 @@ exports.watch = function(dust, templateDir, publicDir, templateExtension, callBa
             console.error('Error all.js stats: ', err);
         }else{
             combinedTS = statsAll ? statsAll.mtime : null;
+            combinedMs = combinedTS ? combinedTS.getTime():0;
         }
 
         readdirp({ root: templateDir, fileFilter: '*' + templateExtension }, function (errors, templates) {
-            var fileNames = [];
+            var fileNames = []
+                , compiled=[]
+                , changed=[]
+                , recentMs = 0
+                , nowMs = (new Date()).getTime()
+            ;
+
             if (errors) {
                 errors.forEach(function (err) {
                     console.error('Error: ', err);
@@ -108,19 +129,29 @@ exports.watch = function(dust, templateDir, publicDir, templateExtension, callBa
                 var job = make_job(file, statsAll ? statsAll.mtime : new Date('2000/01/01') );
                 Templates[ job.templatePath ] = job;
                 Jobs.push(job);
-                if( combinedTS === null || job.templateTS > combinedTS ){
-                    changes++;
+                if( job.templateMs > recentMs  ){
+                    recentMs = job.templateMs;
+                    changed.push(job);
+                    job.changed = true;
                 }
             });
 
-            if( !changes && false ){
+            Jobs.sort(function(a,b){
+                return a.changed && !b.changed
+                       ? -1
+                       : !a.changed && b.changed
+                         ? 1
+                         : 0
+                ;
+            });
+
+            if( recentMs <= combinedMs && nowMs - combinedMs < 12*60*60000 ){
                 fs.readFile(path.join(publicDir, 'all.js'), function read(err, text) {
                     if (err) {
                         callBackWhenAllIsReady(err);
                     }else{
                         dust.loadSource( '' + text );
-                        debug('Reusing compiled all.js');
-                        callBackWhenAllIsReady(null, ['all.js']);
+                        callBackWhenAllIsReady(null, 'Reusing compiled all.js');
                     }
                 });
             }else{
@@ -128,11 +159,11 @@ exports.watch = function(dust, templateDir, publicDir, templateExtension, callBa
                     if( err ){
                         console.error( 'Error while compiling DUST templates ', err );
                     }else{
-                        combine_all(jobs, function(err){
+                        combine_all(jobs, function(err, result){
                             if(err){
                                 console.error( 'Error while writing all.js ', err );
                             }
-                            callBackWhenAllIsReady( null, ['all.js']);
+                            callBackWhenAllIsReady( null,  result );
                         });
                     }
                 });
