@@ -37,15 +37,11 @@ box.on('init', function (App, Config, done) {
             );
             app.use(express.json());
             app.use(express.urlencoded());
-
             app.use(express.methodOverride());
-            app.set('views',  config.views );
-
-            app.engine('dust', box.kleiDust.dust);
-            app.set('view engine', 'dust');
-            app.set('view options', {layout: false});
-
+            app.use(express.compress());
             app.use( box.cookieParser );
+            app.use(express.responseTime());
+
             app.use(
                 express.session({
                     secret: config.common.session.secret
@@ -53,6 +49,11 @@ box.on('init', function (App, Config, done) {
                     , store: box.sessionStore
                 })
             );
+
+            app.set('views',  config.views );
+            app.engine('dust', box.kleiDust.dust);
+            app.set('view engine', 'dust');
+            app.set('view options', {layout: false});
     });
 
     app.io.configure(function() {
@@ -65,10 +66,10 @@ box.on('init', function (App, Config, done) {
     box.app.on('error', box.emit.bind(box, 'error'));
 
     box.on('init.attach', function (app, config, cb) {
-          app.use(express.compress());
+//          app.use(express.responseTime());
           app.use(require('less-middleware')( config.less ));
           app.use(express.static(path.join(config.__dirname, 'public')));
-          cb(null, path.join(config.__dirname, 'public') + ' attached' );
+          cb(null, 'route public directory attached' );
     });
 
     box.on('init.listen', function (cb) {

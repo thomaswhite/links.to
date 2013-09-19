@@ -125,7 +125,7 @@ function parseDL( $DL, $, fullPath, flatOutput, isFolder ){
             $H3 = $DT.children('>h3'),
             $A  = $DT.children('>a'),
             $next = $DT.next ? $DT.next() : null,
-            step = {parent : fullPath || '/'},
+            step = {parent : fullPath || '/', excluded:false},
             $subDL;
 
         if( $DT.attr('done') ){
@@ -204,7 +204,6 @@ function parse (path, keep_after_parse, callback) {
             callback('This is not a bookmark file exported from a browser.');
         }else{
             var data2 =  sanitizeData( sData );
-//            console.info( data2 );
             var $ = cheerio.load( '<body>' + data2 + '</body>', cherioParam);
             var root = parseDL( $(' body > dl' ), $, '', subFolders ); //
 
