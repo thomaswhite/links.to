@@ -108,7 +108,6 @@ function Add(req, res) {
     }
     //req.io.route('imports:add');
 
-
     if( req.files.uploaded_file.type != "text/html" ||
         req.files.uploaded_file.mime != "text/html" ){
         responseJSON( res,{
@@ -225,37 +224,29 @@ function Get_One (req, res) {
     }
 }
 
-function process( req ){
-    var session = req.session,
-        user  = session && session.passport && session.passport.user ? JSON.parse(session.passport.user):null;
 
-    if( !user || !user._id ){
-        res.redirect( '/coll'  );  // not logged in
-    }else{
-        function import_folder( oFolder, req, cb ){
-            var Job = jobs.create('import-folder', oFolder);
-            if( typeof Job.data == 'undefined' ) {
-                Job.data = {};
-            }
-            Job.data.req = req;
-            Job
-                .on('complete', function(job){
-                    job.log("Folder '" + oFolder.folder.full_path + "' imported");
-                    req.io.emit('import.collection.added', oFolder );
-                    cb( null, oFolder );
-                })
-                .on('failed', function(){
-                    job.log(" Job failed");
-                    cb( 'error', oFolder );
-                })
-                .on('progress', function(progress){
-                    process.stdout.write('\r  job #' + job.id + ' ' + progress + '% complete');
-                    req.io.emit('import.collection.process', oFolder );
-                })
-                .priority('high')
-                .save();
-        }
+function import_folder( oFolder, req, cb ){
+    var Job = jobs.create('import-folder', oFolder);
+    if( typeof Job.data == 'undefined' ) {
+        Job.data = {};
     }
+    Job.data.req = req;
+    Job
+        .on('complete', function(job){
+            job.log("Folder '" + oFolder.folder.full_path + "' imported");
+            req.io.emit('import.collection.added', oFolder );
+            cb( null, oFolder );
+        })
+        .on('failed', function(){
+            job.log(" Job failed");
+            cb( 'error', oFolder );
+        })
+        .on('progress', function(progress){
+            process.stdout.write('\r  job #' + job.id + ' ' + progress + '% complete');
+            req.io.emit('import.collection.process', oFolder );
+        })
+        .priority('high')
+        .save();
 }
 
 jobs.process('import-folder', 8, function(job, done){
@@ -266,13 +257,16 @@ jobs.process('import-folder', 8, function(job, done){
             done(err);
         }else{
             // add tags ( full_path )
-            // Fetch the list of links in this folder as array
+            // Fetch the list of children in this folder as array: links and folders
+            // create new folder task for folders
+            // add task for link
+
 
             async.map(job.links, function(link, cb){
-                    // check if page exists
-                    // else ping
                     // save existing link data
-                    // ? how to get the page data
+                    // check if page exists then use the page
+                    // else task for link
+                    //  how to get the page data
 
                     // links.push(link.url)
                     //job.progress(links.url, job.links.length );
@@ -287,10 +281,6 @@ jobs.process('import-folder', 8, function(job, done){
             );
         }
     });
-
-
-
-
 });
 
 jobs.on('job complete', function(id){
@@ -302,8 +292,6 @@ jobs.on('job complete', function(id){
         });
     });
 });
-
-
 
 
 
@@ -378,16 +366,29 @@ box.on('init.attach', function (app, config,  done) {
        },
 
        process:function(req){
-           //box.emit( 'import.get.one', id, function( err, Import ){
-           Get_One_data( req.data.id, function(err, displayBlock ){
+           var User = req.session && req.session.passport && req.session.passport.user ?  JSON.parse( req.session.passport.user ):null
+           ;
+           if( !user || !user._id ){
                req.io.respond({
-                   result:displayBlock,
-                   error:err,
-                   success: !err
+                   error:'session-timeout',
+                   go_to:'/coll'
                });
-           });
+           }else{
+               box.emit('folders-in.list', '/', function(err, folders){
+                   async.map( folders,
+                       function(folder, cb ){
+                           import_folder(folder, req, cb);
+                       },
+                       function(err, result){
+                           req.io.respond({
+                               result: result,
+                               success: true
+                           });
+                       }
+                   );
+               });
+           }
        }
-
     });
 
 
