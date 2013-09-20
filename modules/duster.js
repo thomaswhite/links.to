@@ -20,6 +20,8 @@ exports.watch = function(dust, templateDir, publicDir, templateExtension, callBa
         , Jobs = []
         , combinedTS = null
         , combinedMs = 0
+        , compileAll = false
+        , nowMs = new Date()
     ;
 
     function make_templateID(path, ext){
@@ -44,11 +46,30 @@ exports.watch = function(dust, templateDir, publicDir, templateExtension, callBa
     }
 
     function process_job(job, cb){
-        fs.stat( job.compiledPath, function(err, compiled ){
+        fs.stat( job.compiledPath, function(err, compiledFile ){
             if( err && err.code != 'ENOENT'){
                 console.error('Error accessing "' +  job.compiledPath + '"', err);
             }
-            if( !compiled || compiled.mtimeCompiled < job.templateTS || job.compiledTS == -1 || job.changed ){ // new file or changed
+
+            if( compiledFile && job.compiled && !job.changed ){
+                job.type = 'reuse';
+                process.nextTick(function(){
+                    cb(null, job );
+                });
+            }else if( compiledFile && compiledFile.mtime > job.templateTS && !job.changed  ) { // reuse the compiled file
+                job.compiledTS = compiledFile.mtime;
+                fs.readFile(job.compiledPath, function read(err, text) {
+                    if (err) {
+                        cb(err);
+                    }else{
+                        job.compiled = '' + text;
+                        dust.loadSource( job.compiled );
+                        debug( '"' + job.templateID + '.js" has been reused.');
+                        job.type = 'reload';
+                        cb(null, job );
+                    }
+                });
+            } else {
                 delete job.changed;
                 fs.readFile(job.templatePath, function read(err, text) {
                     if (err) {
@@ -61,45 +82,11 @@ exports.watch = function(dust, templateDir, publicDir, templateExtension, callBa
                         job.type = 'compile';
                         fs.writeFile( job.compiledPath, job.compiled, function(err){
                             debug('"' + job.templateID + '.dust" has been COMPILED.');
-                            cb(null, job );
+                            cb(err, job );
                         });
                     }
                 });
-            }else if( job.compiled ){
-                job.type = 'reuse';
-                process.nextTick(function(){
-                    cb(null, job );
-                });
-            }else{ // reuse the compiled file
-                job.compiledTS = compiled.mtime;
-                fs.readFile(job.compiledPath, function read(err, text) {
-                    if (err) {
-                        cb(err);
-                    }else{
-                        job.compiled = '' + text;
-                        dust.loadSource( job.compiled );
-                        debug( '"' + job.templateID + '.js" has been reused.');
-                        job.type = 'reload';
-                        cb(null, job );
-                    }
-                });
             }
-        });
-    }
-
-    function combine_all( jobs, cb ){
-        var all = [], compiled=[];
-        jobs.forEach( function( job ){
-            all.push(job.compiled);
-            if( job.type == 'compile'){
-                compiled.push( job.templateID );
-            }
-        });
-
-        fs.writeFile(path.join(publicDir, 'all.js'), all.join('\r'), function(err){
-            debug('"all.js" has been updated ----------------------------------------------------------');
-            compiled.push('all.js');
-            cb(err, compiled);
         });
     }
 
@@ -110,11 +97,13 @@ exports.watch = function(dust, templateDir, publicDir, templateExtension, callBa
             combinedTS = statsAll ? statsAll.mtime : null;
             combinedMs = combinedTS ? combinedTS.getTime():0;
         }
+        if( nowMs - combinedMs > 12*60*60000 ){
+            compileAll = true;
+        }
 
         readdirp({ root: templateDir, fileFilter: '*' + templateExtension }, function (errors, templates) {
             var fileNames = []
                 , compiled=[]
-                , changed=[]
                 , recentMs = 0
                 , nowMs = (new Date()).getTime()
             ;
@@ -129,13 +118,13 @@ exports.watch = function(dust, templateDir, publicDir, templateExtension, callBa
                 var job = make_job(file, statsAll ? statsAll.mtime : new Date('2000/01/01') );
                 Templates[ job.templatePath ] = job;
                 Jobs.push(job);
-                if( job.templateMs > recentMs  ){
+                if( compileAll || job.templateMs > recentMs  ){
                     recentMs = job.templateMs;
-                    changed.push(job);
                     job.changed = true;
                 }
             });
 
+            // move changed first to give time process the rest while the files are loading
             Jobs.sort(function(a,b){
                 return a.changed && !b.changed
                        ? -1
@@ -145,13 +134,13 @@ exports.watch = function(dust, templateDir, publicDir, templateExtension, callBa
                 ;
             });
 
-            if( recentMs <= combinedMs && nowMs - combinedMs < 12*60*60000 ){
+            if( !compileAll && recentMs <= combinedMs && !changes  ){ //
                 fs.readFile(path.join(publicDir, 'all.js'), function read(err, text) {
                     if (err) {
                         callBackWhenAllIsReady(err);
                     }else{
                         dust.loadSource( '' + text );
-                        callBackWhenAllIsReady(null, 'Reusing compiled all.js');
+                        callBackWhenAllIsReady(null, ['Reusing compiled all.js']);
                     }
                 });
             }else{
@@ -171,6 +160,21 @@ exports.watch = function(dust, templateDir, publicDir, templateExtension, callBa
         });
     });
 
+    function combine_all( jobs, cb ){
+        var all = [], compiled=[];
+        jobs.forEach( function( job ){
+            all.push(job.compiled);
+            if( job.type == 'compile'){
+                compiled.push( job.templateID );
+            }
+        });
+
+        fs.writeFile(path.join(publicDir, 'all.js'), all.join('\r'), function(err){
+            debug('"all.js" has been updated ----------------------------------------------------------');
+            compiled.push('all.js');
+            cb(err, compiled);
+        });
+    }
 
     function refreshTemplate(path, publicDir){
         path = path.split('\\').join('/');
@@ -178,7 +182,7 @@ exports.watch = function(dust, templateDir, publicDir, templateExtension, callBa
         if( !job ){
             throw('Missing template for file:' + path);
         }
-        job.compiledTS = -1;
+        job.changed = true;
         process_job(  Templates[path], function(err, job ){
             if(err){
                 debug('Error white updating file', job.templatePath, err);
@@ -202,27 +206,6 @@ exports.watch = function(dust, templateDir, publicDir, templateExtension, callBa
     //allPreexistingFilesReported
 
 };
-
-/*
-
- async.map( Jobs, function(job, cb){
- try{
- var filePath = file.path.split('\\').join('/');
- filePath = filePath.substr(0,filePath.indexOf('.dust'));
-
- fileNames.push( file.path );
- compileTemplateAsync( file.fullPath, filePath, cb );
- }catch(e){
- console.error( 'Error while compiling DUST template ', file.fullPath, e );
- cb( e );
- }
- },
- process_all
- );
-
- mapSeries
- */
-
 
 /*
 

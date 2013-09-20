@@ -26,13 +26,14 @@ box.on('init', function (App, Config, done) {
 
  //   done(null, 'plugin kleiDust initialised ');
  //   return;
-    require('../modules/watcher').watch(
+    require('../modules/duster').watch(
         kleiDust.getDust(),
         path.join(config.__dirname, 'views'),
         path.join(config.__dirname, 'public/templates'),
         '.dust',
         function(err, result ){
-            done(null, 'plugin kleiDust initialised ' + util.inspect(result, { depth: null, colors:true }) );
+            result.push( '--------------------- > plugin kleiDust initialised ');
+            done(null, result );
         }
     );
 });
