@@ -94,6 +94,12 @@ $(document).ready(function() {
         })
         .on('click', '.import-btn', function(event){
             $(this).attr('disabled', true );
+
+            $('#importBtn').hide();
+            $('#processBtn').show();
+            $('#content').empty()
+
+
             socket.emit('imports:process', {
                 id   : pageParam.id
             }, function( response ){

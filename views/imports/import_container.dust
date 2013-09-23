@@ -4,10 +4,26 @@
     <div class="span8" id="title">
         <h1 class="eip" id="title"><span class="coll-title-prefix">Import </span> {title}</h1>
         <p>Size:{import.size}, {import.folders} folders, {import.links} links, imported on {@timeStamp time="{import.created}" format="YYYY-MM-DD HH:mm" /}, {@timeFromNow time="{import.created}"/}</p>
+        <span id="importBtn">
         <a class="btn btn-danger btn-small"  href="/imports/{import._id}/delete?back=/imports"><i class="icon-trash icon-white"></i> Delete</a>
         <a class="btn btn-primary btn-small import-btn"  href="#"><i class="icon-play icon-white"></i>&nbsp;Import</a>
+        </span>
+        <span id="processBtn" style="display:none">
+        <a class="btn btn-danger btn-small"  href="#" id="cancelImport"><i class="icon-stop icon-white"></i> Cancel</a>
+        </span>
     </div>
 </div>
-<div id="beforeContent">{+beforeContent/}</div>
+<div id="beforeContent">
+  <table border="1" style="margin-top:10px">
+    <tbody>
+       <tr>
+         <td >Folders:</td><td>{import.folders}</td><td width="50" id="importedFolders">0</td><td>imported</td>
+       </tr>
+       <tr>
+         <td >Links:</td><td>{import.links}</td><td id="importedLinks">0</td><td> imported</td>
+       </tr>
+    </tbody>
+  </table>
+</div>
 <div id="content">{>"imports/import"/}</div>
 

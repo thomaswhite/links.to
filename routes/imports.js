@@ -368,7 +368,7 @@ box.on('init.attach', function (app, config,  done) {
        process:function(req){
            var User = req.session && req.session.passport && req.session.passport.user ?  JSON.parse( req.session.passport.user ):null
            ;
-           if( !user || !user._id ){
+           if( !User || !User._id ){
                req.io.respond({
                    error:'session-timeout',
                    go_to:'/coll'
