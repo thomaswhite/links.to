@@ -618,7 +618,7 @@ form .row .title {
   margin: 0 0 0 0.5em;
   overflow: hidden;
   text-overflow: ellipsis;
-  font: normal 75%/normal Arial, Helvetica, sans-serif;
+  font: normal 75% normal Arial, Helvetica, sans-serif;
 }
 .bdLabel textarea,
 .bdLabel input {
@@ -645,6 +645,14 @@ input.excluded {
 }
 .row .updated {
   font-style: italic;
+}
+#importDetails {
+  empty-cells: show;
+  border-collapse: collapse;
+}
+#importDetails td {
+  text-align: right;
+  vertical-align: middle;
 }
 .row.table-header {
   margin-top: .8em;

@@ -14,8 +14,12 @@ h1,h2,h3{
    color:#ddd;
 }
 
-a, #content{
+a, #content, #beforeContent{
     color:#ddd;
+}
+
+#importDetails{
+    border-color:#ddd;
 }
 
 .navbar .brand, .navbar .brand a{

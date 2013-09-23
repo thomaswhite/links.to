@@ -225,34 +225,18 @@ function Get_One (req, res) {
 }
 
 
-function import_folder( oFolder, req, cb ){
-    var Job = jobs.create('import-folder', oFolder);
-    if( typeof Job.data == 'undefined' ) {
-        Job.data = {};
-    }
-    Job.data.req = req;
-    Job
-        .on('complete', function(job){
-            job.log("Folder '" + oFolder.folder.full_path + "' imported");
-            req.io.emit('import.collection.added', oFolder );
-            cb( null, oFolder );
-        })
-        .on('failed', function(){
-            job.log(" Job failed");
-            cb( 'error', oFolder );
-        })
-        .on('progress', function(progress){
-            process.stdout.write('\r  job #' + job.id + ' ' + progress + '% complete');
-            req.io.emit('import.collection.process', oFolder );
-        })
-        .priority('high')
-        .save();
-}
+jobs.active(function(err,aJobs){
+    var dummy = 1;
+});
+jobs.inactive(removeJobs);
+jobs.complete( removeJobs );
+jobs.failed( removeJobs );
 
-jobs.process('import-folder', 8, function(job, done){
+
+jobs.process('import-folder', function(job, done){
     var links = []; //job.data.links;
 
-    box.emit('add_collection', job.user, job.title, job.description, function(err, collection ) {
+    box.emit('add_collection', job.data.user, job.data.folder.title, job.data.folder.description, function(err, collection ) {
         if( err ){
             done(err);
         }else{
@@ -260,7 +244,8 @@ jobs.process('import-folder', 8, function(job, done){
             // Fetch the list of children in this folder as array: links and folders
             // create new folder task for folders
             // add task for link
-
+        done( null, collection);
+        return;
 
             async.map(job.links, function(link, cb){
                     // save existing link data
@@ -282,6 +267,41 @@ jobs.process('import-folder', 8, function(job, done){
         }
     });
 });
+
+
+function import_folder( oFolder, User, done ){
+    var Job = jobs.create('import-folder', {folder:oFolder, user: User })
+        .on('complete', function(job){
+            job.log("Folder '" + oFolder.folder.full_path + "' imported");
+            req.io.emit('import.collection.added', oFolder );
+            cb( null, oFolder );
+        })
+        .on('failed', function(){
+            job.log(" Job failed");
+            cb( 'error', oFolder );
+        })
+        .on('progress', function(progress){
+            process.stdout.write('\r  job #' + job.id + ' ' + progress + '% complete');
+            req.io.emit('import.collection.process', oFolder );
+        })
+        .priority('high')
+        .save( function( err, result ){
+            done(err, oFolder);
+        });
+}
+
+
+function removeJobs( err, aJobs){
+    if( err ){
+        console( err );
+    }else if( aJobs ){
+        aJobs.forEach(function(id){
+            kue.Job.remove(id, function(err,r){
+                var dummy = 1;
+            });
+        });
+    }
+}
 
 jobs.on('job complete', function(id){
     Job.get(id, function(err, job){
@@ -377,13 +397,23 @@ box.on('init.attach', function (app, config,  done) {
                box.emit('folders-in.list', '/', function(err, folders){
                    async.map( folders,
                        function(folder, cb ){
-                           import_folder(folder, req, cb);
+                           import_folder(folder, User, cb);
                        },
                        function(err, result){
-                           req.io.respond({
-                               result: result,
-                               success: true
-                           });
+                           if( err ){
+                               console( err );
+                               req.io.respond({
+                                   result: result,
+                                   success: false,
+                                   error: err
+                               });
+
+                           }else{
+                               req.io.respond({
+                                   result: result,
+                                   success: true
+                               });
+                           }
                        }
                    );
                });
@@ -391,6 +421,6 @@ box.on('init.attach', function (app, config,  done) {
        }
     });
 
-
+    kue.app.listen(3001);
     done(null, 'route "imports.js" attached'  );
 });
