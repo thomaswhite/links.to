@@ -232,6 +232,19 @@ jobs.inactive(removeJobs);
 jobs.complete( removeJobs );
 jobs.failed( removeJobs );
 
+function removeJobs( err, aJobs){
+    if( err ){
+        console( err );
+    }else if( aJobs ){
+        aJobs.forEach(function(id){
+            kue.Job.remove(id, function(err,r){
+                var dummy = 1;
+            });
+        });
+    }
+}
+
+
 
 jobs.process('import-folder', function(job, done){
     var links = []; //job.data.links;
@@ -269,16 +282,16 @@ jobs.process('import-folder', function(job, done){
 });
 
 
-function import_folder( oFolder, User, done ){
-    var Job = jobs.create('import-folder', {folder:oFolder, user: User })
+function import_folder( oFolder, user, req, done ){
+    var Job = jobs.create('import-folder', {folder:oFolder, user: user })
         .on('complete', function(job){
-            job.log("Folder '" + oFolder.folder.full_path + "' imported");
+            //kue.Job("Folder '" + oFolder.folder.full_path + "' imported");
             req.io.emit('import.collection.added', oFolder );
-            cb( null, oFolder );
+            done( null, oFolder );
         })
         .on('failed', function(){
             job.log(" Job failed");
-            cb( 'error', oFolder );
+            done( 'error', oFolder );
         })
         .on('progress', function(progress){
             process.stdout.write('\r  job #' + job.id + ' ' + progress + '% complete');
@@ -291,20 +304,8 @@ function import_folder( oFolder, User, done ){
 }
 
 
-function removeJobs( err, aJobs){
-    if( err ){
-        console( err );
-    }else if( aJobs ){
-        aJobs.forEach(function(id){
-            kue.Job.remove(id, function(err,r){
-                var dummy = 1;
-            });
-        });
-    }
-}
-
 jobs.on('job complete', function(id){
-    Job.get(id, function(err, job){
+    kue.Job.get(id, function(err, job){
         if (err) return;
         job.remove(function(err){
             if (err) throw err;
@@ -314,8 +315,36 @@ jobs.on('job complete', function(id){
 });
 
 
+function process_folder(id, path, User, req ){
+    box.emit('import.folder-content', path, function(err, folders){
+        async.map( folders,
+            function(o, cb ){
+                if(o.folder ){
+                    import_folder(o, User, req,  cb);
+                }else{
+                    import_link(o, User, req,  cb);
+                }
+            },
+            function(err, result){
+                if( err ){
+                    console( err );
+                    req.io.respond({
+                        result: result,
+                        success: false,
+                        error: err
+                    });
 
-
+                }else{
+                    req.io.respond({
+                        message:'Folder '+ path + ' imported',
+                        result: result,
+                        success: true
+                    });
+                }
+            }
+        );
+    });
+}
 
 
 box.on('init', function (App, Config, done) {
@@ -394,10 +423,10 @@ box.on('init.attach', function (app, config,  done) {
                    go_to:'/coll'
                });
            }else{
-               box.emit('folders-in.list', '/', function(err, folders){
+               box.emit('import.folder-content', '/', function(err, folders){
                    async.map( folders,
                        function(folder, cb ){
-                           import_folder(folder, User, cb);
+                           import_folder(folder, User, req,  cb);
                        },
                        function(err, result){
                            if( err ){

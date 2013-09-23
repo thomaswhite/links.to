@@ -122,13 +122,14 @@ box.on('db.init', function( monk, Config, done ){
         });
     });
 
-    box.on('folders-in.list', function( parent, callback){
+    box.on('import.folder-content', function( import_id,  parent_path, callback){
         Imports.find(
-            {parent: parent,  folder: { $exists: true}, excluded: false },
-            { sort:{ last_modified:-1, add_date:-1}},
+            {importID: import_id, parent:parent_path,  excluded: false},
+            { sort:{ folder:-1, add_date:-1,  last_modified:-1 }},
             callback
         );
     });
+
     box.on('links-in.list', function( parent, callback){
         Imports.find(
             {parent: parent,  folder: { $exists: false} },
