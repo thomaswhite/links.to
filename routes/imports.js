@@ -108,8 +108,8 @@ function Add(req, res) {
     }
     //req.io.route('imports:add');
 
-    if( req.files.uploaded_file.type != "text/html" ||
-        req.files.uploaded_file.mime != "text/html" ){
+    if( req.files.uploaded_file.headers['content-type'] != "text/html" ){
+//        req.files.uploaded_file.mime != "text/html"
         responseJSON( res,{
             success:false,
             upload:'error',
@@ -245,6 +245,16 @@ function removeJobs( err, aJobs){
 }
 
 
+jobs.on('job complete', function(id){
+    kue.Job.get(id, function(err, job){
+        if (err) return;
+        job.remove(function(err){
+            if (err) throw err;
+            console.log('removed completed job #%d \r %j', job.id, job.data );
+        });
+    });
+});
+
 
 jobs.process('import-folder', function(job, done){
     var links = []; //job.data.links;
@@ -257,9 +267,10 @@ jobs.process('import-folder', function(job, done){
             // Fetch the list of children in this folder as array: links and folders
             // create new folder task for folders
             // add task for link
+         var dummy =  job.progress(2, 5 );
         done( null, collection);
         return;
-
+/*
             async.map(job.links, function(link, cb){
                     // save existing link data
                     // check if page exists then use the page
@@ -277,73 +288,64 @@ jobs.process('import-folder', function(job, done){
                     done(null, result);
                 }
             );
+*/
+
         }
     });
 });
 
 
-function import_folder( oFolder, user, req, done ){
-    var Job = jobs.create('import-folder', {folder:oFolder, user: user })
-        .on('complete', function(job){
-            //kue.Job("Folder '" + oFolder.folder.full_path + "' imported");
-            req.io.emit('import.collection.added', oFolder );
-            done( null, oFolder );
-        })
-        .on('failed', function(){
-            job.log(" Job failed");
-            done( 'error', oFolder );
-        })
-        .on('progress', function(progress){
-            process.stdout.write('\r  job #' + job.id + ' ' + progress + '% complete');
-            req.io.emit('import.collection.process', oFolder );
-        })
-        .priority('high')
-        .save( function( err, result ){
-            done(err, oFolder);
-        });
-}
+function process_folder( Import_id, Path, user, req ){
+    // get folder content
+    //
+    function import_folder_member( o, cb ){
+        if(o.folder ){
+            import_folder(o, cb);
+        }else{
+            //import_link(o, cb);
+        }
+    };
 
+    function import_folder( oFolder, done ){
+        jobs.create('import-folder', {folder:oFolder, user:user })
+            .on('complete', function(job){
+                req.io.emit('import.collection.added', oFolder );
+            })
+            .on('failed', function(){
+                job.log(" Job failed");
+            })
+            .on('progress', function(progress){
+                process.stdout.write('\r  job #' + this.id + ' ' + progress + '% complete \r');
+                req.io.emit('import.collection.process', oFolder );
+                return 123;
+            })
+            .priority('high')
+            .save( function( err, result ){
+                done(err, oFolder); // go back to the async queue.
+            });
+    }
 
-jobs.on('job complete', function(id){
-    kue.Job.get(id, function(err, job){
-        if (err) return;
-        job.remove(function(err){
-            if (err) throw err;
-            console.log('removed completed job #%d', job.id, job );
-        });
-    });
-});
-
-
-function process_folder(id, path, User, req ){
-    box.emit('import.folder-content', path, function(err, folders){
-        async.map( folders,
-            function(o, cb ){
-                if(o.folder ){
-                    import_folder(o, User, req,  cb);
-                }else{
-                    import_link(o, User, req,  cb);
-                }
-            },
-            function(err, result){
-                if( err ){
-                    console( err );
-                    req.io.respond({
-                        result: result,
-                        success: false,
-                        error: err
-                    });
-
-                }else{
+    function import_subNodes( import_id, path ){
+        box.emit('import.folder-content', import_id, path, function(err, folders){
+            async.map( folders,
+                import_folder_member,
+                function(err, result){
+                    if( err ){
+                        console( err );
+                    }
                     req.io.respond({
                         message:'Folder '+ path + ' imported',
                         result: result,
-                        success: true
+                        success: !err,
+                        error:err
                     });
                 }
-            }
-        );
-    });
+            );
+        });
+    }
+
+    import_subNodes( Import_id, Path );
+
 }
 
 
@@ -423,6 +425,9 @@ box.on('init.attach', function (app, config,  done) {
                    go_to:'/coll'
                });
            }else{
+
+               process_folder( req.data.id, '/', User, req );
+/*
                box.emit('import.folder-content', '/', function(err, folders){
                    async.map( folders,
                        function(folder, cb ){
@@ -446,10 +451,11 @@ box.on('init.attach', function (app, config,  done) {
                        }
                    );
                });
+*/
            }
        }
     });
 
-    kue.app.listen(3001);
+   // kue.app.listen(3001);
     done(null, 'route "imports.js" attached'  );
 });

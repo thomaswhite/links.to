@@ -124,8 +124,8 @@ box.on('db.init', function( monk, Config, done ){
 
     box.on('import.folder-content', function( import_id,  parent_path, callback){
         Imports.find(
-            {importID: import_id, parent:parent_path,  excluded: false},
-            { sort:{ folder:-1, add_date:-1,  last_modified:-1 }},
+            {importID: Imports.col.ObjectID(import_id), parent:parent_path,  excluded: false},
+            { sort:{ add_date:-1,  last_modified:-1 }},
             callback
         );
     });
