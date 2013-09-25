@@ -97,7 +97,7 @@ $(document).ready(function() {
 
             $('#importBtn').hide();
             $('#processBtn').show();
-            $('#content').empty()
+            $('#content').empty();
 
 
             socket.emit('imports:process', {
@@ -121,11 +121,41 @@ $(document).ready(function() {
 
     disableSelection( $('.coll-title'));
 
+    socket.on('import.process-start', function(data){
+        debug.log ( 'import.process-start, data:', data );
+    });
+    socket.on('import.process-progress', function(data){
+        debug.log ( 'import.process-progress, data:', data );
+    });
+    socket.on('import.process-end', function(data){
+        debug.log ( 'import.process-end, data:', data );
+    });
+    socket.on('import.process-error', function(data){
+        debug.log ( 'import.process-end, data:', data );
+    });
+
+    socket.on('import.collection-start', function(data){
+        debug.log ( 'import.process-start, data:', data );
+    });
+    socket.on('import.collection-progress', function(data){
+        debug.log ( 'import.process-progress, data:', data );
+    });
+    socket.on('import.collection-end', function(data){
+        debug.log ( 'import.process-end, data:', data );
+    });
+    socket.on('import.collection-error', function(data){
+        debug.log ( 'import.process-error, data:', data );
+    });
+
+
+
     socket.on('import.processing', function(data){
         debug.log ( 'import.processing, data:', data );
     });
     socket.on('import.root', function(data){
         debug.log ( 'import.root, data:', data );
     });
+
+
 
 });

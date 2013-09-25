@@ -183,7 +183,7 @@ function Delete (req, res) {
 }
 
 function Get_One_data (id, callBack) {
-    box.emit( 'import.get.one', id, function( err, Import ){
+    box.emit( 'import.get-with-root-level-folders', id, function( err, Import ){
         callBack(err, {
             title: (Import && Import.title ? Import.title: 'Import not found' ),
             import: Import,
@@ -257,41 +257,63 @@ jobs.on('job complete', function(id){
 
 
 jobs.process('import-folder', function(job, done){
-    var links = []; //job.data.links;
 
-    box.emit('add_collection', job.data.user, job.data.folder.title, job.data.folder.description, function(err, collection ) {
+    box.emit('improt.links-in-folder', job.data.folder.importID, job.data.folder.folder.full_path, function(err, Links) {
         if( err ){
             done(err);
         }else{
-            // add tags ( full_path )
-            // Fetch the list of children in this folder as array: links and folders
-            // create new folder task for folders
-            // add task for link
-         var dummy =  job.progress(2, 5 );
-        done( null, collection);
-        return;
-/*
-            async.map(job.links, function(link, cb){
-                    // save existing link data
-                    // check if page exists then use the page
-                    // else task for link
-                    //  how to get the page data
+            var oData = job.data;
 
-                    // links.push(link.url)
-                    //job.progress(links.url, job.links.length );
-                    var result;
-                    cb( null, result );
-                },
-                function(err, results){
-                    // job.progress(links.url, job.links.length );
+            box.emit('add_collection', job.data.user, job.data.folder.title, job.data.folder.description, function(err, collection ) {
+                if( err ){
+                    done(err);
+                }else{
+                    // add tags ( full_path )
 
-                    done(null, result);
+                function import_link(link, done){
+                    jobs.create('import-link', {folder:oData.folder, user:oData.user, link:link, collectionID: collection._id })
+                        .on('complete', function(job){
+                            req.io.emit('import.collection-end', { status:'end', folder:oFolder }  );
+                        })
+                        .on('failed', function(){
+                            req.io.emit('import.collection-error', { status:'error', folder:oFolder }  );
+                        })
+                        .on('progress', function(progress){
+                            process.stdout.write('\r  job #' + this.id + ' ' + progress + '% complete \r');
+                            req.io.emit('import.collection-process', { status:'progress', progress: progress, folder:oFolder} );
+                            return 123;
+                        })
+                        .priority('high')
+                        .save( function( err, result ){
+                            done(err, oFolder); // go back to the async queue.
+                        });
                 }
-            );
-*/
 
+                 var dummy =  job.progress(2, 5 );
+
+                    async.mapLimit(Links, 5, function(link, cb){
+                            // save existing link data
+                            // check if page exists then use the page
+                            // else task for link
+                            //  how to get the page data
+
+                            // links.push(link.url)
+                            //job.progress(links.url, job.links.length );
+                            console.info(link.href);
+                            var result;
+                            cb( null, result );
+                        },
+                        function(err, links_results){
+                            done( err, collection);
+                        }
+                    );
+
+
+                }
+            });
         }
     });
+
 });
 
 
@@ -307,44 +329,43 @@ function process_folder( Import_id, Path, user, req ){
     };
 
     function import_folder( oFolder, done ){
-        jobs.create('import-folder', {folder:oFolder, user:user })
-            .on('complete', function(job){
-                req.io.emit('import.collection.added', oFolder );
-            })
-            .on('failed', function(){
-                job.log(" Job failed");
-            })
-            .on('progress', function(progress){
-                process.stdout.write('\r  job #' + this.id + ' ' + progress + '% complete \r');
-                req.io.emit('import.collection.process', oFolder );
-                return 123;
-            })
-            .priority('high')
-            .save( function( err, result ){
-                done(err, oFolder); // go back to the async queue.
-            });
+        if( oFolder.folder.this_links ){
+            req.io.emit('import.collection-start', { status:'start', folder:oFolder } );
+            jobs.create('import-folder', {folder:oFolder, user:user })
+                .on('complete', function(job){
+                    req.io.emit('import.collection-end', { status:'end', folder:oFolder }  );
+                })
+                .on('failed', function(){
+                    req.io.emit('import.collection-error', { status:'error', folder:oFolder }  );
+                })
+                .on('progress', function(progress){
+                    process.stdout.write('\r  job #' + this.id + ' ' + progress + '% complete \r');
+                    req.io.emit('import.collection-process', { status:'progress', progress: progress, folder:oFolder} );
+                    return 123;
+                })
+                .priority('high')
+                .save( function( err, result ){
+                    process.nextTick(done); // go back to the async queue.
+                });
+        }else{
+            process.nextTick( done );
+        }
     }
+    box.emit('import.get', Import_id, function(err, Import){
+        req.io.emit('import.process-start', Import );
 
-    function import_subNodes( import_id, path ){
-        box.emit('import.folder-content', import_id, path, function(err, folders){
-            async.map( folders,
+        box.emit('import.folders', Import_id, function(err, folders){
+            async.mapLimit( folders, 5,
                 import_folder_member,
                 function(err, result){
                     if( err ){
                         console( err );
                     }
-                    req.io.respond({
-                        message:'Folder '+ path + ' imported',
-                        result: result,
-                        success: !err,
-                        error:err
-                    });
+                    req.io.emit('import.process-end', { status:'done', import:Import, err:err }  );
                 }
             );
         });
-    }
-
-    import_subNodes( Import_id, Path );
+    });
 
 }
 

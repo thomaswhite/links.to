@@ -18,7 +18,8 @@ box.on('db.init', function( monk, Config, done ){
         , Imports = box.db.coll.Imports = monk.get('Imports')
         ;
 
-    Imports.ensureIndex( { importID: 1, owner:1, excluded:1, parent:1 }, {sparse:1} ); // , {background:true}, {sparse:1}
+    Imports.ensureIndex( { excluded:1, importID: 1, parent:1 } ); // , {background:true}, {sparse:1}
+    Imports.ensureIndex( { folder: 1,  importID: 1, parent:1 }, {sparse:1} ); // , {background:true}
 
     box.on('import.add', function( oColl, callback){
         Imports.insert( oColl,  { safe: true }, callback);
@@ -28,25 +29,6 @@ box.on('db.init', function( monk, Config, done ){
         Imports.insert( importNodes,  { safe: false }, callback );
     });
 
-    box.on('import.get.one', function( id, callback){
-        Imports.findById(id, function(err, import_found ){
-            Imports.find({importID: import_found._id, parent:'/'},  { sort:{ folder:-1, add_date:-1,  last_modified:-1 }}, function(err, result){
-                import_found.root_nodes =  result;
-                callback(err, import_found);
-            });
-        });
-    });
-
-
-    box.on('import.get', function( waterfall, callback){
-        Imports.findById(waterfall.coll_id, function(err, found_coll ){
-            if( found_coll) {
-                found_coll.type = "collection";
-            }
-            waterfall.collection  = found_coll;
-            callback(err, waterfall);
-        });
-    });
 
 
     box.on('import.delete', function(id, callback){
@@ -86,26 +68,6 @@ box.on('db.init', function( monk, Config, done ){
             });
         }
     });
-    box.on('import.folder_exclude', function(id, excluded, callback){
-        if( !id ){
-            throw "Import ID expected!";
-        }else{
-            Imports.updateById( id, {$set: { excluded:excluded} }, callback );
-/*                function(err, result){
-                Imports.findById(id, function(err, folder ){
-                    Imports.update(
-                        {parent: new RegExp('^' + folder.folder.full_path, 'i')},
-                        {$set: { excluded:excluded} },
-                        function(err, result2){
-                           callback(err, folder);
-                        }
-                    );
-                });
-            });
-*/
-        }
-    });
-
 
     box.on('_import.eip', function(id, field, value, callback){
         var o = {};
@@ -130,14 +92,58 @@ box.on('db.init', function( monk, Config, done ){
         );
     });
 
-    box.on('links-in.list', function( parent, callback){
+// --------------------------------------------------------------------- used ---
+
+    box.on('import.get-with-root-level-folders', function( id, callback){
+        Imports.findById(id, function(err, import_found ){
+            Imports.find({importID: import_found._id, parent:'/'},  { sort:{ folder:-1, add_date:-1,  last_modified:-1 }}, function(err, result){
+                import_found.root_nodes =  result;
+                callback(err, import_found);
+            });
+        });
+    });
+
+    box.on('import.get', function( id, callback){
+        Imports.findById(id, callback );
+    });
+
+
+    box.on('import.folder_exclude', function(id, excluded, callback){
+        if( !id ){
+            throw "Import ID expected!";
+        }else{
+            Imports.updateById( id, {$set: { excluded:excluded} },    function(err, folder){
+                if( err ){
+                    callback(err);
+                }else{
+                    Imports.update(
+                        { importID:folder.importID, folder: { $exists: true}, parent: new RegExp('^' + folder.folder.full_path, 'i')},
+                        {$set: { excluded:excluded} },
+                        function(err2, result2){
+                            callback(err2, folder);
+                        }
+                    );
+                }
+            });
+        }
+    });
+
+    box.on('import.folders', function( import_id,  callback){
         Imports.find(
-            {parent: parent,  folder: { $exists: false} },
-            { sort:{ last_modified:-1, add_date:-1}},
+            {importID: Imports.col.ObjectID(import_id), excluded: false, folder: { $exists: true} },
+            { sort:{ parent:1, add_date:-1,  last_modified:-1 }},
             callback
         );
     });
 
+
+    box.on('improt.links-in-folder', function( import_id, parent, callback){
+        Imports.find(
+            {importID: Imports.col.ObjectID(import_id), parent: parent,  folder: { $exists: false} },
+            { sort:{ last_modified:-1, add_date:-1}},
+            callback
+        );
+    });
 
     process.nextTick(function() {
         done(null, 'db:Imports initialised.');
