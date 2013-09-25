@@ -244,7 +244,6 @@ function removeJobs( err, aJobs){
     }
 }
 
-
 jobs.on('job complete', function(id){
     kue.Job.get(id, function(err, job){
         if (err) return;
@@ -255,60 +254,73 @@ jobs.on('job complete', function(id){
     });
 });
 
+jobs.process('import-link', function(job, Done){
+    var oData = job.data
+    ;
+    // save existing link data
+    // check if page exists then use the page
+    // else task for link
+    //  how to get the page data
 
-jobs.process('import-folder', function(job, done){
+    job.data._id = 11; // link's id
+    Done(null);
+});
 
+jobs.process('import-folder', function(job, Done){
     box.emit('improt.links-in-folder', job.data.folder.importID, job.data.folder.folder.full_path, function(err, Links) {
         if( err ){
             done(err);
         }else{
-            var oData = job.data;
+            job.progress(0, Links.length );
+            var oData = job.data
+                , req = job.req
+                , aLinks = []
+                , Error = null
+            ;
 
-            box.emit('add_collection', job.data.user, job.data.folder.title, job.data.folder.description, function(err, collection ) {
+            // Add a collection for this folder, event captured in collections.js
+            box.emit('add_collection', job.data.user, job.data.folder.title, job.data.folder.description || '', function(err, collection ) {
                 if( err ){
                     done(err);
                 }else{
-                    // add tags ( full_path )
+                    function import_link(link, done){
+                        //req.io.emit('import.link-start', { status:'start', link:link }  );
+                        jobs.create('import-link', {link:link, user:oData.user, collectionID: collection._id })
+                            .on('complete', function(){
+                                aLinks.push( {
+                                    link_id    : this.data._id,
+                                    imported_id: this.data.link._id
+                                });
 
-                function import_link(link, done){
-                    jobs.create('import-link', {folder:oData.folder, user:oData.user, link:link, collectionID: collection._id })
-                        .on('complete', function(job){
-                            req.io.emit('import.collection-end', { status:'end', folder:oFolder }  );
-                        })
-                        .on('failed', function(){
-                            req.io.emit('import.collection-error', { status:'error', folder:oFolder }  );
-                        })
-                        .on('progress', function(progress){
-                            process.stdout.write('\r  job #' + this.id + ' ' + progress + '% complete \r');
-                            req.io.emit('import.collection-process', { status:'progress', progress: progress, folder:oFolder} );
-                            return 123;
-                        })
-                        .priority('high')
-                        .save( function( err, result ){
-                            done(err, oFolder); // go back to the async queue.
-                        });
-                }
+                                // add additional jobs:
+                                //    1. fetch page
+                                //    2. make page tags
 
-                 var dummy =  job.progress(2, 5 );
-
-                    async.mapLimit(Links, 5, function(link, cb){
-                            // save existing link data
-                            // check if page exists then use the page
-                            // else task for link
-                            //  how to get the page data
-
-                            // links.push(link.url)
-                            //job.progress(links.url, job.links.length );
-                            console.info(link.href);
-                            var result;
-                            cb( null, result );
-                        },
+                                if( aLinks.length == Links.length ){
+                                    Done( Error, {
+                                       collectionID : this.data.collectionID,
+                                       folderID : job.data.folder._id,
+                                       links: aLinks
+                                    });
+                                }
+                            })
+                            .on('failed', function(a){
+                                aLinks.push( this.data.link._id );
+                            })
+                            .priority('medium')
+                            .save( done )
+                        ;
+                    }
+                    async.mapLimit(Links, 5, import_link,
                         function(err, links_results){
-                            done( err, collection);
+                            // links_results contain list of folder/links
+                            if( err ){
+                                console.warn( err );
+                                Error = err;
+                            }
+                            // Done( err, collection);
                         }
                     );
-
-
                 }
             });
         }
@@ -317,56 +329,59 @@ jobs.process('import-folder', function(job, done){
 });
 
 
-function process_folder( Import_id, Path, user, req ){
-    // get folder content
-    //
-    function import_folder_member( o, cb ){
-        if(o.folder ){
-            import_folder(o, cb);
-        }else{
-            //import_link(o, cb);
-        }
-    };
+function perform_import( Import_id, user, req ){
+    var aReady = [],
+        aFolders,
+        oImport;
 
     function import_folder( oFolder, done ){
         if( oFolder.folder.this_links ){
             req.io.emit('import.collection-start', { status:'start', folder:oFolder } );
             jobs.create('import-folder', {folder:oFolder, user:user })
-                .on('complete', function(job){
+                .on('complete', function(){
                     req.io.emit('import.collection-end', { status:'end', folder:oFolder }  );
+                    aReady.push(this.data.folder._id );
+                    if( aFolders.length == aReady.length ){
+                        req.io.emit('import.process-end', { status:'end', import:oImport }  );
+                        aFolders = aReady = oImport = null;
+                    }
                 })
                 .on('failed', function(){
                     req.io.emit('import.collection-error', { status:'error', folder:oFolder }  );
                 })
                 .on('progress', function(progress){
-                    process.stdout.write('\r  job #' + this.id + ' ' + progress + '% complete \r');
-                    req.io.emit('import.collection-process', { status:'progress', progress: progress, folder:oFolder} );
-                    return 123;
+                    if( progress == 0 ){
+                        this.req = req; // tricky way to pass req back to the folder processing function
+                    }else{
+                        req.io.emit('import.collection-process', { status:'progress', progress: progress, folder:oFolder} );
+                    }
                 })
                 .priority('high')
                 .save( function( err, result ){
-                    process.nextTick(done); // go back to the async queue.
+                    process.nextTick(done);
+                    // go back to the async queue even if the folder is not processed.
                 });
         }else{
             process.nextTick( done );
         }
     }
     box.emit('import.get', Import_id, function(err, Import){
+        oImport = Import;
         req.io.emit('import.process-start', Import );
 
         box.emit('import.folders', Import_id, function(err, folders){
-            async.mapLimit( folders, 5,
-                import_folder_member,
+            aFolders = folders;
+            async.mapLimit( folders, 10,
+                import_folder,
                 function(err, result){
                     if( err ){
                         console( err );
                     }
-                    req.io.emit('import.process-end', { status:'done', import:Import, err:err }  );
+                    req.io.emit('import.process-queued', { status:'queued', import:Import, err:err }  );
                 }
             );
         });
     });
-
 }
 
 
@@ -446,33 +461,7 @@ box.on('init.attach', function (app, config,  done) {
                    go_to:'/coll'
                });
            }else{
-
-               process_folder( req.data.id, '/', User, req );
-/*
-               box.emit('import.folder-content', '/', function(err, folders){
-                   async.map( folders,
-                       function(folder, cb ){
-                           import_folder(folder, User, req,  cb);
-                       },
-                       function(err, result){
-                           if( err ){
-                               console( err );
-                               req.io.respond({
-                                   result: result,
-                                   success: false,
-                                   error: err
-                               });
-
-                           }else{
-                               req.io.respond({
-                                   result: result,
-                                   success: true
-                               });
-                           }
-                       }
-                   );
-               });
-*/
+               perform_import( req.data.id, User, req );
            }
        }
     });

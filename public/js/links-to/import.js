@@ -122,38 +122,52 @@ $(document).ready(function() {
     disableSelection( $('.coll-title'));
 
     socket.on('import.process-start', function(data){
-        debug.log ( 'import.process-start, data:', data );
+        debug.log ( 'import.process-start:', data );
     });
     socket.on('import.process-progress', function(data){
-        debug.log ( 'import.process-progress, data:', data );
+        debug.log ( 'import.process-progress:', data );
     });
     socket.on('import.process-end', function(data){
-        debug.log ( 'import.process-end, data:', data );
+        debug.log ( 'import.process-end:', data );
     });
     socket.on('import.process-error', function(data){
-        debug.log ( 'import.process-end, data:', data );
+        debug.log ( 'import.process-end:', data );
     });
+    socket.on('import.process-queued', function(data){
+        debug.log ( 'import.process-queued:', data );
+    });
+
 
     socket.on('import.collection-start', function(data){
-        debug.log ( 'import.process-start, data:', data );
+        debug.log ( 'import.collection-start:', data );
     });
     socket.on('import.collection-progress', function(data){
-        debug.log ( 'import.process-progress, data:', data );
+        debug.log ( 'import.collection-progress:', data );
     });
     socket.on('import.collection-end', function(data){
-        debug.log ( 'import.process-end, data:', data );
+        debug.log ( 'import.collection-end:', data );
     });
     socket.on('import.collection-error', function(data){
-        debug.log ( 'import.process-error, data:', data );
+        debug.log ( 'import.collection-error:', data );
     });
 
+
+    socket.on('import.link-start', function(data){
+        debug.log ( 'import.link-start:', data );
+    });
+    socket.on('import.link-end', function(data){
+        debug.log ( 'import.link-end:', data );
+    });
+    socket.on('import.link-error', function(data){
+        debug.log ( 'import.link-error:', data );
+    });
 
 
     socket.on('import.processing', function(data){
-        debug.log ( 'import.processing, data:', data );
+        debug.log ( 'import.processing:', data );
     });
     socket.on('import.root', function(data){
-        debug.log ( 'import.root, data:', data );
+        debug.log ( 'import.root:', data );
     });
 
 

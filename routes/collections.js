@@ -39,7 +39,7 @@ function newCollection  (user, name, description){
         owner: user._id,
         author_screen_name: user.screen_name,
         title: name.trim(),
-        description: description || 'Description...',
+        description: description || '',
         linksCount:0,
         created : new Date(),
         updated:  new Date(),
