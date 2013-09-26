@@ -88,10 +88,10 @@ function getAttr_and_Name( $s, dest, folder ){
 
             switch(attrName){
                 case 'last_modified':
-                    if( value == o.attribs.ADD_DATE ){
+/*                    if( value == o.attribs.ADD_DATE ){
                         continue;
                     }
-
+*/
                 case 'add_date':
                     value = new Date( parseInt(o.attribs[i] + '000') );
             }

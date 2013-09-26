@@ -13,6 +13,8 @@ var   box = require('../modules/box.js')
 box.on('db.init', function( monk, Config, done ){
     var URLs = box.db.coll.urls = monk.get('urls');
 
+    URLs.index('url');
+
     box.on('url.add', function( oURL, callback){
         URLs.insert( oURL,  { safe: true }, callback);
     });
@@ -24,11 +26,15 @@ box.on('db.init', function( monk, Config, done ){
 
     box.on('link.added', function( newLink, callback){
         var link_id =  newLink._id;
-        URLs.update(
-            { _id: newLink.url_id, "links" :{ $ne : link_id }},
-            {  $push: {  "links" : link_id } },
-            callback
-        );
+        if( newLink.url_id ){
+            URLs.update(
+                { _id: newLink.url_id, "links" :{ $ne : link_id }},
+                {  $push: {  "links" : link_id } },
+                callback
+            );
+        } else{
+            process.nextTick( callback );
+        }
     });
 
     box.on('link.delete', function(link_id, url_id, coll_id, callback){

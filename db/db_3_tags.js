@@ -22,7 +22,7 @@ box.on('db.init', function( monk, Config, done ){
 
     Tags.ensureIndex( { coll_ID:1 }); // , {background:true}
 
-    box.on('link.added', function( newLink, callback){
+    box.on('_link.added_', function( newLink, callback){
         var link_id =  newLink._id,
             newTags = [];
 
@@ -50,11 +50,11 @@ box.on('db.init', function( monk, Config, done ){
                 }
             );
         }else{
-            callback(null, []);
+            process.nextTick( callback );
         }
     });
 
-    box.on('link.delete', function(link_id, url_id, coll_id, callback){
+    box.on('_link.delete_', function(link_id, url_id, coll_id, callback){
         if( !link_id ){
             throw "Link ID expected!";
         }else{

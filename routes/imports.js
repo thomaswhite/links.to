@@ -7,15 +7,17 @@
 var box = require('../modules/box.js')
     , _ = require('lodash')
     ,  util = require('util')
-    , debug = require('debug')('linksTo:view.import')
-    , breadcrumbs = require('./breadcrumbs.js')
-    , ShortId  = require('shortid').seed(96715)
+    , async = require('async')
     , moment = require('moment')
+    , debug = require('debug')('linksTo:view.import')
+    , ShortId  = require('shortid').seed(96715)
+
+    , kue // = require('kue')
+    , jobs //= kue.createQueue()
+
+    , breadcrumbs = require('./breadcrumbs.js')
     , favorites = require('../modules/parse-favorites')
 
-    , kue = require('kue')
-    , jobs = kue.createQueue()
-    , async = require('async')
     , config
     , app
 
@@ -225,48 +227,128 @@ function Get_One (req, res) {
 }
 
 
-jobs.active(function(err,aJobs){
-    var dummy = 1;
-});
-jobs.inactive(removeJobs);
-jobs.complete( removeJobs );
-jobs.failed( removeJobs );
 
-function removeJobs( err, aJobs){
-    if( err ){
-        console( err );
-    }else if( aJobs ){
-        aJobs.forEach(function(id){
-            kue.Job.remove(id, function(err,r){
-                var dummy = 1;
-            });
-        });
+/*
+IMPORTERD link
+  {
+        "parent":"/",
+    "title":"Get Bookmark Add-ons",
+    "description"
+    "href":"https://addons.mozilla.org/en-US/firefox/bookmarks/",
+    "add_date":
+    "last_modified":
+
+    "icon_uri":"http://www.mozilla.org/2005/made-up-favicon/0-1357573349534",
+    "icon":
+        "importID":
+  }
+ Saved Link
+  {
+        "collection":"51f7d3086cda2f4413000001",
+        "owner_screen_name":"Dummy User",
+        "owner":1,
+        "updated":
+        "display":{
+            "title":"The Hathors &#8211; Lion&#8217;s Gate Portal August 8th &amp; 25th &#8211; THEME MAGIC &#8211; EXPANSION OF&nbsp;CONSCIOUSNESS | Sacred Ascension - Key of Life -                                          Secrets of the Universe on WordPress.com",
+            "description":"We are the Hathors, and we come to bring you a message. A message that a new MAGICAL wave of light is about to sweep your planet and YOU are NEEDED yet again. For the theme of the portal that is about to sweep your planet is MAGIC. On August 8th of your earthly time,&hellip;",
+            "imagePos":"",
+            "thumbnail":"http://i2.wp.com/sacredascensionmerkaba.files.wordpress.com/2013/08/thehathorslionsgate.jpg?fit=1000%2C1000",
+            "canonicalURL":true,
+            "url":"http://sacredascensionmerkaba.wordpress.com/2013/08/07/lions-gate-portal-august-8th-25th-theme-magic-expansion-of-conscience/",
+            "tags":[ {  "word":"light",   "count":21  }]
+        },
+        "url_id":
+        "_id":
     }
+
+// processed saved page
+ {
+   "body":{
+      "images":[
+         {
+            "src":"http://www.seoconsultants.com/images/seo-consultants.png",
+            "width":"370",
+            "height":"40"
+         },
+      ],
+      "h1":[
+         "DCMI Dublin Core Metadata Initiative"
+      ],
+      "h2":[
+         "DC Dublin Core META Tags",
+         "Dublin Core Metadata Initiative References",
+         "Where did the name Dublin Core originate?"
+      ]
+   },
+   "head":{
+      "title":"DC Dublin Core META Tags: DCMI Dublin Core Metadata Initiative",
+      "fb":{},
+      "og":{},
+      "names":{
+         "description":"The Dublin Core Metadata Initiative (DCMI) is an open forum engaged in the development of interoperable online metadata standards that support a broad range of purposes and business models.",
+         "author":"Administrator"
+      },
+      "keywords":[
+         "Dublin Core Metadata Initiative",
+         "DCMI",
+         "Dublin Core META Tags",
+         "DC",
+         "Dublin Core Metadata Element Set"
+      ],
+      "dc":{
+         "title":"DC Dublin Core META Tags: DCMI Dublin Core Metadata Initiative",
+         "creator":"Administrator",
+         "subject":"DCMI; Dublin Core Metadata Initiative; DC META Tags",
+         "description":"Examples of Dublin Core META Tags.",
+         "publisher":"SEO Consultants Directory",
+         "contributor":"DCMI Dublin Core Metadata Initiative",
+         "date":"2004-01-01",
+         "type":"Text",
+         "format":"text/html",
+         "identifier":"/meta-tags/dublin/",
+         "source":"/meta-tags/",
+         "language":"en",
+         "relation":"/meta-tags/",
+         "coverage":"World",
+         "rights":"/legal/terms-of-use"
+      },
+      "links":{
+         "favicon":{
+            "href":"http://www.seoconsultants.com/images/favicon.ico"
+         },
+         "icon":{
+            "href":"http://www.seoconsultants.com/images/favicon.gif",
+            "type":"image/gif"
+         }
+      }
+   },
+   "links":["51ff5dedc470e7f800000003"],
+   "tags":[{"word":"seo", "count":21 }],
+   "url":"http://www.seoconsultants.com/meta-tags/dublin/#Creator"
 }
 
-jobs.on('job complete', function(id){
-    kue.Job.get(id, function(err, job){
-        if (err) return;
-        job.remove(function(err){
-            if (err) throw err;
-            console.log('removed completed job #%d \r %j', job.id, job.data );
-        });
-    });
-});
+*/
 
-jobs.process('import-link', function(job, Done){
+
+function job_process_import_link (job, Done){
     var oData = job.data
-    ;
-    // save existing link data
-    // check if page exists then use the page
-    // else task for link
-    //  how to get the page data
+        ;
 
+    // save existing link data
+    // check if page exists
+    //  then use the page and tags
+    // else
+    //   task for page
+    //   task for tags
+
+    //  how to get the page data
     job.data._id = 11; // link's id
     Done(null);
-});
+};
 
-jobs.process('import-folder', function(job, Done){
+
+
+function job_process_import_folder(job, Done){
     box.emit('improt.links-in-folder', job.data.folder.importID, job.data.folder.folder.full_path, function(err, Links) {
         if( err ){
             done(err);
@@ -326,7 +408,7 @@ jobs.process('import-folder', function(job, Done){
         }
     });
 
-});
+};
 
 
 function perform_import( Import_id, user, req ){
@@ -350,11 +432,7 @@ function perform_import( Import_id, user, req ){
                     req.io.emit('import.collection-error', { status:'error', folder:oFolder }  );
                 })
                 .on('progress', function(progress){
-                    if( progress == 0 ){
-                        this.req = req; // tricky way to pass req back to the folder processing function
-                    }else{
-                        req.io.emit('import.collection-process', { status:'progress', progress: progress, folder:oFolder} );
-                    }
+                    req.io.emit('import.collection-process', { status:'progress', progress: progress, folder:oFolder} );
                 })
                 .priority('high')
                 .save( function( err, result ){
@@ -388,10 +466,16 @@ function perform_import( Import_id, user, req ){
 box.on('init', function (App, Config, done) {
     app = App;
     config = Config;
+    kue = box.Queue;
+    jobs = box.Jobs;
     done(null, 'route imports.js initialised');
 });
 
 box.on('init.attach', function (app, config,  done) {
+
+    jobs.process('import-link', job_process_import_link);
+    jobs.process('import-folder', job_process_import_folder);
+
     app.use(
         box.middler()
             .get('/imports',            All)

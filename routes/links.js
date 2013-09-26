@@ -284,8 +284,6 @@ box.on('init.attach', function (app, config,  done) {
                 });
             });
 
-
-
             ping_a_link( request_options, function( err, found ){
                 delete found.headers;
                 if( err ){

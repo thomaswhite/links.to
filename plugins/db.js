@@ -85,3 +85,18 @@ box.on('init', function (App, Config, initDone) {
 
 });
 
+
+
+/*
+ https://github.com/LearnBoost/monk
+
+ users.index('name.first', fn);
+ users.index('email', { unique: true }); // unique
+ users.index('name.first name.last') // compound
+ users.index({ 'email': 1, 'password': -1 }); // compound with sort
+ users.index('email', { sparse: true }, fn); // with options
+ users.indexes(fn); // get indexes
+ users.dropIndex(name, fn); // drop an index
+ users.dropIndexes(fn); // drop all indexes
+
+ */
