@@ -66,18 +66,24 @@ box.on('init', function (App, Config, done) {
     box.app.on('error', box.emit.bind(box, 'error'));
 
     box.on('init.attach', function (app, config, cb) {
-//          app.use(express.responseTime());
-          app.use(require('less-middleware')( config.less ));
-          app.use(express.static(path.join(config.__dirname, 'public')));
-          cb(null, 'route public directory attached' );
+        app.use(require('less-middleware')( config.less ));
+        app.use(express.static(path.join(config.__dirname, 'public')));
+        process.nextTick(function() {
+              cb(null, 'route "public directory" attached' );
+        });
     });
 
     box.on('init.listen', function (cb) {
           app.listen( config.port );
           // box.server.listen(config.port);
           // box.emit('init.server', box.server);
-          cb(null, 'listening on port #' +config.port );
+          process.nextTick(function() {
+              cb(null, 'express.io listening on port #' +config.port );
+          });
     });
 
-    done(null, 'plugin express.io initialised');
+    process.nextTick(function() {
+        done(null, 'plugin "express.io" initialised');
+    });
+
 });

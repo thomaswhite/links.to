@@ -468,7 +468,11 @@ box.on('init', function (App, Config, done) {
     config = Config;
     kue = box.Queue;
     jobs = box.Jobs;
-    done(null, 'route imports.js initialised');
+
+    process.nextTick(function() {
+        done(null, 'route imports.js initialised');
+    });
+
 });
 
 box.on('init.attach', function (app, config,  done) {
@@ -551,5 +555,8 @@ box.on('init.attach', function (app, config,  done) {
     });
 
    // kue.app.listen(3001);
-    done(null, 'route "imports.js" attached'  );
+    process.nextTick(function() {
+        done(null, 'route "imports.js" attached'  );
+    });
+
 });

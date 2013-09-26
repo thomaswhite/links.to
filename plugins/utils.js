@@ -87,5 +87,7 @@ box.on('init', function (app, conf, done) {
         formatUpdated:formatUpdated,
         removeAll: removeAll
      };
-    done(null, 'plugin utils initialised');
+    process.nextTick(function() {
+        done(null, 'plugin utils initialised');
+    });
 });

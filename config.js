@@ -29,7 +29,10 @@ exports.init = function(  env, mainDir ){
                 root: path.join(mainDir, 'views')
             },
             less:{
-                paths:['.'],
+                paths:[
+                    '.'
+                    // , path.join( mainDir, 'node_modules', 'bootstrap' , 'less')
+                ],
                 src  :  path.join(mainDir, 'public'),
                 dest :  path.join(mainDir, 'public'),
                 prefix:  ['/stylesheets', '/less']
@@ -42,6 +45,7 @@ exports.init = function(  env, mainDir ){
     ;
     var json = etc.toJSON();
     json.request.proxy =  json.PROXY;
+    json.__dirname = mainDir;
 
     return json;
 };

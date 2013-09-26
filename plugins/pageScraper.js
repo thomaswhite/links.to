@@ -4,5 +4,7 @@ var box = require('../modules/box.js')
 
 box.on('init', function (app, config, done) {
     pageSrcaper.init( config.request );
-    done(null, 'plugin middleware initialised');
+    process.nextTick(function() {
+        done(null, 'plugin "pageSrcaper" initialised');
+    });
 });

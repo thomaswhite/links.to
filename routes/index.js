@@ -22,7 +22,10 @@ function top ( req, res ){
 box.on('init', function (App, Config, done) {
     app = App;
     config = Config;
-    done(null, 'route index.js initialised');
+    process.nextTick(function() {
+        done(null, 'route index.js initialised');
+    });
+
 });
 
 box.on('init.attach', function (app, config,  done) {
@@ -31,7 +34,9 @@ box.on('init.attach', function (app, config,  done) {
          .get('/', top)
          .handler
     );
-    done(null, 'route index attached'  );
+    process.nextTick(function() {
+        done(null, 'route index attached'  );
+    });
 });
 
 

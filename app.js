@@ -18,22 +18,22 @@ var   app = box.app
 
 app.locals.config = config;
 config.less.paths.push ( path.join( path.join(__dirname, 'node_modules', 'bootstrap') , 'less') );
-config.__dirname = __dirname;
+// config.__dirname = __dirname;
 
 box.series('init', app, config, function(err, result){
     if (err) {
         return box.emit('error', err);
     }
-    debug( '\n' + box.utils.inspect(result, { showHidden: true, depth: null, colors:true }) );
-
     box.series('init.attach', app, config, function(err2, result2){
-        if (err) { return box.emit('error', err2); }
-        debug( "init.attach: %s", box.utils.inspect(result2) );
-
-        box.series('init.listen', function (err, result3) {
-            debug( result3 );
+        if (err) {
+            return box.emit('error', err2);
+        }
+        box.series('init.listen', function (err3, result3) {
+            debug(  box.utils.inspect(result, { showHidden: true, depth: null, colors:false }),
+                    box.utils.inspect(result2, { showHidden: true, depth: null, colors:false }),
+                    box.utils.inspect(result3, { showHidden: true, depth: null, colors:false })
+            );
             //console.log('Links.To server listening on port ' + app.get('port') );
         });
-
     });
 });

@@ -27,7 +27,9 @@ box.on('init.attach', function (app, config, cb) {
         }
   */
     });
-    cb(null,   'io.rutes attached' );
+    process.nextTick(function() {
+        cb(null,   'io.rutes attached' );
+    });
 
 });
 

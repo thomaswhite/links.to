@@ -231,7 +231,10 @@ box.on( 'add_collection', function( user, name, description, done ){
 box.on('init', function (App, Config, done) {
     app = App;
     config = Config;
-    done(null, 'route collections.js initialised');
+
+    process.nextTick(function() {
+        done(null, 'route collections.js initialised');
+    });
 });
 
 box.on('init.attach', function (app, config,  done) {
@@ -311,5 +314,8 @@ box.on('init.attach', function (app, config,  done) {
     //    app.get('/tags',        routes.collections.tags);
     //    app.get('/tags/mine',   routes.collections.tags_mine);
 
-    done(null, 'route collections attached'  );
+    process.nextTick(function() {
+        done(null, 'route collections attached'  );
+    });
+
 });

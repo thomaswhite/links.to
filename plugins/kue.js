@@ -39,7 +39,9 @@ box.on('init', function (app, config, done) {
     jobs.complete( removeJobs );
     jobs.failed( removeJobs );
 
-    done(null, 'plugin KUE initialised');
+    process.nextTick(function() {
+        done(null, 'plugin "KUE" initialised');
+    });
 });
 
 /*

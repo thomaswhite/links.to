@@ -237,7 +237,9 @@ function newLink (data, collection_id, owner, user_screen_name, token ){
 box.on('init', function (App, Config, done) {
     app = App;
     config = Config;
-    done(null, 'route links.js initialised');
+    process.nextTick(function() {
+        done(null, 'route links.js initialised');
+    });
 });
 
 box.on('init.attach', function (app, config,  done) {
@@ -353,6 +355,7 @@ box.on('init.attach', function (app, config,  done) {
         }
     });
 
-
-    done(null, 'route links.js attached'  ); //
+    process.nextTick(function() {
+        done(null, 'route links.js attached'  ); //
+    });
 });

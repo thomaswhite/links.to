@@ -44,7 +44,10 @@ box.on('init', function (App, Config, initDone) {
     box.on('db.init', function( monk2, Config, done ){
         var settings = Config.db
             , common_config = Config.common;
-        done(null, 'db:session and db:authTemp initialised.');
+
+        process.nextTick(function() {
+            done(null, 'db:session and db:authTemp initialised.');
+        });
     });
 
 

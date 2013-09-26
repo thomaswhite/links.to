@@ -4,5 +4,7 @@ var box = require('../modules/box.js')
 
 box.on('init', function (app, conf, done) {
   box.middleware = middler(box.app);
-  done(null, 'plugin middleware initialised');
+    process.nextTick(function() {
+        done(null, 'plugin middleware initialised');
+    });
 });
