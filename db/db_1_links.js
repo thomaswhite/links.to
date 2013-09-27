@@ -69,6 +69,41 @@ box.on('db.init', function( monk, Config, done ){
             Links.remove( {_id: link_id }, callback );
         }
     });
+
+    // ================================== updated  =======================================
+
+    box.on('link.add2', function( oLink, callback){
+        var cb = callback;
+        Links.insert( oLink,  { safe: true }, function( err, addedLink){
+            if( err ){
+                callback(err);
+            }else{
+                box.db.coll.collections.update(
+                    { _id: newLink.collection, "links" :{ $ne : addedLink._id  }},
+                    {  $push: {  "links" : addedLink._id }, updated: new Date() },
+                    function(err2, result){
+                        callback(err2, addedLink);
+                    }
+                );
+            }
+        });
+    });
+
+    box.on('link.delete2', function(link_id, coll_id, callback){
+        if( !link_id ){
+            throw "Link ID expected!";
+        }else{
+            Links.remove( {_id: link_id }, function(err, l ){
+                box.db.coll.collections.updateById(
+                    coll_id,
+                    {  $pull: {  "links" : Links.col.ObjectID(link_id) } },
+                    callback
+                );
+           });
+        }
+    });
+
+
     process.nextTick(function() {
         done(null, 'db:links initialised.');
     });

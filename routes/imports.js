@@ -204,23 +204,23 @@ function Get_One (req, res) {
         res.redirect( '/coll' );
     }else{
         Get_One_data( id, function(err, displayBlock ){
-                if ( err ){
-                    console.error(  'import.get.one', err);
-                }
-                if( err || !displayBlock.import ){
-                     res.redirect( '/imports' );
-                }else{
-                     var user  =  req.session && req.session.passport && req.session.passport.user ? JSON.parse(req.session.passport.user):''
-                        , base = box.dust.makeBase({
-                            user:user,
-                            pageParam:{
-                                route:'import:get',
-                                id : id
-                            }
-                        })
-                    ;
-                    console.log(  util.inspect( displayBlock, false, 7, true ) );
-                    box.dust.render(res, 'imports/page_import', base.push(displayBlock));
+            if ( err ){
+                console.error(  'import.get.one', err);
+            }
+            if( err || !displayBlock.import ){
+                 res.redirect( '/imports' );
+            }else{
+                  var user  =  req.session && req.session.passport && req.session.passport.user ? JSON.parse(req.session.passport.user):''
+                    , base = box.dust.makeBase({
+                        user:user,
+                        pageParam:{
+                            route:'import:get',
+                            id : id
+                        }
+                    })
+                ;
+                console.log(  util.inspect( displayBlock, false, 7, true ) );
+                box.dust.render(res, 'imports/page_import', base.push(displayBlock));
             }
         });
     }

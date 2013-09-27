@@ -24,16 +24,15 @@ box.series('init', app, config, function(err, result){
     if (err) {
         return box.emit('error', err);
     }
+    debug(  box.utils.inspect(result, { showHidden: true, depth: null, colors:false }));
     box.series('init.attach', app, config, function(err2, result2){
         if (err) {
             return box.emit('error', err2);
         }
+        debug( box.utils.inspect(result2, { showHidden: true, depth: null, colors:false }) );
         box.series('init.listen', function (err3, result3) {
-            debug(  box.utils.inspect(result, { showHidden: true, depth: null, colors:false }),
-                    box.utils.inspect(result2, { showHidden: true, depth: null, colors:false }),
-                    box.utils.inspect(result3, { showHidden: true, depth: null, colors:false })
-            );
-            //console.log('Links.To server listening on port ' + app.get('port') );
+             debug( box.utils.inspect(result3, { showHidden: true, depth: null, colors:false }) );
+                    //console.log('Links.To server listening on port ' + app.get('port') );
         });
     });
 });
