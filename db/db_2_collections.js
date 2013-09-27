@@ -17,7 +17,8 @@ box.on('db.init', function( monk, Config, done ){
         , Collections = box.db.coll.collections = monk.get('collections')
         ;
 
-    Collections.ensureIndex( { updated: -1, created: -1, owner:1 }); // , {background:true}
+    Collections.index('owner', {background:true} );
+    Collections.ensureIndex( { updated: -1, created: -1, owner:1 });
 
     box.on('collection.add', function( oColl, callback){
         Collections.insert( oColl,  { safe: true }, callback);
@@ -123,6 +124,10 @@ box.on('db.init', function( monk, Config, done ){
         }
     };
  */
+
+// =============================  updated =================================================
+
+
     process.nextTick(function() {
         done(null, 'db:collections initialised.');
     });

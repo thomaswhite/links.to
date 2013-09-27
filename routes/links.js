@@ -253,20 +253,8 @@ box.on('init.attach', function (app, config,  done) {
     app.io.route('link', {
 
         remove: function(req){
-            var id = req.data.id;
-            box.db.coll.links.findById(id, function(err, Link ){
-                req.io.respond({
-                    result:err ? 'error':'ok',
-                    error:err,
-                    link:Link
-                });
-                if( !Link ){
-                    req.io.emit('link.delete.missing', { param:req.data } );
-                }else{
-                    box.parallel('link.delete', id, Link.url_id, Link.collection, function(err, aResult){
-                        req.io.emit('link.deleted', { param:req.data, error:err } );
-                    });
-                }
+            box.invoke('link.delete2', req.data.id, function(err, found ){
+                req.io.emit('link.deleted', { param:req.data, error:err, found:found } );
             });
         },
 

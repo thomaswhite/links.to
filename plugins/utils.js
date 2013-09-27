@@ -28,10 +28,12 @@ var box = require('../modules/box.js')
         maxLength: 32000           // Truncate output if longer
     })
     , moment = require('moment')
+    , config
+
     ;
 
 function ShorterID( length ){
-    return  ShortId.generate().substr(0, length || 7 );
+    return  ShortId.generate().substr(0, length || config.db.short_id_length );
 };
 
 
@@ -74,6 +76,9 @@ function removeAll(s, regEx ){
 
 
 box.on('init', function (app, conf, done) {
+
+    config = conf;
+
     box.utils = {
         _ : _,
         path : require('path'),
@@ -85,7 +90,8 @@ box.on('init', function (app, conf, done) {
         shorterID: ShorterID,
         pickUpFromAsyncResult: pickUpFromAsyncResult,
         formatUpdated:formatUpdated,
-        removeAll: removeAll
+        removeAll: removeAll,
+        ShorterID:ShorterID
      };
     process.nextTick(function() {
         done(null, 'plugin utils initialised');

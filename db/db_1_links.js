@@ -74,13 +74,15 @@ box.on('db.init', function( monk, Config, done ){
 
     box.on('link.add2', function( oLink, callback){
         var cb = callback;
+        oLink.collection_id =  Links.col.ObjectID( oLink.collection_id );
+
         Links.insert( oLink,  { safe: true }, function( err, addedLink){
             if( err ){
                 callback(err);
             }else{
                 box.db.coll.collections.update(
-                    { _id: newLink.collection, "links" :{ $ne : addedLink._id  }},
-                    {  $push: {  "links" : addedLink._id }, updated: new Date() },
+                    { _id: addedLink.collection_id, "links" :{ $ne : addedLink._id  }},
+                    {  $push: {  "links" : addedLink._id },  $set:{updated: new Date()} },
                     function(err2, result){
                         callback(err2, addedLink);
                     }
@@ -89,17 +91,30 @@ box.on('db.init', function( monk, Config, done ){
         });
     });
 
-    box.on('link.delete2', function(link_id, coll_id, callback){
+    box.on('link.delete2', function(link_id, callback){
         if( !link_id ){
             throw "Link ID expected!";
         }else{
-            Links.remove( {_id: link_id }, function(err, l ){
-                box.db.coll.collections.updateById(
-                    coll_id,
-                    {  $pull: {  "links" : Links.col.ObjectID(link_id) } },
-                    callback
-                );
-           });
+            Links.findById( link_id, function(err, Link){
+                 if(err){
+                     callback(err);
+                 }else if( !Link ){
+                     callback(null, false );
+                 }else {
+                     box.db.coll.collections.updateById(
+                         Link.collection_id,
+                         {  $pull: {  "links" : Link._id },  $set:{updated: new Date()}},
+                         { safe: false }
+                     );
+                     box.db.coll.urls.updateById(
+                         Link.url_id,
+                         {  $pull: {  links : Link._id }  },
+                         { safe: false }
+                     );
+                     Links.remove( {_id: link_id },  { safe: false } );
+                     callback( null, true  );
+                 }
+            });
         }
     });
 

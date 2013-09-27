@@ -9,7 +9,7 @@ var box = require('../modules/box.js')
     ,  util = require('util')
     , async = require('async')
     , moment = require('moment')
-    , debug = require('debug')('linksTo:view.import')
+    , debug = require('debug')('linksTo:import')
     , ShortId  = require('shortid').seed(96715)
 
     , kue // = require('kue')
@@ -228,6 +228,8 @@ function Get_One (req, res) {
 
 
 
+// link:link, user:oData.user, collectionID: collection._id
+
 /*
 IMPORTERD link
   {
@@ -262,94 +264,62 @@ IMPORTERD link
     }
 
 // processed saved page
- {
-   "body":{
-      "images":[
-         {
-            "src":"http://www.seoconsultants.com/images/seo-consultants.png",
-            "width":"370",
-            "height":"40"
-         },
-      ],
-      "h1":[
-         "DCMI Dublin Core Metadata Initiative"
-      ],
-      "h2":[
-         "DC Dublin Core META Tags",
-         "Dublin Core Metadata Initiative References",
-         "Where did the name Dublin Core originate?"
-      ]
-   },
-   "head":{
-      "title":"DC Dublin Core META Tags: DCMI Dublin Core Metadata Initiative",
-      "fb":{},
-      "og":{},
-      "names":{
-         "description":"The Dublin Core Metadata Initiative (DCMI) is an open forum engaged in the development of interoperable online metadata standards that support a broad range of purposes and business models.",
-         "author":"Administrator"
-      },
-      "keywords":[
-         "Dublin Core Metadata Initiative",
-         "DCMI",
-         "Dublin Core META Tags",
-         "DC",
-         "Dublin Core Metadata Element Set"
-      ],
-      "dc":{
-         "title":"DC Dublin Core META Tags: DCMI Dublin Core Metadata Initiative",
-         "creator":"Administrator",
-         "subject":"DCMI; Dublin Core Metadata Initiative; DC META Tags",
-         "description":"Examples of Dublin Core META Tags.",
-         "publisher":"SEO Consultants Directory",
-         "contributor":"DCMI Dublin Core Metadata Initiative",
-         "date":"2004-01-01",
-         "type":"Text",
-         "format":"text/html",
-         "identifier":"/meta-tags/dublin/",
-         "source":"/meta-tags/",
-         "language":"en",
-         "relation":"/meta-tags/",
-         "coverage":"World",
-         "rights":"/legal/terms-of-use"
-      },
-      "links":{
-         "favicon":{
-            "href":"http://www.seoconsultants.com/images/favicon.ico"
-         },
-         "icon":{
-            "href":"http://www.seoconsultants.com/images/favicon.gif",
-            "type":"image/gif"
-         }
-      }
-   },
-   "links":["51ff5dedc470e7f800000003"],
-   "tags":[{"word":"seo", "count":21 }],
-   "url":"http://www.seoconsultants.com/meta-tags/dublin/#Creator"
-}
 
 */
 
 
 function job_process_import_link (job, Done){
-    var oData = job.data
-        ;
+    var   user = job.data.user
+        , link = job.data.link
+        , link2save = {
+            collection_id: job.data.collectionID,
+            short_id: box.utils.ShorterID(),
+            url_id: -1,
+            owner_id: user._id,
+            updated: link.last_modified || link.add_date || new Date(),
+            created: link.add_date || new Date(),
+            owner_screen_name: user.screen_name,
+            display:{
+                title: link.title || link.href,
+                title_type:'extracted',
+                description: link.description || '',
+                summary:'',
+                summary_tyle:'500chars',
+                imagePos:-1,
+                thumbnail:"",
+                url: link.href,
+                tags:[]
+            }
+          }
+    ;
 
-    // save existing link data
-    // check if page exists
-    //  then use the page and tags
-    // else
-    //   task for page
-    //   task for tags
+    box.invoke( 'link.add2', link2save, function(err, savedLink){
+        if(err){
+            debug( err );
+        }
+        box.invoke( 'url.add-link', link.href, savedLink, function(err, oURL, existing_URL  ){
+            if(err){
+              debug( err );
+            }
+            if( existing_URL && existing_URL.ready  ){
+                // generate .display for the link from the oURL
 
-    //  how to get the page data
-    job.data._id = 11; // link's id
-    Done(null);
+                Done(null);
+            }else{
+                //   job to ping URL
+                //   job to fetch and process page then update .display
+                //   job to update oURL
+                //   job to create tags
+                Done(null);
+            }
+        });
+    });
 };
 
 
 
 function job_process_import_folder(job, Done){
-    box.emit('improt.links-in-folder', job.data.folder.importID, job.data.folder.folder.full_path, function(err, Links) {
+    box.invoke('improt.links-in-folder', job.data.folder.importID, job.data.folder.folder.full_path, function(err, Links) {
         if( err ){
             done(err);
         }else{
@@ -370,8 +340,7 @@ function job_process_import_folder(job, Done){
                         jobs.create('import-link', {link:link, user:oData.user, collectionID: collection._id })
                             .on('complete', function(){
                                 aLinks.push( {
-                                    link_id    : this.data._id,
-                                    imported_id: this.data.link._id
+                                    link_id: this.data.link._id
                                 });
 
                                 // add additional jobs:
