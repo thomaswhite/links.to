@@ -6,7 +6,7 @@
  * To change this template use File | Settings | File Templates.
  */
 
-var   box = require('../modules/box.js')
+var   box = require('../lib/box.js')
     , debug = require('debug')('linksTo:db:Imports')
     ;
 
@@ -20,15 +20,6 @@ box.on('db.init', function( monk, Config, done ){
 
     Imports.ensureIndex( { excluded:1, importID: 1, parent:1 } ); // , {background:true}, {sparse:1}
     Imports.ensureIndex( { folder: 1,  importID: 1, parent:1 }, {sparse:1} ); // , {background:true}
-
-    box.on('import.add', function( oColl, callback){
-        Imports.insert( oColl,  { safe: true }, callback);
-    });
-
-    box.on('import.added', function( importNodes, callback){
-        Imports.insert( importNodes,  { safe: false }, callback );
-    });
-
 
 
     box.on('import.delete', function(id, callback){
@@ -93,6 +84,15 @@ box.on('db.init', function( monk, Config, done ){
     });
 
 // --------------------------------------------------------------------- used ---
+
+
+    box.on('import.add', function( oColl, callback){
+        Imports.insert( oColl,  { safe: true }, callback);
+    });
+
+    box.on('import.add-nodes', function( importNodes, callback){
+        Imports.insert( importNodes,  { safe: false }, callback );
+    });
 
     box.on('import.get-with-root-level-folders', function( id, callback){
         Imports.findById(id, function(err, import_found ){

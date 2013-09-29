@@ -3,15 +3,14 @@
  * GET home page.
  */
 
-var  box = require('../modules/box.js')
+var  box = require('../lib/box.js')
    , _ = require('lodash')
    , debug = require('debug')('linksTo:view.links')
    , breadcrumbs = require('./breadcrumbs.js')
    , ShortId  = require('shortid').seed(96715652)
-   , request = require('request')
-   , requestDefaults = {}
-   , url = require('url')
-// var sanitize = require('validator').sanitize;
+   , ping_url = require( '../lib/ping-url')
+
+// , sanitize = require('validator').sanitize
 
     , headers_to_watch = {
        server: true,
@@ -133,18 +132,18 @@ function page_display( page, metaTagsToJoin ){
                             value = {
                                 type:'email',
                                 value: author
-                            }
+                            };
                          }else{
                              value = {
                                  type:'text',
                                  value: author
-                             }
+                             };
                          }
                     }else if( author.href ){
                         value = {
                             value:author.href,
                             type:'url'
-                        }
+                        };
                     }
                 }
                 break;
@@ -174,30 +173,6 @@ function page_display( page, metaTagsToJoin ){
 
 function ShorterID(){
     return  ShortId.generate().substr(0, config.db.short_id_length);
-};
-
-
-function ping_a_link( request_options, callback ){
-    request.head(request_options, function (err, response, body) {
-        var h,
-            found = {
-                url:request_options.uri,
-                token:request_options.token,
-                headers:{},
-                state: 'found'
-            },
-            oURL = url.parse( request_options.uri )
-            ;
-        if( response ){
-            found.headers = response.headers;
-            callback( null, found );
-        }else{
-            found.state = 'not-found';
-            found.title = "Page not found";
-            callback( found );
-        }
-
-    });
 }
 
 function Delete (req, res) {
@@ -234,6 +209,123 @@ function newLink (data, collection_id, owner, user_screen_name, token ){
     return link;
 }
 
+function make_link_display( oURL, oLink){
+    var display = {};
+    return display;
+}
+
+function make_missing_link_display( oURL, oLink){
+    var display = {};
+    return display;
+}
+
+
+function link_process( url, collectionID, param, Done, requestIO, paramsIO ){
+    requestIO = requestIO || {io:function(){}};
+
+    var link2save = box.envoke('link.new',
+            url,
+            collectionID,
+            {
+                title: param.title || '',
+                description: param.description || '',
+                owner_id: param.owner_id,
+                owner_screen_name: param.owner_screen_name,
+                created: param.add_date || null,
+                updated: param.last_modified || null
+            }
+        ),
+        canonicalRegEx = /<link\s+rel=(?:"canonical"|'canonical')\s+href\s*=\s*(\"[^"]*\"|'[^']*')\s*(?:\/>|><\/link>)/gi
+        ;
+        box.invoke( 'link.add2', link2save, function(err, savedLink){
+            if(err){
+                err.result = 'error';
+                requestIO.io.respond( err );
+                Done( err, 'link.add2' );
+            }
+            box.invoke( 'url.add-link', link.href, savedLink, function(err, oURL, existing_URL  ){
+                if(err){
+                    Done( err, 'url.add-link' );
+                }
+                if( !existing_URL || !oURL.ready  ){
+                    var request_options = _.merge( {}, config.request, options, {uri:url, jar:request.jar()  });
+                    request(request_options, function (err, response, body) {
+                        if( err ){
+                            found.result = 'error';
+                            requestIO.io.respond( {
+                                url: url,
+                                statusCode: response ? response.statusCode : -1 ,
+                                result: response && response.statusCode == 200 ?  'found' : 'not-found',
+                                state: 'url-ping'
+                            } );
+                            Done(err);
+                        }else if( response.statusCode == 200 ){
+                            var canonical = ('' + body).match(canonicalRegEx),
+                                canonicalURL = canonical ? canonical[0]:null;
+
+                            box.emit('url.find-url', canonicalURL || url, function(err, existing_canonical_oURL ){
+                               if( existing_canonical_oURL ){
+                                   // URL will be updated to the canonicalURL when .display is updated
+                                   box.emit('link.update-display', savedLink._id, make_link_display( existing_canonical_oURL, savedLink), function(err, updated_Link){
+                                       requestIO.io.emit( 'link.saved', { result:'ok', param: paramsIO, link: updated_Link });
+                                       Done( err, updated_Link);
+                                   });
+                               }else{
+                                   box.invoke( 'pageScrape', url, body, function(err, new_oURL ){
+                                      box.invoke('url.update', oURL._id, new_oURL, function(err){
+                                          if( err ){
+                                              Done(err);
+                                          }else{
+                                              box.emit('link.update-display', savedLink._id, make_link_display( new_oURL, savedLink), function(err, updated_Link){
+                                                  requestIO.io.emit( 'link.saved', { result:'ok', param: paramsIO, link: updated_Link });
+                                                  Done( err, updated_Link);
+                                              });
+                                          }
+                                      });
+                                   });
+                               }
+                            });
+                        }else{
+                            box.emit('link.update-display', savedLink._id, make_missing_link_display( existing_URL, savedLink), function(err, updated_Link){
+                                requestIO.io.emit( 'link.failed', { result:'error', param: paramsIO, link: updated_Link });
+                                Done( err, updated_Link);
+                            });
+                        }
+                    });
+
+                }else{
+                    box.emit('link.update-display', savedLink._id, make_link_display( oURL, savedLink), function(err, updated_Link){
+                        requestIO.io.emit( 'link.saved', {
+                            result:'ok',
+                            param: paramsIO,
+                            link: updated_Link
+                        });
+                        Done( err, updated_Link);
+                    });
+                }
+            });
+        });
+
+}
+
+
+var cherioParam = {
+    ignoreWhitespace: false,
+    xmlMode: true,
+    lowerCaseTags: true
+};
+function scrape_tags( $, uri, callback ){
+    var Tags = keyWords.makeList( $('body').find('p, ul, h1, h2, h3').text(), null, 4, 'en'),
+        result = Tags.words.slice(0, 12);
+
+    result.local = Tags.locale;
+    callback( null,{
+        tags: result
+    });
+}
+
+
+
 box.on('init', function (App, Config, done) {
     app = App;
     config = Config;
@@ -241,6 +333,7 @@ box.on('init', function (App, Config, done) {
         done(null, 'route links.js initialised');
     });
 });
+
 
 box.on('init.attach', function (app, config,  done) {
     app.use(
@@ -261,7 +354,7 @@ box.on('init.attach', function (app, config,  done) {
         add:function(req){
             var url = req.data.value.trim(),
                 token = ShortId.generate(),
-                request_options = _.merge( {}, config.request, {uri:url, token: token })
+                request_options = {uri:url, token: token }
                 ;
 
             req.data.token = token;
@@ -274,7 +367,7 @@ box.on('init.attach', function (app, config,  done) {
                 });
             });
 
-            ping_a_link( request_options, function( err, found ){
+            ping_url.ping( url, { token: token, method:'HEAD' }, function( err, found ){
                 delete found.headers;
                 if( err ){
                     err.url    = url;

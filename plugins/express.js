@@ -1,4 +1,4 @@
-var box = require('../modules/box.js')
+var box = require('../lib/box.js')
     , express    = box.express =  require('express.io')
     , app        = box.app = express()
     , mongoStore = require('connect-mongo')(express)

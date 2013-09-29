@@ -5,7 +5,7 @@
  * Time: 15:25
  */
 
-var   box = require('../modules/box.js')
+var   box = require('../lib/box.js')
     , debug = require('debug')('linksTo:db')
     , Monk  = require('monk')
 

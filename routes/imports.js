@@ -4,7 +4,7 @@
  * GET home page.
  */
 
-var box = require('../modules/box.js')
+var box = require('../lib/box.js')
     , _ = require('lodash')
     ,  util = require('util')
     , async = require('async')
@@ -16,7 +16,8 @@ var box = require('../modules/box.js')
     , jobs //= kue.createQueue()
 
     , breadcrumbs = require('./breadcrumbs.js')
-    , favorites = require('../modules/parse-favorites')
+    , favorites = require('../lib/parse-favorites')
+    , ping_url = require('../lib/ping-url')
 
     , config
     , app
@@ -159,7 +160,7 @@ function Add(req, res) {
                             allNodes[n].importID = ID;
                         }
 
-                        box.parallel('import.added',  allNodes, function(err, result){
+                        box.invoke('add-nodes',  allNodes, function(err, result){
                             if( err ){
                                 console.error('Error saving import nodes for file ' + saved_import.title, err );
                             }else{
@@ -268,29 +269,22 @@ IMPORTERD link
 */
 
 
+
 function job_process_import_link (job, Done){
     var   user = job.data.user
         , link = job.data.link
-        , link2save = {
-            collection_id: job.data.collectionID,
-            short_id: box.utils.ShorterID(),
-            url_id: -1,
-            owner_id: user._id,
-            updated: link.last_modified || link.add_date || new Date(),
-            created: link.add_date || new Date(),
-            owner_screen_name: user.screen_name,
-            display:{
-                title: link.title || link.href,
-                title_type:'extracted',
-                description: link.description || '',
-                summary:'',
-                summary_tyle:'500chars',
-                imagePos:-1,
-                thumbnail:"",
-                url: link.href,
-                tags:[]
+        , link2save = box.envoke('link.new',
+            link.href,
+            job.data.collectionID,
+            {
+                title: link.title,
+                description: link.description,
+                owner_id: user._id,
+                owner_screen_name: user.screen_name,
+                created: link.add_date,
+                updated: link.last_modified
             }
-          }
+        )
     ;
 
     box.invoke( 'link.add2', link2save, function(err, savedLink){
@@ -301,21 +295,23 @@ function job_process_import_link (job, Done){
             if(err){
               debug( err );
             }
-            if( existing_URL && existing_URL.ready  ){
-                // generate .display for the link from the oURL
 
-                Done(null);
-            }else{
+
+            if( !existing_URL || !existing_URL.ready  ){
                 //   job to ping URL
                 //   job to fetch and process page then update .display
                 //   job to update oURL
                 //   job to create tags
+
+                Done(null);
+            }else{
+                // generate .display for the link from the oURL
+
                 Done(null);
             }
         });
     });
-};
-
+}
 
 
 function job_process_import_folder(job, Done){
@@ -376,8 +372,7 @@ function job_process_import_folder(job, Done){
             });
         }
     });
-
-};
+}
 
 
 function perform_import( Import_id, user, req ){

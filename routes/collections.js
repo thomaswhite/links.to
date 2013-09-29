@@ -4,7 +4,7 @@
  * GET home page.
  */
 
-var box = require('../modules/box.js')
+var box = require('../lib/box.js')
     , _ = require('lodash')
     , debug = require('debug')('linksTo:view.collections')
     , breadcrumbs = require('./breadcrumbs.js')

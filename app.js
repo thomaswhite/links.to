@@ -1,5 +1,5 @@
 var debug = require('debug')('linksTo:app')
-    ,  box = require('./modules/box')
+    ,  box = require('./lib/box')
     , glob = require('glob').Glob
     , path = require('path')
     , config = box.config = require('./config').init(  'dev', __dirname )
@@ -11,8 +11,8 @@ var debug = require('debug')('linksTo:app')
     });
 
 var   app = box.app
-    , passports = require('./modules/passports')
-    , socket = require('./modules/socket-io')
+    , passports = require('./lib/passports')
+    , socket = require('./lib/socket-io')
     , routes = require('./routes')
     ;
 

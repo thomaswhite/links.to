@@ -6,7 +6,7 @@
  * To change this template use File | Settings | File Templates.
  */
 
-var   box = require('../modules/box.js')
+var   box = require('../lib/box.js')
     , debug = require('debug')('linksTo:db:openID')
 
     ;

@@ -6,7 +6,7 @@
  * To change this template use File | Settings | File Templates.
  */
 
-var   box = require('../modules/box.js')
+var   box = require('../lib/box.js')
     , debug = require('debug')('linksTo:db:urls')
     ;
 
@@ -15,12 +15,11 @@ function new_url( url, link_id ){
     var url2save = {
         ready: false,
         canonical:false,
-        rawHTML:'',
         url:  url,
         head: [],
         body:[],
-        links:[],
-        tags:[]
+        tags:[],
+        bodyHTML:''
     };
     if( link_id ){
         url2save.links.push( link_id );
@@ -34,34 +33,9 @@ box.on('db.init', function( monk, Config, done ){
     URLs.index('url',  { unique: true });
     URLs.index('links', {background:true});
 
-    box.on('url.add', function( oURL, callback){
-        URLs.insert( oURL,  { safe: true }, callback);
-    });
-
     // TODO: DO not delete URL thst is used in any active link
     box.on('url.delete', function( url_id, callback){
          URLs.remove( {_id: url_id || 'missing' }, callback );
-    });
-
-    box.on('link.added', function( newLink, callback){
-        var link_id =  newLink._id;
-        if( newLink.url_id ){
-            URLs.update(
-                { _id: newLink.url_id, "links" :{ $ne : link_id }},
-                {  $push: {  "links" : link_id } },
-                callback
-            );
-        } else{
-            process.nextTick( callback );
-        }
-    });
-
-    box.on('link.delete', function(link_id, url_id, coll_id, callback){
-        URLs.updateById(
-            url_id,
-            {  $pull: {  "links" : URLs.id(link_id) } },
-            callback
-        );
     });
 
 // ================== updated =================
@@ -71,30 +45,32 @@ box.on('db.init', function( monk, Config, done ){
         Imports.find( {url: url }, callback );
     });
 
+    box.on('url.update', function( id, oURL, callback){
+        Imports.updateById( id, oURL,  { safe: false }, callback );
+    });
+
+
     // invoked
     box.on('url.add-link', function( url, newLink, callback){
         var link_id =  newLink._id;
 
-        URLs.find( {url: url }, function(err, exisitng_URL ){
-            //this.destroy();
+        // fields:{ links:false }
+        URLs.find( {url: url }, { fields:{links:false, rawHTML:false} },  function(err, exisitng_URL ){
             if( exisitng_URL.length ){
                 URLs.update(
                     { _id: exisitng_URL[0]._id, "links" :{ $ne : link_id }},
                     {  $push: {  "links" : link_id } },
                     function( err, result ){
-                        //this.destroy();
                         box.db.coll.links.updateById(  newLink._id,
                             { $set:{url_id:exisitng_URL[0]._id }},
                             function( err, result ){
-                            //this.destroy();
-                            callback(err, exisitng_URL[0], true ); // true indicated it is an existing URL
+                                callback(err, exisitng_URL[0], true ); // true indicates it is an existing URL
                         });
                     }
                 );
             }else{
                 URLs.insert( new_url(url, link_id), function(err, insertedURL){
                     box.db.coll.links.updateById(  newLink._id, {url_id:insertedURL._id }, function( err, result ){
-                        //this.destroy();
                         callback(err, insertedURL, false );
                     });
                 });

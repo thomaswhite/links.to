@@ -6,10 +6,41 @@
  * To change this template use File | Settings | File Templates.
  */
 
-var   box = require('../modules/box.js')
+var   box = require('../lib/box.js')
     , debug = require('debug')('linksTo:db:links')
 
     ;
+
+/**
+ *
+ * @param url
+ * @param collection_id
+ * @param  param { title, description, owner_id, owner_screen_name, add_date, last_modified }
+ * @returns {{collection_id: *, short_id: (box.utils.ShorterID|*), url_id: number, owner_id: *, updated: (*|Date), created: (*|Date), owner_screen_name: *, display: {title: (HTMLElement|*), title_type: string, description: (HTMLElement|*|string), summary: string, summary_style: string, imagePos: number, thumbnail: string, url: *, tags: Array}}}
+ */
+function new_link( url, collection_id, param  ){
+
+    return {
+        collection_id: collection_id,
+        short_id: box.utils.ShorterID(),
+        url_id: -1,
+        owner_id: param.owner_id,
+        owner_screen_name: param.owner_screen_name || '',
+        updated: param.last_modified || param.add_date || new Date(),
+        created: param.add_date || new Date(),
+        display:{
+            title: param.title || url,
+            title_type:'imported',
+            description: param.description || '',
+            summary:'',
+            summary_style:'',
+            imagePos:-1,
+            thumbnail:"",
+            url: url,
+            tags:[]
+        }
+    };
+}
 
 box.on('db.init', function( monk, Config, done ){
     var   settings = Config.db
@@ -20,6 +51,8 @@ box.on('db.init', function( monk, Config, done ){
     Links.ensureIndex( { updated: -1, created: -1 }, {background:true} ); // coll_id ?
 
     // Returns an array of the links for a collection
+
+    box.on('link.new', new_link); // to be invoked
 
     box.on('collection.get', function( waterfall, callback){
         if( waterfall.collection && waterfall.collection.links && waterfall.collection.links.length ){
@@ -72,9 +105,19 @@ box.on('db.init', function( monk, Config, done ){
 
     // ================================== updated  =======================================
 
+    box.on('link.update-display', function( link_id, display, callback){
+        Links.updateById(link_id,  { $set:{ display:display }}, function(err){
+            if( err ){
+                callback(err);
+            }
+            Links.findById(link_id, callback );
+        });
+    });
+
     box.on('link.add2', function( oLink, callback){
         var cb = callback;
-        oLink.collection_id =  Links.col.ObjectID( oLink.collection_id );
+        oLink.collection_id = Links.col.ObjectID( oLink.collection_id );
+        oLink.url_id = oLink.collection_id; // reserve space in the db for an ID
 
         Links.insert( oLink,  { safe: true }, function( err, addedLink){
             if( err ){

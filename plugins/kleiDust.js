@@ -1,4 +1,4 @@
-var box = require('../modules/box.js')
+var box = require('../lib/box.js')
     , path = require('path')
     , kleiDust = require('klei-dust')
     , helpers = require('dustjs-helpers')
@@ -26,7 +26,7 @@ box.on('init', function (App, Config, done) {
 
  //   done(null, 'plugin kleiDust initialised ');
  //   return;
-    require('../modules/duster').watch(
+    require('../lib/duster').watch(
         kleiDust.getDust(),
         path.join(config.__dirname, 'views'),
         path.join(config.__dirname, 'public/templates'),
