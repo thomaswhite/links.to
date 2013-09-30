@@ -19,7 +19,8 @@ function new_url( url, link_id ){
         head: [],
         body:[],
         tags:[],
-        bodyHTML:''
+        links:[],
+        rawHTML:''
     };
     if( link_id ){
         url2save.links.push( link_id );
@@ -35,18 +36,18 @@ box.on('db.init', function( monk, Config, done ){
 
     // TODO: DO not delete URL thst is used in any active link
     box.on('url.delete', function( url_id, callback){
-         URLs.remove( {_id: url_id || 'missing' }, callback );
+         URLs.remove( {_id: url_id || 'missing' }, { safe: false } );
     });
 
 // ================== updated =================
 
 
     box.on('url.find-url', function( url, callback){
-        Imports.find( {url: url }, callback );
+        URLs.find( {url: url }, callback );
     });
 
     box.on('url.update', function( id, oURL, callback){
-        Imports.updateById( id, oURL,  { safe: false }, callback );
+        URLs.updateById( id, oURL,  { safe: false }, callback );
     });
 
 

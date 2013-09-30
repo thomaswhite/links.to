@@ -1,17 +1,8 @@
 <div class="blocked-link token_{token}" id="token_{token}">
   <div class="row link-title">
      <div class="span8 link-content">
-        {@select key="{state}" }
-           {@eq value="found"}
-                  <i class="icon-refresh icon-spin "></i>
-                  <span class="link-fetching">
-                    {url}
-                  </span>
-           {/eq}
-           {@default}
-              URL not found!
-           {/default}
-        {/select}
+           <i class="icon-refresh icon-spin "></i>
+           <span class="link-fetching">{url}</span>
       </div>
   </div>
 </div>

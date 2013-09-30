@@ -90,9 +90,9 @@ function fnBtnAdd(event){
         if( Context.page.routeIO == "link:add" ){
             var param = Context.page.adding;
             myRender( param.tempateID, dataDone, $(param.containerID), param.contentAction  );
-            if( dataDone.state != 'found'){
+            //if( dataDone.state != 'found'){
                 setTimeout('$("#token_"' + dataDone.token + '" ).slideUp(400)', 1000);
-            }
+            //}
         }
         return;
     });

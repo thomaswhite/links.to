@@ -6,8 +6,9 @@
 
 var box = require('../lib/box.js')
     , _ = require('lodash')
+    ,  util = require('util')
     , debug = require('debug')('linksTo:view.collections')
-    , breadcrumbs = require('./breadcrumbs.js')
+    , breadcrumbs = require('./../lib/breadcrumbs.js')
     , ShortId  = require('shortid').seed(96715)
     , moment = require('moment')
     , config
@@ -212,7 +213,7 @@ function Get_One (req, res) {
                 })
                 ;
             Get_One_data( collID, function(err, displayBlock ){
-                console.log( displayBlock );
+                console.log(  util.inspect( displayBlock, false, 7, true ) );
 
 //        var isOwner = collection.owner == user._id ? true : '';
 //            canEdit: isOwner,

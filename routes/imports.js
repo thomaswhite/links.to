@@ -15,7 +15,7 @@ var box = require('../lib/box.js')
     , kue // = require('kue')
     , jobs //= kue.createQueue()
 
-    , breadcrumbs = require('./breadcrumbs.js')
+    , breadcrumbs = require('./../lib/breadcrumbs.js')
     , favorites = require('../lib/parse-favorites')
     , ping_url = require('../lib/ping-url')
 
