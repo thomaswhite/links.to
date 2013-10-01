@@ -24,8 +24,6 @@ function ShorterID(){
     return  ShortId.generate().substr(0, config.db.short_id_length);
 }
 
-
-
 /**
  *
  * @param owner
@@ -158,10 +156,16 @@ function Add(req, res) {
 function Delete (req, res) {
     var referer = req.headers.referer
         , coll_id = req.params.id
+        , User = req.session.User
         ;
-    box.parallel('collection.delete', coll_id, function(err, aResult){
-        res.redirect( req.query.back );
-    });
+    if( !User ){
+        res.redirect( '/coll');
+    }else{
+        box.emit('collection.delete', coll_id, function(err, aResult){
+            res.redirect( req.query.back || '/coll/mine');
+        });
+    }
+
     // todo: get the id of current collection to return back after deletion
 }
 
@@ -193,7 +197,8 @@ function Get_One_data (collID, callBack) {
 
 function Get_One (req, res) {
     var referer = req.headers.referer,
-        collID = req.params.id;
+        collID = req.params.id,
+        User = req.session.User;
 
     box.emit( 'collection.get.one', collID, function( err, collection ){
         if ( err ){
@@ -289,19 +294,27 @@ box.on('init.attach', function (app, config,  done) {
                    req.io.respond({
                        result:'ok',
                        collection: collection,
-                       extra: extra
+                       param: req.data
                    });
                }
            });
        },
        remove:function(req){
-           box.parallel('collection.delete', req.data.id, function(err, result){
+           var User = req.session.User;
+
+           if( !User ){
                req.io.respond({
-                   result:err ? 'error':'ok',
-                   error:err
+                   result:'timeout'
                });
-               req.io.emit('collection.deleted', {param:req.data, result:result} );
-           });
+           }else{
+               box.emit('collection.delete', req.data.id, function(err, result){
+                   req.io.respond({
+                       result:err ? 'error':'ok',
+                       error:err
+                   });
+                   req.io.emit('collection.deleted', {param:req.data, result:result} );
+               });
+           }
        }
     });
 

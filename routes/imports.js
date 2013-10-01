@@ -493,7 +493,7 @@ box.on('init.attach', function (app, config,  done) {
                 });
             });
         },
-
+/*
        remove:function(req){
            box.parallel('collection.delete', req.data.id, function(err, result){
                req.io.respond({
@@ -503,7 +503,7 @@ box.on('init.attach', function (app, config,  done) {
                req.io.emit('collection.deleted', {param:req.data, result:result} );
            });
        },
-
+*/
        process:function(req){
            var User = req.session && req.session.passport && req.session.passport.user ?  JSON.parse( req.session.passport.user ):null
            ;

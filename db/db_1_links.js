@@ -71,17 +71,6 @@ box.on('db.init', function( monk, Config, done ){
         }
     });
 
-
-    box.on('collection.get.links', function( collection, options, callback){
-        if( collection && collection.links && collection.links.length ){
-            options = { sort:{'updated': -1, created:-1}, fields:{head:false, type:false, body:false, tags:false} };
-            Links.find( { _id :  { $in : collection.links} }, options, callback);
-//          Links.find( { _id :  { $in : collection.links}, fields:{head:false, type:false, body:false,  tags:false}  }, options , callback);
-        }else{
-            callback( null, [] );
-        }
-    });
-
     box.on('link.add', function( oLink, callback){
         var cb = callback;
         Links.insert( oLink,  { safe: true }, function( err, addedLink){
@@ -106,11 +95,12 @@ box.on('db.init', function( monk, Config, done ){
     // ================================== updated  =======================================
 
     box.on('link.update-display', function( link_id, display, callback){
-        Links.updateById(link_id,  { $set:{ display:display }}, function(err){
+        Links.updateById(link_id,  { $set:{ display: display } }, {safe:true}, function(err, a){
             if( err ){
                 callback(err);
+            }else{
+                Links.findById(link_id, callback );
             }
-            Links.findById(link_id, callback );
         });
     });
 

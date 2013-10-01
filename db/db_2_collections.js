@@ -34,21 +34,6 @@ box.on('db.init', function( monk, Config, done ){
         });
     });
 
-    box.on('collection.get.one', function( coll_id, callback){
-        Collections.findById(coll_id, function(err, found_coll ){
-            if( err || !found_coll) {
-                callback(err, found_coll);
-            }else{
-                found_coll.type = "collection";
-                box.emit( 'collection.get.links', found_coll, {}, function(err2, links){
-                    box.utils.formatUpdated( links );
-                    found_coll.links = links;
-                    callback(err2, found_coll);
-
-                });
-            }
-        });
-    });
 
     box.on('collection.delete', function(coll_id, callback){
         if( !coll_id ){
@@ -126,6 +111,24 @@ box.on('db.init', function( monk, Config, done ){
  */
 
 // =============================  updated =================================================
+
+
+    box.on('collection.get.one', function( coll_id, callback){
+        Collections.findById(coll_id, function(err, found_coll ){
+            if( err || !found_coll) {
+                callback(err, found_coll);
+            }else{
+                box.db.coll.links.find(
+                    { _id :  { $in : found_coll.links} },
+                    { sort:{'updated': -1, created:-1}, fields:{url_id:false, collection_id:false, short_id:false} },
+                    function(err2, links){
+                        found_coll.links = links;
+                        callback(err2, found_coll);
+                    }
+                );
+            }
+        });
+    });
 
 
     process.nextTick(function() {

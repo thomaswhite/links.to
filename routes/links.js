@@ -44,27 +44,9 @@ function Delete (req, res) {
         }
     });
     // todo: get the id of current collection to return back after deletion
-};
-
-
-/**
- *
- * @param owner
- * @param name
- * @param description
- * @returns {{type: string, shortID: *, owner: *, title: *, description: (*|string), linksCount: number, links: Array}}
- */
-function newLink (data, collection_id, owner, user_screen_name, token ){
-    var link =  {
-        collection : collection_id,
-        shortID : token || ShorterID(),
-        owner: owner,
-        updated : new Date(),
-        owner_screen_name: user_screen_name
-    };
-    _.merge( link, data);
-    return link;
 }
+
+
 
 function make_link_display( oURL, oLink){
     var tags = linkDisplay.tags();
@@ -109,22 +91,18 @@ function link_process( url, collectionID, param, Done ){
                             canonicalURL = canonical ? canonical[0]:null;
 
                         box.emit('url.find-url', canonicalURL || url, function(err, existing_oURL ){
-                            existing_oURL = existing_oURL.length ? existing_oURL[0]:null; 
+                            existing_oURL = existing_oURL.length ? existing_oURL[0]:null;
                             if( existing_oURL && existing_oURL.ready ){
                                // URL will be updated to the URL found in the oURL if it is canonical, when .display is updated
-                               box.emit('link.update-display', savedLink._id, make_link_display( existing_oURL, savedLink), function(err, updated_Link){
-                                   Done( err, updated_Link);
-                               });
+                               box.emit('link.update-display', savedLink._id, make_link_display( existing_oURL, savedLink), Done );
                             }else{
                                box.invoke( 'pageScrape', url, body, function(err, new_oURL ){
                                    new_oURL.links = oURL.links || [ savedLink._id ];
-                                   box.invoke('url.update', oURL._id, new_oURL, function(err){
+                                   box.invoke('url.update', oURL._id, new_oURL, function(err, o){
                                       if( err ){
                                           Done(err);
                                       }else{
-                                          box.emit('link.update-display', savedLink._id, make_link_display( new_oURL, savedLink), function(err, updated_Link){
-                                              Done( err, updated_Link);
-                                          });
+                                          box.emit('link.update-display', savedLink._id, make_link_display( new_oURL, savedLink), Done);
                                       }
                                   });
                                });
@@ -136,18 +114,15 @@ function link_process( url, collectionID, param, Done ){
                                 result: 'error',
                                 state: 'url-ping'
                             };
-
                             box.emit('url.delete', oURL._id );
                             box.emit('link.update-display', savedLink._id, make_link_display( null, savedLink), function(err2, updated_Link){
-                                Done(  err || err2 || notFound, updated_Link);
+                                Done(  err2 || notFound, updated_Link);
                             });
                     }
                 });
 
             }else{
-                box.emit('link.update-display', savedLink._id, make_link_display( oURL, savedLink), function(err, updated_Link){
-                    Done( err, updated_Link);
-                });
+                box.emit('link.update-display', savedLink._id, make_link_display( oURL, savedLink), Done );
             }
         });
     });
@@ -227,8 +202,8 @@ box.on('init.attach', function (app, config,  done) {
                     owner_screen_name: User.screen_name
                 },
                 function(err,link){
-
                     if( err ){
+                        console.error( err );
                         req.io.emit( 'link-failure', {
                             result:'error',
                             param: req.data,
