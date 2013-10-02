@@ -1,4 +1,4 @@
-var box = require('../lib/box.js')
+var box = require('../lib/box')
     , path = require('path')
     , kleiDust = require('klei-dust')
     , helpers = require('dustjs-helpers')

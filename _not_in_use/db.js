@@ -14,7 +14,7 @@ var ShortId  = require('shortid').seed(96715)
     , _ = require('lodash')
     , async = require('async')
 
-    , box = require('./../lib/box.js')
+    , box = require('./../lib/box')
 
     , app
     , db

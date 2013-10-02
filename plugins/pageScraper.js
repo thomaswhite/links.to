@@ -1,10 +1,10 @@
-var box = require('../lib/box.js')
-    , pageSrcaper = require('../lib/pageSrcaper.js')
+var box = require('../lib/box')
+    , pageScraper = require('../lib/pageScraper')
     ;
 
 box.on('init', function (app, config, done) {
-    pageSrcaper.init( config.request );
+    pageScraper.init( config.request );
     process.nextTick(function() {
-        done(null, 'plugin "pageSrcaper" initialised');
+        done(null, 'plugin "pageScraper" initialised');
     });
 });

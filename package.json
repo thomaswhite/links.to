@@ -71,6 +71,7 @@
     "kue": ">=0.6.x",
     "bson": "~0.2.2",
     "graceful-fs": "~2.0.1"
+
   },
   "devDependencies": {
     "nodelint": "~0.6.x",

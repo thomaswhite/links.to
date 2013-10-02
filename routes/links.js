@@ -3,7 +3,7 @@
  * GET home page.
  */
 
-var  box = require('../lib/box.js')
+var  box = require('../lib/box')
    , _ = require('lodash')
    , request = require('request')
    ,  util = require('util')
@@ -25,7 +25,7 @@ var  box = require('../lib/box.js')
    , config
    ,  app
 
-    ;
+   ;
 
 
 function ShorterID(){
@@ -47,13 +47,26 @@ function Delete (req, res) {
 }
 
 
-
+// todo: take into account the link can be imported ie do not overwrite the title with the URL if we have the title already.
 function make_link_display( oURL, oLink){
     var tags = linkDisplay.tags();
     return oURL
             ? linkDisplay.update( oURL, tags)
             : {  notFound:true,  title:oLink.display.url }
             ;
+}
+
+function scrape_page(HTML, url, link_id, oURL, Done){
+    box.invoke( 'pageScrape', url, HTML, function(err, new_oURL ){
+        new_oURL.links = oURL.links || [ link_id ];
+        box.invoke('url.update', oURL._id, new_oURL, function(err, o){
+            if( err ){
+                Done(err);
+            }else{
+                box.emit('link.update-display', savedLink._id, make_link_display( new_oURL, savedLink), Done);
+            }
+        });
+    });
 }
 
 function link_process( url, collectionID, param, Done ){
@@ -98,16 +111,7 @@ function link_process( url, collectionID, param, Done ){
                                 if( param.no_pageScrap ){
                                     Done(null, savedLink, oURL, existing_oURL );
                                 }else{
-                                    box.invoke( 'pageScrape', url, body, function(err, new_oURL ){
-                                       new_oURL.links = oURL.links || [ savedLink._id ];
-                                       box.invoke('url.update', oURL._id, new_oURL, function(err, o){
-                                          if( err ){
-                                              Done(err);
-                                          }else{
-                                              box.emit('link.update-display', savedLink._id, make_link_display( new_oURL, savedLink), Done);
-                                          }
-                                      });
-                                    });
+                                    scrape_page(body, url,  savedLink._id, oURL, Done);
                                }
                            }
                         });

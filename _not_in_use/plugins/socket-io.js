@@ -1,4 +1,4 @@
-var box = require('../../lib/box.js')
+var box = require('../../lib/box')
   , SessionSockets = require('session.socket.io')
 
 //  , MongoStore     = require('socket.io-mongo')

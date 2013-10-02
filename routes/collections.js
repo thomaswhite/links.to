@@ -4,7 +4,7 @@
  * GET home page.
  */
 
-var box = require('../lib/box.js')
+var box = require('../lib/box')
     , _ = require('lodash')
     ,  util = require('util')
     , debug = require('debug')('linksTo:view.collections')

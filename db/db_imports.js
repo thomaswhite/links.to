@@ -6,7 +6,7 @@
  * To change this template use File | Settings | File Templates.
  */
 
-var   box = require('../lib/box.js')
+var   box = require('../lib/box')
     , debug = require('debug')('linksTo:db:Imports')
     ;
 
