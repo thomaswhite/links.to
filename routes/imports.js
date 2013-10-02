@@ -335,14 +335,33 @@ function job_process_import_folder(job, Done){
                         //req.io.emit('import.link-start', { status:'start', link:link }  );
                         jobs.create('import-link', {link:link, user:oData.user, collectionID: collection._id })
                             .on('complete', function(){
-                                aLinks.push( {
-                                    link_id: this.data.link._id
-                                });
-
-                                // add additional jobs:
+                                aLinks.push( {  link_id: this.data.link._id });
+                                var link = this.data.link;
+/*
                                 //    1. fetch page
-                                //    2. make page tags
-
+                                box.invoke('link_process',
+                                    link.display.url,
+                                    link.collection_id,
+                                   {
+                                      title:link.display.title,
+                                      no_pageScrap: true
+                                   },
+                                   function(err, Link2, oURL, existing_oURL){
+                                       //  2. additional task for pageScrap
+                                       box.invoke( 'pageScrape', url, body, function(err, new_oURL ){
+                                           new_oURL.links = oURL.links || [ savedLink._id ];
+                                           box.invoke('url.update', oURL._id, new_oURL, function(err, o){
+                                               if( err ){
+                                                   Done(err);
+                                               }else{
+                                                   box.emit('link.update-display', savedLink._id, make_link_display( new_oURL, savedLink), Done);
+                                               }
+                                           });
+                                       });
+                                       //  3. additional task for tags
+                                   }
+                                );
+*/
                                 if( aLinks.length == Links.length ){
                                     Done( Error, {
                                        collectionID : this.data.collectionID,
@@ -400,8 +419,7 @@ function perform_import( Import_id, user, req ){
                 })
                 .priority('high')
                 .save( function( err, result ){
-                    process.nextTick(done);
-                    // go back to the async queue even if the folder is not processed.
+                    process.nextTick(done); // go back to the async queue even if the folder is not processed.
                 });
         }else{
             process.nextTick( done );
@@ -418,8 +436,9 @@ function perform_import( Import_id, user, req ){
                 function(err, result){
                     if( err ){
                         console( err );
+                    }else{
+                        req.io.emit('import.process-queued', { status:'queued', import:Import, err:err }  );
                     }
-                    req.io.emit('import.process-queued', { status:'queued', import:Import, err:err }  );
                 }
             );
         });

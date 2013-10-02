@@ -57,7 +57,6 @@ function make_link_display( oURL, oLink){
 }
 
 function link_process( url, collectionID, param, Done ){
-
     var link2save = box.invoke('link.new',
             url,
             collectionID,
@@ -71,14 +70,14 @@ function link_process( url, collectionID, param, Done ){
             }
         ),
         canonicalRegEx = /<link\s+rel=(?:"canonical"|'canonical')\s+href\s*=\s*(\"[^"]*\"|'[^']*')\s*(?:\/>|><\/link>)/gi
-        ;
+    ;
     box.invoke( 'link.add2', link2save, function(err, savedLink){
         if(err){
             err.result = 'error';
             err.state = 'add-link';
             Done( err, link2save );
         }
-        // TODO do not created oURL before a checking the URL exists
+        // TODO do not created oURL before the checking if URL exists
         box.invoke( 'url.add-link', url, savedLink, function(err, oURL, this_is_existing_url  ){
             if(err){
                 Done( err, 'url.add-link' );
@@ -96,16 +95,20 @@ function link_process( url, collectionID, param, Done ){
                                // URL will be updated to the URL found in the oURL if it is canonical, when .display is updated
                                box.emit('link.update-display', savedLink._id, make_link_display( existing_oURL, savedLink), Done );
                             }else{
-                               box.invoke( 'pageScrape', url, body, function(err, new_oURL ){
-                                   new_oURL.links = oURL.links || [ savedLink._id ];
-                                   box.invoke('url.update', oURL._id, new_oURL, function(err, o){
-                                      if( err ){
-                                          Done(err);
-                                      }else{
-                                          box.emit('link.update-display', savedLink._id, make_link_display( new_oURL, savedLink), Done);
-                                      }
-                                  });
-                               });
+                                if( param.no_pageScrap ){
+                                    Done(null, savedLink, oURL, existing_oURL );
+                                }else{
+                                    box.invoke( 'pageScrape', url, body, function(err, new_oURL ){
+                                       new_oURL.links = oURL.links || [ savedLink._id ];
+                                       box.invoke('url.update', oURL._id, new_oURL, function(err, o){
+                                          if( err ){
+                                              Done(err);
+                                          }else{
+                                              box.emit('link.update-display', savedLink._id, make_link_display( new_oURL, savedLink), Done);
+                                          }
+                                      });
+                                    });
+                               }
                            }
                         });
                     }else{
@@ -114,19 +117,17 @@ function link_process( url, collectionID, param, Done ){
                                 result: 'error',
                                 state: 'url-ping'
                             };
-                            box.emit('url.delete', oURL._id );
-                            box.emit('link.update-display', savedLink._id, make_link_display( null, savedLink), function(err2, updated_Link){
-                                Done(  err2 || notFound, updated_Link);
-                            });
+                        box.emit('url.delete', oURL._id );
+                        box.emit('link.update-display', savedLink._id, make_link_display( null, savedLink), function(err2, updated_Link){
+                            Done(  err2 || notFound, updated_Link);
+                        });
                     }
                 });
-
             }else{
                 box.emit('link.update-display', savedLink._id, make_link_display( oURL, savedLink), Done );
             }
         });
     });
-
 }
 
 
@@ -165,7 +166,6 @@ box.on('init.attach', function (app, config,  done) {
     );
 
     box.on('link_process', link_process);
-
 
     app.io.route('link', {
 
