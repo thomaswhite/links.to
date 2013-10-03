@@ -59,118 +59,56 @@ function make_link_display( oURL, oLink){
             ;
 }
 
-function scrape_page( url, link_id, url_id, oURL, Done ){
-    box.invoke( 'pageScrape', url, HTML, function(err, new_oURL ){
-        new_oURL.links = oURL.links || [ link_id ];
-        box.invoke('url.update', oURL._id, new_oURL, function(err, o){
-            if( err ){
-                Done(err);
-            }else{
-                box.emit('link.update-display', savedLink._id, make_link_display( new_oURL, savedLink), Done);
-            }
+function scrape_page( url, oLink, oURL, HTML, Done ){
+    box.invoke( 'pageScrape', url, HTML, function(err, page_Parts ){
+        page_Parts.links = oURL.links || [ oLink._id ];
+        box.invoke('url.update', oURL._id, page_Parts, function(err, o){
+            Done( err, page_Parts );
         });
     });
 }
 
 
-/**
- *
- * @param url
- * @param url_id
- * @param link_id
- * @param priority
- * @param Done - asynch callback function
- *
- */
-function scrape_page_asynch( url,  url_id, link_id, Done ){
-    // retrieve HTML and oURL if they are missing
-
-    priority = priority || 'normal'; // 0
-    var param = {
-        url:url,
-        url_id: url_id,
-        link_id : link_id
-    }
-
-    function create_job(){
-
-    }
-
-    jobs.create('scrape-page', {folder:oFolder, user:user })
-        .on('complete', function(){
-            aReady.push(this.data.folder._id );
-            if( aFolders.length == aReady.length ){
-                req.io.emit('import.process-end', { status:'end', import:oImport }  );
-                aFolders = aReady = oImport = null;
-            }
-        })
-        .on('failed', function(){
-            req.io.emit('import.collection-error', { status:'error', folder:oFolder }  );
-        })
-        .on('progress', function(progress){
-            req.io.emit('import.collection-process', { status:'progress', progress: progress, folder:oFolder} );
-        })
-        .priority('high')
+function scrape_page_as_job( url, link_id,  url_id, Done ){
+    jobs.create('scrape-page', {url:url, url_id: url_id, link_id : link_id} )
+        .on('complete', function(){ Done(null, true);    })
+        .on('failed',   function(){ Done('error');      })
+        .priority('normal')
         .save( function( err, result ){
-            process.nextTick(done); // go back to the async queue even if the folder is not processed.
-        });
-
-    box.invoke( 'pageScrape', url, HTML, function(err, new_oURL ){
-        new_oURL.links = oURL.links || [ link_id ];
-        box.invoke('url.update', oURL._id, new_oURL, function(err, o){
-            if( err ){
-                Done(err);
-            }else{
-                box.emit('link.update-display', savedLink._id, make_link_display( new_oURL, savedLink), Done);
-            }
-        });
-    });
-
-
-}
-
-function import_folder( oFolder, done ){
-    if( oFolder.folder.this_links ){
-        req.io.emit('import.collection-start', { status:'start', folder:oFolder } );
-        jobs.create('import-folder', {folder:oFolder, user:user })
-            .on('complete', function(){
-                req.io.emit('import.collection-end', { status:'end', folder:oFolder }  );
-                aReady.push(this.data.folder._id );
-                if( aFolders.length == aReady.length ){
-                    req.io.emit('import.process-end', { status:'end', import:oImport }  );
-                    aFolders = aReady = oImport = null;
+            process.nextTick(function(){
+                if( err ){
+                    Done(err);
                 }
-            })
-            .on('failed', function(){
-                req.io.emit('import.collection-error', { status:'error', folder:oFolder }  );
-            })
-            .on('progress', function(progress){
-                req.io.emit('import.collection-process', { status:'progress', progress: progress, folder:oFolder} );
-            })
-            .priority('high')
-            .save( function( err, result ){
-                process.nextTick(done); // go back to the async queue even if the folder is not processed.
             });
-    }else{
-        process.nextTick( done );
-    }
+        });
 }
 
+function find_canonical_url(html){
+    var   canonical_link_rex = /<link\s+rel=(?:"canonical"|'canonical')\s+href\s*=\s*(\"[^"]*\"|'[^']*')\s*(?:\/>|><\/link>)/gi
+        , canonical_name_rex = /<meta[^>]*name\s*=\s*"og:url".*content\s*=\s*"([^"]*)/gi
+    ;
+
+    return canonical_link_rex
+            ? canonical_link_rex[1]
+            : canonical_name_rex
+                ? canonical_name_rex[1]
+                : null
+        ;
+}
 
 function link_process( url, collectionID, param, Done ){
     var link2save = box.invoke('link.new',
             url,
             collectionID,
             {
-                title: param.title || '',
+                title:       param.title || '',
                 description: param.description || '',
-                owner_id: param.owner_id,
+                owner_id:    param.owner_id,
                 owner_screen_name: param.owner_screen_name,
-                created: param.add_date || null,
-                updated: param.last_modified || null
+                created:     param.add_date || null,
+                updated:     param.last_modified || null
             }
-        ),
-        canonicalRegEx = /<link\s+rel=(?:"canonical"|'canonical')\s+href\s*=\s*(\"[^"]*\"|'[^']*')\s*(?:\/>|><\/link>)/gi
+        )
     ;
     box.invoke( 'link.add2', link2save, function(err, savedLink){
         if(err){
@@ -183,23 +121,33 @@ function link_process( url, collectionID, param, Done ){
             if(err){
                 Done( err, 'url.add-link' );
             }
-            if( !this_is_existing_url || !oURL.ready  ){
+            if( this_is_existing_url || oURL.ready  ){
+                box.emit('link.update-display', savedLink._id, make_link_display( oURL, savedLink), Done ); // reuse existing oURL with the same URL
+            }else{
                 var request_options = _.merge( {}, config.request, {uri:url, jar:request.jar()  });
                 request(request_options, function (err, response, page_HTML) {
                     if( !err && response.statusCode == 200 ){
-                        var canonical = ('' + page_HTML).match(canonicalRegEx),
-                            canonicalURL = canonical ? canonical[0]:null;
+                        var canonicalURL = find_canonical_url('' + page_HTML);
 
-                        box.emit('url.find-url', canonicalURL || url, function(err, existing_oURL ){
-                            existing_oURL = existing_oURL.length ? existing_oURL[0]:null;
-                            if( existing_oURL && existing_oURL.ready ){
-                               // URL will be updated to the URL found in the oURL if it is canonical, when .display is updated
-                               box.emit('link.update-display', savedLink._id, make_link_display( existing_oURL, savedLink), Done );
+                        box.emit('url.find-url', canonicalURL, function(err, found_same_url_oURL ){
+                            found_same_url_oURL = found_same_url_oURL.length ? found_same_url_oURL[0]:null;
+
+                            if( found_same_url_oURL ){
+                                url =  canonicalURL;
+                                if( found_same_url_oURL._id != oURL._id){
+                                   box.emit('url.delete', oURL._id );
+                                }
+                            }
+                            if( found_same_url_oURL && found_same_url_oURL.ready ){
+                               // URL should be updated to the URL found in the oURL if it is canonical, when .display is updated
+                               box.emit('link.update-display', savedLink._id, make_link_display( found_same_url_oURL, savedLink), Done );
                             }else{
                                 if( param.no_pageScrap ){
-                                    Done(null, savedLink, oURL, existing_oURL );
+                                    Done(null, savedLink, oURL, found_same_url_oURL );
                                 }else{
-                                    scrape_page( url,  oURL._id, savedLink._id, page_HTML, oURL, Done);
+                                    scrape_page( url, savedLink, oURL, page_HTML, function(err, updated_oURL){
+                                        box.emit('link.update-display', savedLink._id, make_link_display( updated_oURL, savedLink), Done );
+                                    });
                                }
                            }
                         });
@@ -215,29 +163,10 @@ function link_process( url, collectionID, param, Done ){
                         });
                     }
                 });
-            }else{
-                box.emit('link.update-display', savedLink._id, make_link_display( oURL, savedLink), Done );
             }
         });
     });
 }
-
-
-var cherioParam = {
-    ignoreWhitespace: false,
-    xmlMode: true,
-    lowerCaseTags: true
-};
-function scrape_tags( $, uri, callback ){
-    var Tags = keyWords.makeList( $('body').find('p, ul, h1, h2, h3').text(), null, 4, 'en'),
-        result = Tags.words.slice(0, 12);
-
-    result.local = Tags.locale;
-    callback( null,{
-        tags: result
-    });
-}
-
 
 
 box.on('init', function (App, Config, done) {

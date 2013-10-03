@@ -295,8 +295,6 @@ function job_process_import_link (job, Done){
             if(err){
               debug( err );
             }
-
-
             if( !existing_URL || !existing_URL.ready  ){
                 //   job to ping URL
                 //   job to fetch and process page then update .display

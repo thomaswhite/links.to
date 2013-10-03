@@ -1,5 +1,5 @@
 var box = require('../lib/box')
-    , pageScraper = require('../lib/pageScraper')
+    , pageScraper = require('../lib/pageScraper/pageScraper')
     ;
 
 box.on('init', function (app, config, done) {

@@ -27,6 +27,8 @@ var box = require('../lib/box')
         stream: process.stdout,   // Stream to write to, or null
         maxLength: 32000           // Truncate output if longer
     })
+    , glob = require('glob').Glob
+    , path = require('path')
     , moment = require('moment')
     , config
 
@@ -74,6 +76,24 @@ function removeAll(s, regEx ){
     return s;
 }
 
+function later(fn, arg1){
+    arguments.shift();
+    process.nextTick(function() {
+        fn.apply(undefined, arguments);
+    });
+}
+
+function request_files_in_directory(dir){
+    var plugins = [];
+    new glob( dir + '/*.js' , { sync:true, cache:true, nosort :true}, function (err, plugins) {
+        for(var i=0; plugins && i < plugins.length; i++){
+            plugins.push(
+                require(path.resolve(plugins[i]))
+            );
+        }
+    });
+    return plugins;
+}
 
 box.on('init', function (app, conf, done) {
 
@@ -81,7 +101,7 @@ box.on('init', function (app, conf, done) {
 
     box.utils = {
         _ : _,
-        path : require('path'),
+        path : path,
         fs :  require('fs'),
         colors : require('colors'),
         async : require('async'),
@@ -91,8 +111,9 @@ box.on('init', function (app, conf, done) {
         pickUpFromAsyncResult: pickUpFromAsyncResult,
         formatUpdated:formatUpdated,
         removeAll: removeAll,
-        ShorterID:ShorterID
-     };
+        ShorterID:ShorterID,
+        later:later
+};
     process.nextTick(function() {
         done(null, 'plugin utils initialised');
     });
