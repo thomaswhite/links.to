@@ -17,16 +17,35 @@ box.on('db.init', function( monk, Config, done ){
         , Pages = box.db.coll.pages = monk.get('pages')
         ;
 
-    box.on('page.save', function( sBody, uri, callback){
+    box.on('page.save', function( HTML, uri, url_id,  callback){
         Pages.insert(  {
-                body : sBody,
+                url_id: url_id,
                 uri: uri,
                 updated : new Date(),
-                state:'none'
+                html : HTML
             },
-            callback
+            function( err, added_page){
+                if( err ){
+                    callback(err);
+                }else{
+                    box.db.coll.urls.updateById(
+                        url_id,
+                        { $set:{ page_id: added_page._id, state:'saved'}},
+                        { safe: true },
+                        function(err2, r ){
+                           callback(err2, added_page);
+                        }
+                    );
+                }
+            }
+
         );
     });
+
+    box.on('page.get', function( id,  callback){
+        Pages.findOneById(id, callback);
+    });
+
     process.nextTick(function() {
         done(null, 'db:page initialised.');
     });

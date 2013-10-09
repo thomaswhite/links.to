@@ -1,6 +1,12 @@
-var box = require('../lib/box'),
-    kue  = require('kue'),
-    jobs = kue.createQueue();
+var box = require('../lib/box')
+    , kue  = require('kue')
+    , path = require('path')
+
+    , jobs = kue.createQueue()
+
+    , app
+    , config
+;
 
 box.Queue = kue;
 box.Jobs  = jobs;
@@ -30,18 +36,33 @@ jobs.on('job complete', function(id){
 });
 
 
-box.on('init', function (app, config, done) {
+box.on('init', function (App, Config, done) {
+    app = App;
+    config = Config.queue;
+
+    var jobs_id = [],
+        jobs_processors = box.utils.request_files_in_directory( path.join( Config.__dirname, config.jobs_dir ) )
+        ;
+
+    for(var i=0; jobs_processors && i < jobs_processors.length; i++){
+        var j = jobs_processors[i];
+        jobs.process( j.id, j.processor);
+        jobs_id.push(j.id);
+    }
+
 
     jobs.active(function(err,aJobs){
         var dummy = 1;
     });
-    jobs.inactive(removeJobs);
+ //   jobs.inactive(removeJobs);
     jobs.complete( removeJobs );
     jobs.failed( removeJobs );
 
-    process.nextTick(function() {
-        done(null, 'plugin "KUE" initialised');
+    box.utils.later( done, null,  'plugin "KUE" initialised. Jobs registered:', jobs_id );
+  /*  process.nextTick(function() {
+        done(null, 'plugin "KUE" initialised. Jobs registered:' + jobs_id.join(', '));
     });
+  */
 });
 
 /*

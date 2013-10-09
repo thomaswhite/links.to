@@ -13,14 +13,14 @@ var   box = require('../lib/box')
 
 function new_url( url, link_id ){
     var url2save = {
-        ready: false,
+        state: 'none',
         canonical:false,
+        page_id:link_id,  // just a placeholder
         url:  url,
         head: [],
         body:[],
         tags:[],
-        links:[],
-        rawHTML:''
+        links:[]
     };
     if( link_id ){
         url2save.links.push( link_id );
@@ -46,17 +46,39 @@ box.on('db.init', function( monk, Config, done ){
         URLs.find( {url: url }, callback );
     });
 
-    box.on('url.update', function( id, oURL, callback){
-        URLs.updateById( id, oURL,  { safe: false }, callback );
+    box.on('url.update', function( id, oURL, link_id, callback){
+        URLs.updateById( id, { $set:oURL }, { safe: true }, function(err, r ){
+            if( err ){
+                callback(err);
+            }else if( link_id ){
+                URLs.update(
+                    { _id: id, "links" :{ $ne : link_id }},
+                    {  $push: {  "links" : link_id } },
+                    { safe: true },
+                    function( err, r2 ){
+                        URLs.findById(id, callback );
+                    }
+                    //callback
+                );
+            }
+        });
     });
 
+    box.on('url.add-link-id', function( id, link_id, callback){
+        URLs.update(
+            { _id: id, "links" :{ $ne : link_id }},
+            {  $push: {  "links" : link_id } },
+            { safe: false },
+            callback
+        );
+    });
 
     // invoked
     box.on('url.add-link', function( url, newLink, callback){
         var link_id =  newLink._id;
 
         // fields:{ links:false }
-        URLs.find( {url: url }, { fields:{links:false, rawHTML:false} },  function(err, exisitng_URL ){
+        URLs.find( {url: url }, { fields:{links:false, page_id:false} },  function(err, exisitng_URL ){
             if( exisitng_URL.length ){
                 URLs.update(
                     { _id: exisitng_URL[0]._id, "links" :{ $ne : link_id }},

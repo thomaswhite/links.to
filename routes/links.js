@@ -59,18 +59,32 @@ function make_link_display( oURL, oLink){
             ;
 }
 
-function scrape_page( url, oLink, oURL, HTML, Done ){
+
+function __scrape_page ( url, link_id, url_id, HTML, Done ){
     box.invoke( 'pageScrape', url, HTML, function(err, page_Parts ){
-        page_Parts.links = oURL.links || [ oLink._id ];
-        box.invoke('url.update', oURL._id, page_Parts, function(err, o){
+        page_Parts.state = 'ready';
+        box.invoke('url.update', url_id, page_Parts, link_id, function(err, o){
             Done( err, page_Parts );
         });
     });
 }
 
+function scrape_page( url, link_id, url_id, page_id, HTML, Done ){
+    if( HTML ){
+        __scrape_page ( url, link_id, url_id, HTML, Done );
+    }else{
+       box.ivoke('page.get', page_id, function(err, Page){
+           if( err ){
+               Done(err, 'page.get');
+           }else{
+               __scrape_page ( url, link_id, url_id, Page.html, Done );
+           }
+       });
+    }
+}
 
-function scrape_page_as_job( url, link_id,  url_id, Done ){
-    jobs.create('scrape-page', {url:url, url_id: url_id, link_id : link_id} )
+function scrape_page_as_job( url, link_id,  url_id, page_id, HTML, Done ){
+    jobs.create('scrape-page', {url:url, url_id: url_id, link_id : link_id, page_id: page_id, HTML: HTML} )
         .on('complete', function(){ Done(null, true);    })
         .on('failed',   function(){ Done('error');      })
         .priority('normal')
@@ -93,7 +107,7 @@ function find_canonical_url(html){
             : canonical_name_rex
                 ? canonical_name_rex[1]
                 : null
-        ;
+            ;
 }
 
 function link_process( url, collectionID, param, Done ){
@@ -121,7 +135,7 @@ function link_process( url, collectionID, param, Done ){
             if(err){
                 Done( err, 'url.add-link' );
             }
-            if( this_is_existing_url || oURL.ready  ){
+            if( this_is_existing_url || oURL.state == 'ready'  ){
                 box.emit('link.update-display', savedLink._id, make_link_display( oURL, savedLink), Done ); // reuse existing oURL with the same URL
             }else{
                 var request_options = _.merge( {}, config.request, {uri:url, jar:request.jar()  });
@@ -138,18 +152,24 @@ function link_process( url, collectionID, param, Done ){
                                    box.emit('url.delete', oURL._id );
                                 }
                             }
-                            if( found_same_url_oURL && found_same_url_oURL.ready ){
+                            if( found_same_url_oURL && found_same_url_oURL.state == 'ready' ){
                                // URL should be updated to the URL found in the oURL if it is canonical, when .display is updated
                                box.emit('link.update-display', savedLink._id, make_link_display( found_same_url_oURL, savedLink), Done );
                             }else{
                                 if( param.no_pageScrap ){
                                     Done(null, savedLink, oURL, found_same_url_oURL );
                                 }else{
-                                    scrape_page( url, savedLink, oURL, page_HTML, function(err, updated_oURL){
-                                        box.emit('link.update-display', savedLink._id, make_link_display( updated_oURL, savedLink), Done );
+                                    box.emit( 'page.save', page_HTML, url, oURL._id, function(err, added_page ){
+                                       if( err ){
+                                           Done(err, 'page.save');
+                                       }else{
+                                           scrape_page( url, savedLink._id, oURL._id, added_page._id, page_HTML, function(err, updated_oURL){
+                                               box.emit('link.update-display', savedLink._id, make_link_display( updated_oURL, savedLink), Done );
+                                           });
+                                       }
                                     });
-                               }
-                           }
+                                }
+                            }
                         });
                     }else{
                         var notFound = {

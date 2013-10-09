@@ -76,44 +76,50 @@ function removeAll(s, regEx ){
     return s;
 }
 
-function later(fn, arg1){
-    arguments.shift();
+function later(fn, a1,a2,a3,a4,a5,a6 ){
+    //arguments.shift();
+    var A = [];
+    for (var i = 1; i < arguments.length; i++) {
+        A.push(arguments[i]);
+    }
     process.nextTick(function() {
-        fn.apply(undefined, arguments);
+        fn.apply(undefined, A );
     });
 }
 
 function request_files_in_directory(dir){
     var plugins = [];
-    new glob( dir + '/*.js' , { sync:true, cache:true, nosort :true}, function (err, plugins) {
-        for(var i=0; plugins && i < plugins.length; i++){
+    new glob( dir + '/*.js' , { sync:true, cache:true, nosort :true}, function (err, files ) {
+        for(var i=0; files && i < files.length; i++){
             plugins.push(
-                require(path.resolve(plugins[i]))
+                require(path.resolve(files[i]))
             );
         }
     });
     return plugins;
 }
 
+box.utils = {
+    _ : _,
+    path : path,
+    fs :  require('fs'),
+    colors : require('colors'),
+    async : require('async'),
+    moment : moment,
+    inspect : inspect,
+    shorterID: ShorterID,
+    pickUpFromAsyncResult: pickUpFromAsyncResult,
+    formatUpdated:formatUpdated,
+    removeAll: removeAll,
+    ShorterID:ShorterID,
+    later:later,
+    request_files_in_directory:request_files_in_directory
+};
+
 box.on('init', function (app, conf, done) {
 
     config = conf;
 
-    box.utils = {
-        _ : _,
-        path : path,
-        fs :  require('fs'),
-        colors : require('colors'),
-        async : require('async'),
-        moment : moment,
-        inspect : inspect,
-        shorterID: ShorterID,
-        pickUpFromAsyncResult: pickUpFromAsyncResult,
-        formatUpdated:formatUpdated,
-        removeAll: removeAll,
-        ShorterID:ShorterID,
-        later:later
-};
     process.nextTick(function() {
         done(null, 'plugin utils initialised');
     });

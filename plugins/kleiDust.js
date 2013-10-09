@@ -32,7 +32,7 @@ box.on('init', function (App, Config, done) {
         path.join(config.__dirname, 'public/templates'),
         '.dust',
         function(err, result ){
-            result.push( '--------------------- > plugin kleiDust initialised ');
+            result.unshift( 'plugin kleiDust initialised.');
             done(null, result );
         }
     );
