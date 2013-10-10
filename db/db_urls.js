@@ -96,9 +96,13 @@ box.on('db.init', function( monk, Config, done ){
                 );
             }else{
                 URLs.insert( new_url(url, link_id), function(err, insertedURL){
-                    box.db.coll.links.updateById(  newLink._id, {url_id:insertedURL._id }, function( err, result ){
-                        callback(err, insertedURL, false );
-                    });
+                    box.db.coll.links.updateById(
+                        newLink._id,
+                        { $set: { url_id:insertedURL._id }},
+                        function( err, result ){
+                            callback(err, insertedURL, false );
+                        }
+                    );
                 });
             }
         });
