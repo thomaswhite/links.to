@@ -43,7 +43,7 @@ box.on('db.init', function( monk, Config, done ){
     });
 
     box.on('page.get', function( id,  callback){
-        Pages.findOneById(id, callback);
+        Pages.findById(id, callback);
     });
 
     process.nextTick(function() {

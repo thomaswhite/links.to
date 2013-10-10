@@ -59,34 +59,14 @@ function make_link_display( oURL, oLink){
             ;
 }
 
-
-function __scrape_page ( url, link_id, url_id, HTML, Done ){
-    box.invoke( 'pageScrape', url, HTML, function(err, page_Parts ){
-        page_Parts.state = 'ready';
-        box.invoke('url.update', url_id, page_Parts, link_id, function(err, o){
-            Done( err, page_Parts );
-        });
-    });
-}
-
-function scrape_page( url, link_id, url_id, page_id, HTML, Done ){
-    if( HTML ){
-        __scrape_page ( url, link_id, url_id, HTML, Done );
-    }else{
-       box.ivoke('page.get', page_id, function(err, Page){
-           if( err ){
-               Done(err, 'page.get');
-           }else{
-               __scrape_page ( url, link_id, url_id, Page.html, Done );
-           }
-       });
-    }
-}
-
 function scrape_page_as_job( url, link_id,  url_id, page_id, HTML, Done ){
-    jobs.create('scrape-page', {url:url, url_id: url_id, link_id : link_id, page_id: page_id, HTML: HTML} )
-        .on('complete', function(){ Done(null, true);    })
-        .on('failed',   function(){ Done('error');      })
+    jobs.create('scrap-page', {url:url, url_id: url_id, link_id : link_id, page_id: page_id, HTML: HTML} )
+        .on('complete', function(){
+            Done(null, this.data.page_parts );
+        })
+        .on('failed',   function(){
+            Done('error');
+        })
         .priority('normal')
         .save( function( err, result ){
             process.nextTick(function(){
@@ -144,7 +124,7 @@ function link_process( url, collectionID, param, Done ){
                         var canonicalURL = find_canonical_url('' + page_HTML);
 
                         box.emit('url.find-url', canonicalURL, function(err, found_same_url_oURL ){
-                            found_same_url_oURL = found_same_url_oURL.length ? found_same_url_oURL[0]:null;
+                            found_same_url_oURL = found_same_url_oURL && found_same_url_oURL.length ? found_same_url_oURL[0]:null;
 
                             if( found_same_url_oURL ){
                                 url =  canonicalURL;
@@ -163,8 +143,10 @@ function link_process( url, collectionID, param, Done ){
                                        if( err ){
                                            Done(err, 'page.save');
                                        }else{
-                                           scrape_page( url, savedLink._id, oURL._id, added_page._id, page_HTML, function(err, updated_oURL){
-                                               box.emit('link.update-display', savedLink._id, make_link_display( updated_oURL, savedLink), Done );
+                                           scrape_page_as_job( oURL.url, savedLink._id, oURL._id, added_page._id, page_HTML, function(err, xxx){
+                                               box.invoke('url.add-link-id', oURL._id, savedLink._id, true, function(err2, updated_oURL){
+                                                   box.emit('link.update-display', savedLink._id, make_link_display( updated_oURL, savedLink), Done );
+                                               });
                                            });
                                        }
                                     });

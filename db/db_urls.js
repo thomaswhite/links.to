@@ -41,35 +41,38 @@ box.on('db.init', function( monk, Config, done ){
 
 // ================== updated =================
 
+    box.on('url.get', function( id,  callback){
+        URLs.findById(id, callback);
+    });
+
 
     box.on('url.find-url', function( url, callback){
-        URLs.find( {url: url }, callback );
+        if( !url ){
+            process.nextTick(function() {
+                callback(null, null);
+            })
+        }else{
+            URLs.find( {url: url }, callback );
+        }
     });
 
-    box.on('url.update', function( id, oURL, link_id, callback){
-        URLs.updateById( id, { $set:oURL }, { safe: true }, function(err, r ){
-            if( err ){
-                callback(err);
-            }else if( link_id ){
-                URLs.update(
-                    { _id: id, "links" :{ $ne : link_id }},
-                    {  $push: {  "links" : link_id } },
-                    { safe: true },
-                    function( err, r2 ){
-                        URLs.findById(id, callback );
-                    }
-                    //callback
-                );
-            }
-        });
+    box.on('url.update', function( id, oURL, callback ){
+        URLs.updateById( id, { $set:oURL }, { safe: true }, callback );
     });
 
-    box.on('url.add-link-id', function( id, link_id, callback){
+    box.on('url.add-link-id', function( id, link_id, returnUpdated, callback){
         URLs.update(
             { _id: id, "links" :{ $ne : link_id }},
             {  $push: {  "links" : link_id } },
             { safe: false },
-            callback
+            function(err, u){
+                if( returnUpdated ){
+                    URLs.findById(id, callback );
+                }else{
+                    callback(err);
+                }
+            }
+
         );
     });
 

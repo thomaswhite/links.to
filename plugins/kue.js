@@ -46,7 +46,7 @@ box.on('init', function (App, Config, done) {
 
     for(var i=0; jobs_processors && i < jobs_processors.length; i++){
         var j = jobs_processors[i];
-        jobs.process( j.id, j.processor);
+        jobs.process( j.id, j.processor );
         jobs_id.push(j.id);
     }
 
