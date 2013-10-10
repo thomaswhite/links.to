@@ -78,16 +78,23 @@ function scrape_page_as_job( url, link_id,  url_id, page_id, HTML, Done ){
 }
 
 function find_canonical_url(html){
-    var   canonical_link_rex = /<link\s+rel=(?:"canonical"|'canonical')\s+href\s*=\s*(\"[^"]*\"|'[^']*')\s*(?:\/>|><\/link>)/gi
-        , canonical_name_rex = /<meta[^>]*name\s*=\s*"og:url".*content\s*=\s*"([^"]*)/gi
+    var regEx = [
+           /<link\s+rel=(?:"canonical"|'canonical')\s+href\s*=\s*(\"[^"]*\"|'[^']*')\s*(?:\/>|><\/link>)/gi,
+           /<meta[^>]*property\s*=\s*"og:url".*content\s*=\s*"([^"]*)/gi,
+           /<meta[^>]*name\s*=\s*"twitter:url".*content\s*=\s*"([^"]*)/gi
+        ]
+        , match
+        , result = null
     ;
 
-    return canonical_link_rex
-            ? canonical_link_rex[1]
-            : canonical_name_rex
-                ? canonical_name_rex[1]
-                : null
-            ;
+    for( var i = 0; i < regEx.length; i++ ){
+        match = regEx[i].exec( html );
+        if( match ){
+            result = match[1];
+            break;
+        }
+    }
+    return result;
 }
 
 function link_process( url, collectionID, param, Done ){
@@ -205,7 +212,7 @@ box.on('init.attach', function (app, config,  done) {
         add:function(req){
             var url = req.data.value.trim()
                 , token = ShortId.generate()
-                , User = req.session && req.session.User ?  req.session.User : null;
+                , User = req.session && req.session.User ?  req.session.User : null
             ;
             req.data.token = token;
 
