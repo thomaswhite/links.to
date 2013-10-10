@@ -142,10 +142,22 @@ box.on('db.init', function( monk, Config, done ){
                      box.db.coll.urls.updateById(
                          Link.url_id,
                          {  $pull: {  links : Link._id }  },
-                         { safe: false }
+                         { safe: true },
+                         function(err){
+                             if( err){
+                                 callback(err, 'updating url');
+                             }else{
+                                 box.db.coll.urls.findById(Link.url_id, function(err, oURL){
+                                     if( oURL && !oURL.links.length && !settings.collections.url.orphan_urls ){
+                                        box.db.coll.pages.remove({_id:oURL.page_id}, {safe:false});
+                                        box.db.coll.urls.remove( {_id:oURL._id},     {safe:false});
+                                    }
+                                    Links.remove( {_id: link_id },  { safe: false } );
+                                    callback( null, true  );
+                                 });
+                             }
+                         }
                      );
-                     Links.remove( {_id: link_id },  { safe: false } );
-                     callback( null, true  );
                  }
             });
         }

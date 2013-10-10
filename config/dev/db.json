@@ -5,5 +5,13 @@
     "short_id_length":6,
     "auto_reconnect":true,
     "collection":"sessions",
-    "dbModules":"db/*.js"
+    "dbModules":"db/*.js",
+    "collections":{
+        "urls":{
+            "orphan_urls":true
+        },
+        "links":{},
+        "collections":{},
+        "pages":{}
+    }
 }
