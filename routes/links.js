@@ -59,24 +59,6 @@ function make_link_display( oURL, oLink){
             ;
 }
 
-function scrape_page_as_job( url, link_id,  url_id, page_id, HTML, Done ){
-    jobs.create('scrap-page', {url:url, url_id: url_id, link_id : link_id, page_id: page_id, HTML: HTML} )
-        .on('complete', function(){
-            Done(null, this.data.page_parts );
-        })
-        .on('failed',   function(){
-            Done('error');
-        })
-        .priority('normal')
-        .save( function( err, result ){
-            process.nextTick(function(){
-                if( err ){
-                    Done(err);
-                }
-            });
-        });
-}
-
 function find_canonical_url(html){
     var regEx = [
            /<link\s+rel=(?:"canonical"|'canonical')\s+href\s*=\s*(\"[^"]*\"|'[^']*')\s*(?:\/>|><\/link>)/gi,
@@ -97,8 +79,27 @@ function find_canonical_url(html){
     return result;
 }
 
-function link_process( url, collectionID, param, Done ){
-    var link2save = box.invoke('link.new',
+
+function scrape_page_as_job( url, link_id,  url_id, page_id, HTML, Done ){
+    jobs.create('scrap-page', {url:url, url_id: url_id, link_id : link_id, page_id: page_id, HTML: HTML} )
+        .on('complete', function(){
+            Done(null, this.data.page_parts );
+        })
+        .on('failed',   function(){
+            Done('error');
+        })
+        .priority('normal')
+        .save( function( err, result ){
+            process.nextTick(function(){
+                if( err ){
+                    Done(err);
+                }
+            });
+        });
+}
+
+function link_process( url, collectionID, param, oLink, Done ){
+    var link2save = oLink || box.invoke('link.new',
             url,
             collectionID,
             {
@@ -117,7 +118,22 @@ function link_process( url, collectionID, param, Done ){
             err.state = 'add-link';
             Done( err, link2save );
         }
-        // TODO do not created oURL before the checking if URL exists
+        // TODO do not create oURL before the checking if URL exists
+        /**
+         * check if the URL exists as canonical or original_URL
+         * if yes
+         *  then: create .display out of the oURL, save link and Done
+         *  else:
+         *       save the Link
+         *
+         * 2. request
+         *      if canonical
+         *          then exists use it
+         *          else save page, create oURL, scrap page, update .display
+         *
+         *
+         */
+
         box.invoke( 'url.add-link', url, savedLink, function(err, oURL, this_is_existing_url  ){
             if(err){
                 Done( err, 'url.add-link' );
@@ -129,7 +145,6 @@ function link_process( url, collectionID, param, Done ){
                 request(request_options, function (err, response, page_HTML) {
                     if( !err && response.statusCode == 200 ){
                         var canonicalURL = find_canonical_url('' + page_HTML);
-
                         box.emit('url.find-url', canonicalURL, function(err, found_same_url_oURL ){
                             found_same_url_oURL = found_same_url_oURL && found_same_url_oURL.length ? found_same_url_oURL[0]:null;
 
@@ -235,6 +250,7 @@ box.on('init.attach', function (app, config,  done) {
                     owner_id: User._id,
                     owner_screen_name: User.screen_name
                 },
+                null,
                 function(err,link){
                     if( err ){
                         console.error( err );
