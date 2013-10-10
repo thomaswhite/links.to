@@ -28,6 +28,7 @@ function new_link( url, collection_id, param  ){
         owner_screen_name: param.owner_screen_name || '',
         updated: param.last_modified || param.add_date || new Date(),
         created: param.add_date || new Date(),
+        origin: param.origin || 'interactive',
         display:{
             title: param.title || url,
             title_type:'imported',

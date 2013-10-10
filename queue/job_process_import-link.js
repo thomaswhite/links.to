@@ -16,7 +16,7 @@ module.exports = {
     processor : function (job, Done){
         var   user = job.data.user
             , link = job.data.link
-            , link2save = box.envoke('link.new',
+            , link2save = box.invoke('link.new',
                 link.href,
                 job.data.collectionID,
                 {
@@ -25,12 +25,14 @@ module.exports = {
                     owner_id: user._id,
                     owner_screen_name: user.screen_name,
                     created: link.add_date,
-                    updated: link.last_modified
+                    updated: link.last_modified,
+                    origin:'imported'
                 }
             )
             ;
 
-        box.invoke( 'link.add2', link2save, function(err, savedLink){
+
+        box.invoke( 'link.add2', link.href, job.data.collectionID, { no_pageScrap:true }, link2save, function(err, savedLink){
             if(err){
                 debug( err );
             }
