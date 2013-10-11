@@ -8,6 +8,7 @@
 
 var   box = require('../lib/box')
     , debug = require('debug')('linksTo:db:links')
+    , _ = require('lodash')
 
     ;
 
@@ -18,17 +19,18 @@ var   box = require('../lib/box')
  * @param  param { title, description, owner_id, owner_screen_name, add_date, last_modified }
  * @returns {{collection_id: *, short_id: (box.utils.ShorterID|*), url_id: number, owner_id: *, updated: (*|Date), created: (*|Date), owner_screen_name: *, display: {title: (HTMLElement|*), title_type: string, description: (HTMLElement|*|string), summary: string, summary_style: string, imagePos: number, thumbnail: string, url: *, tags: Array}}}
  */
-function new_link( url, collection_id, param  ){
+function new_link( url, collection_id, param, extra  ){
 
-    return {
+    var L =  {
         collection_id: collection_id,
         short_id: box.utils.ShorterID(),
-        url_id: -1,
+        url_id: param.url_id || null,
         owner_id: param.owner_id,
         owner_screen_name: param.owner_screen_name || '',
         updated: param.last_modified || param.add_date || new Date(),
         created: param.add_date || new Date(),
         origin: param.origin || 'interactive',
+        state:'new',
         display:{
             title: param.title || url,
             title_type:'imported',
@@ -41,6 +43,8 @@ function new_link( url, collection_id, param  ){
             tags:[]
         }
     };
+
+    return _.merge( L, extra );
 }
 
 box.on('db.init', function( monk, Config, done ){
@@ -94,6 +98,7 @@ box.on('db.init', function( monk, Config, done ){
     });
 
     // ================================== updated  =======================================
+
 
     box.on('link.update-display', function( link_id, display, callback){
         Links.updateById(link_id,  { $set:{ display: display } }, {safe:true}, function(err, a){

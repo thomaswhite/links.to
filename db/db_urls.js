@@ -8,10 +8,11 @@
 
 var   box = require('../lib/box')
     , debug = require('debug')('linksTo:db:urls')
+    , _ = require('lodash')
     ;
 
 
-function new_url( url, link_id ){
+function new_url( url, link_id, extra ){
     var url2save = {
         state: 'none',
         canonical:false,
@@ -25,7 +26,8 @@ function new_url( url, link_id ){
     if( link_id ){
         url2save.links.push( link_id );
     }
-    return url2save;
+    return _.merge( url2save, extra );
+
 }
 
 box.on('db.init', function( monk, Config, done ){
@@ -52,7 +54,13 @@ box.on('db.init', function( monk, Config, done ){
                 callback(null, null);
             })
         }else{
-            URLs.find( {url: url }, callback );
+            URLs.findOne(
+                {$or : [
+                    {url: url },
+                    {original_url:url}
+                ]},
+                callback
+          );
         }
     });
 
@@ -72,7 +80,6 @@ box.on('db.init', function( monk, Config, done ){
                     callback(err);
                 }
             }
-
         );
     });
 

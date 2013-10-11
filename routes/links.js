@@ -193,6 +193,44 @@ function link_process( url, collectionID, param, oLink, Done ){
 }
 
 
+function link_add( url, collectionID, param, oLink, Done ){
+
+    var link2save = oLink || box.invoke('link.new',
+            url,
+            collectionID,
+            {
+                title:       param.title || '',
+                description: param.description || '',
+                owner_id:    param.owner_id,
+                owner_screen_name: param.owner_screen_name,
+                created:     param.add_date || null,
+                updated:     param.last_modified || null
+            }
+        )
+    ;
+    box.on('url.find-url', url, function(err, oExisting_URL ){
+        if( err ){
+            Done(err, 'url.find-url');
+        }else if( oExisting_URL ){
+            link2save.state = 'reuse',
+            link2save.url_id = oExisting_URL._id;
+            link2save.display = make_link_display( oURL, link2save);
+            box.invoke( 'link.add2', link2save, function(err, savedLink){
+                if(err){
+                    Done(err, 'link.add2');
+                }else{
+                    box.on('url.add-link-id', function( oExisting_URL._id, savedLink._id, false, function(err){
+                        Done(err, savedLink);
+                    });
+                }
+            });
+        }else{
+            box.invoke( 'link.add2', link2save, Done)
+        }
+    });
+}
+
+
 box.on('init', function (App, Config, done) {
     app = App;
     config = Config;
