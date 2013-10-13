@@ -99,6 +99,9 @@ box.on('db.init', function( monk, Config, done ){
 
     // ================================== updated  =======================================
 
+    box.on('link.get', function( id,  callback){
+        Links.findById(id, callback);
+    });
 
     box.on('link.update-display', function( link_id, display, callback){
         Links.updateById(link_id,  { $set:{ display: display } }, {safe:true}, function(err, a){
@@ -106,6 +109,20 @@ box.on('db.init', function( monk, Config, done ){
                 callback(err);
             }else{
                 Links.findById(link_id, callback );
+            }
+        });
+    });
+
+    box.on('link.update', function( link_id, oUpdated, get_updated, callback){
+        Links.updateById(link_id,  { $set:oUpdated }, {safe:true}, function(err, a){
+            if( err ){
+                callback(err);
+            }else{
+                if( get_updated ){
+                    Links.findById(link_id, callback );
+                }else{
+                    callback(null);
+                }
             }
         });
     });

@@ -193,7 +193,7 @@ function link_process( url, collectionID, param, oLink, Done ){
 }
 
 
-function link_add( url, collectionID, param, oLink, Done ){
+function link_add( url, collectionID, oLink, param, extra, Done ){
 
     var link2save = oLink || box.invoke('link.new',
             url,
@@ -208,27 +208,43 @@ function link_add( url, collectionID, param, oLink, Done ){
             }
         )
     ;
-    box.on('url.find-url', url, function(err, oExisting_URL ){
+    link2save = _.merge( link2save, extra || {} );
+    box.invoke( 'link.add2', link2save, function(err, oAdded_Link ){
         if( err ){
-            Done(err, 'url.find-url');
-        }else if( oExisting_URL ){
-            link2save.state = 'reuse',
-            link2save.url_id = oExisting_URL._id;
-            link2save.display = make_link_display( oURL, link2save);
-            box.invoke( 'link.add2', link2save, function(err, savedLink){
-                if(err){
-                    Done(err, 'link.add2');
+            Done( err, 'url.add2');
+        }else{
+            box.invoke('url.check-url-and-original_url', url, function(err, oExisting_URL ){
+                if( err ){
+                    Done(err, 'url.find-url');
+                }else if( exisitng_URL ){
+                    box.invoke('url.add-link-id', oExisting_URL._id, savedLink._id, false, function( err, number_of_updated ){
+                        if( err ){
+                            Done( err );
+                        }else{
+                            var oUpdate = {
+                                url_id  : exisitng_URL._id,
+                                state   : 'queued'
+                            };
+                            if(  oExisting_URL.state == 'ready' ){
+                                oUpdate.state   = 'ready';
+                                oUpdate.display = oExisting_URL.display;
+                            }
+                            box.invoke('link.update', oAdded_Link._id, oUpdate, true, function( err, updated_Link ){
+                                    Done(err, updated_Link, oExisting_URL, true ); // true indicates it is an existing URL
+                                }
+                            );
+                        }
+                    });
                 }else{
-                    box.on('url.add-link-id', function( oExisting_URL._id, savedLink._id, false, function(err){
-                        Done(err, savedLink);
+                    box.on('url.add', url, oAdded_Link, {}, function(err, oURL ){
+                        Done(err, oAdded_Link, oURL, false );
                     });
                 }
             });
-        }else{
-            box.invoke( 'link.add2', link2save, Done)
         }
     });
 }
+
 
 
 box.on('init', function (App, Config, done) {

@@ -14,53 +14,85 @@ var   box = require('../lib/box')
 
 function new_url( url, link_id, extra ){
     var url2save = {
-        state: 'none',
-        canonical:false,
-        page_id:link_id,  // just a placeholder
-        url:  url,
-        head: [],
-        body:[],
-        tags:[],
-        links:[]
+        state: 'fetching',
+        url:  url
     };
     if( link_id ){
-        url2save.links.push( link_id );
+        url2save.links = [ link_id ];
     }
     return _.merge( url2save, extra );
+}
+
+
+function update_queued_links( id, display, cb ){
 
 }
+
 
 box.on('db.init', function( monk, Config, done ){
     var URLs = box.db.coll.urls = monk.get('urls');
 
     URLs.index('url',  { unique: true });
+    URLs.index('original_url', {background:true, sparse:1} );
     URLs.index('links', {background:true});
+
+
+// ================== updated =================
+
+    box.on('url.add', function( url, newLink, extra, callback){
+        URLs.insert( new_url(url, newLink._id, extra), function(err, insertedURL){
+            if( err ){
+                callback(err);
+            }else if( newLink ){
+                box.db.coll.links.updateById(
+                    newLink._id,
+                    { $set: { url_id:insertedURL._id }},
+                    function( err, result ){
+                        callback( err, insertedURL );
+                    }
+                );
+            }else{
+                callback(err, insertedURL);
+            }
+        });
+    });
 
     // TODO: DO not delete URL thst is used in any active link
     box.on('url.delete', function( url_id, callback){
-         URLs.remove( {_id: url_id || 'missing' }, { safe: false } );
+        URLs.remove( {_id: url_id || -1 }, { safe: false } );
     });
-
-// ================== updated =================
 
     box.on('url.get', function( id,  callback){
         URLs.findById(id, callback);
     });
 
 
-    box.on('url.find-url', function( url, callback){
+    box.on('url.check-url', function( url, callback){
         if( !url ){
             process.nextTick(function() {
                 callback(null, null);
-            })
+            });
+        }else{
+            URLs.findOne( {url: url }, { fields:{links:false, page_id:false} }, callback  );
+        }
+    });
+
+    box.on('url.check-url-and-original_url', function( url, callback){
+        if( !url ){
+            process.nextTick(function() {
+                callback(null, null);
+            });
         }else{
             URLs.findOne(
                 {$or : [
                     {url: url },
                     {original_url:url}
                 ]},
-                callback
-          );
+                { fields:{links:false, page_id:false} },
+                function(err, oFound){
+                    callback(err, oFound, url == oFound.url );
+                }
+            );
         }
     });
 
@@ -68,11 +100,42 @@ box.on('db.init', function( monk, Config, done ){
         URLs.updateById( id, { $set:oURL }, { safe: true }, callback );
     });
 
-    box.on('url.add-link-id', function( id, link_id, returnUpdated, callback){
-        URLs.update(
-            { _id: id, "links" :{ $ne : link_id }},
-            {  $push: {  "links" : link_id } },
-            { safe: false },
+    box.on('url.update-display-and-queued-links', function( id, display, callback ){
+
+        var oUpdate = {
+            state: 'ready',
+            display: display,
+            updated: new Date()
+        };
+
+        URLs.updateById( id, oUpdate, function(err, n){
+            if( err ){
+                callback(err);
+            }else{
+                URLs.findById( id, function( err, oURL ){
+                    if( err ){
+                        callback(err);
+                    }else{
+                        box.db.coll.links.update(
+                            {_id : oURL.links, state: 'queued' },
+                            { $set:oUpdate},
+                            { multi : true },
+                            function( err, updated ){
+                                callback(err, updated );
+                            }
+                        );
+                    }
+                });
+            }
+        });
+    });
+
+
+
+
+    box.on('url.add-link-ids', function( id, aLinks, returnUpdated, callback){
+        URLs.updateById( id,
+            {   $addToSet: {  "links" :aLinks } },
             function(err, u){
                 if( returnUpdated ){
                     URLs.findById(id, callback );
@@ -88,31 +151,54 @@ box.on('db.init', function( monk, Config, done ){
         var link_id =  newLink._id;
 
         // fields:{ links:false }
-        URLs.find( {url: url }, { fields:{links:false, page_id:false} },  function(err, exisitng_URL ){
-            if( exisitng_URL.length ){
-                URLs.update(
-                    { _id: exisitng_URL[0]._id, "links" :{ $ne : link_id }},
-                    {  $push: {  "links" : link_id } },
-                    function( err, result ){
-                        box.db.coll.links.updateById(  newLink._id,
-                            { $set:{url_id:exisitng_URL[0]._id }},
-                            function( err, result ){
-                                callback(err, exisitng_URL[0], true ); // true indicates it is an existing URL
-                        });
-                    }
-                );
-            }else{
-                URLs.insert( new_url(url, link_id), function(err, insertedURL){
-                    box.db.coll.links.updateById(
-                        newLink._id,
-                        { $set: { url_id:insertedURL._id }},
-                        function( err, result ){
-                            callback(err, insertedURL, false );
+        URLs.findOne(
+            {$or : [
+                {url: url },
+                {original_url:url}
+            ]},
+            { fields:{links:false, page_id:false} },
+            function(err, exisitng_URL ){
+                if( exisitng_URL ){
+                    URLs.update(
+                        { _id: exisitng_URL._id, "links" :{ $ne : link_id }},
+                        {  $push: {  "links" : link_id } },
+                        function( err, number_of_updated ){
+                            if( err ){
+                                callback( err );
+                            }else{
+                                var oUpdate = {
+                                    url_id  : exisitng_URL._id,
+                                    state   : 'queued'
+                                };
+                                if(  exisitng_URL.state == 'ready' ){
+                                    oUpdate.state   = 'ready';
+                                    oUpdate.display = exisitng_URL.display;
+                                }
+                                box.db.coll.links.updateById(  link_id, { $set:oUpdate},
+                                    function( err, result ){
+                                        callback(err, exisitng_URL, true ); // true indicates it is an existing URL
+                                    }
+                                );
+                            }
                         }
                     );
-                });
+                }else{
+                    URLs.insert( new_url(url, link_id), function(err, insertedURL){
+                        if( err ){
+                            callback( err );
+                        }else{
+                            box.db.coll.links.updateById(
+                                link_id,
+                                { $set: { url_id:insertedURL._id }},
+                                function( err, result ){
+                                    callback(err, insertedURL, false );
+                                }
+                            );
+                        }
+                    });
+                }
             }
-        });
+        );
     });
 
     process.nextTick(function() {
