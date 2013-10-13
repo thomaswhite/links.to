@@ -31,7 +31,6 @@ module.exports = {
             )
             ;
 
-
         box.invoke( 'link.add2', link.href, job.data.collectionID, { no_pageScrap:true }, link2save, function(err, savedLink){
             if(err){
                 debug( err );
