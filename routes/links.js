@@ -142,7 +142,12 @@ function link_add( url, collectionID, param, oLink, extra, Done ){
 
 
 function job_fetch_link( url, link_id,  url_id, Done ){
-    jobs.create('link-fetch', {url:url, url_id: url_id, link_id : link_id } )
+    jobs.create('link-fetch', {
+        url:url,
+        url_id: url_id,
+        link_id : link_id,
+        default_request_settings: config.request
+       })
         .on('complete', Done )
         .on('failed',   function(err) {
             Done('job-error' )

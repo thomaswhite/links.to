@@ -56,7 +56,7 @@ box.on('init', function (App, Config, done) {
     });
  //   jobs.inactive(removeJobs);
     jobs.complete( removeJobs );
-    jobs.failed( removeJobs );
+ //   jobs.failed( removeJobs );
 
     box.utils.later( done, null,  'plugin "KUE" initialised. Jobs registered:', jobs_id );
   /*  process.nextTick(function() {

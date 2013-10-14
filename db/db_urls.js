@@ -23,12 +23,6 @@ function new_url( url, link_id, extra ){
     return _.merge( url2save, extra );
 }
 
-
-function update_queued_links( id, display, cb ){
-
-}
-
-
 box.on('db.init', function( monk, Config, done ){
     var URLs = box.db.coll.urls = monk.get('urls');
 

@@ -10,6 +10,7 @@ var job_id = 'link-fetch'
     ,  box = require('../lib/box')
     , debug = require('debug')('jobs:' + job_id )
     , async = require('async')
+    , request = require('request')
     , _ = require('lodash')
     , linkDisplay = require('../lib/link-make-display')
 
@@ -61,10 +62,16 @@ module.exports = {
      */
 
     processor : function (job, Done){
-        var URL = job.data.url, request_options = _.merge( {}, config.request, {uri:URL, jar:request.jar()  });
-        async.series({
-                Link: async.apply( box.invoke, job,data.link_id ),
-                Url:  async.apply( box.invoke, job,data.url_id )
+        var URL = job.data.url, request_options = _.merge( {}, job.data.default_request_settings, {uri:URL, jar:request.jar()  });
+        async.parallel({
+//              Link: async.apply( box.invoke, 'link.get', job.data.link_id ),
+//              Url:  async.apply( box.invoke, 'url.get', job.data.url_id )
+                Link: function(cb){
+                        box.invoke('link.get', job.data.link_id, cb );
+                      },
+                Url : function(cb){
+                       box.invoke('url.get', job.data.url_id, cb );
+                }
             },
             function(err, o){
                 if( err ){
