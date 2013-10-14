@@ -10,6 +10,7 @@ var job_id = 'link-fetch'
     ,  box = require('../lib/box')
     , debug = require('debug')('jobs:' + job_id )
     , async = require('async')
+    , _ = require('lodash')
     , linkDisplay = require('../lib/link-make-display')
 
 ;
@@ -41,9 +42,6 @@ module.exports = {
     id : job_id,
 
     /**
-     * @param job
-     * @param Done
-     *
      * At this moment we have oLink and oURL.
      * We have the following cases:
      * 1. state == queued
@@ -56,6 +54,10 @@ module.exports = {
      *      2.2 fetch
      *          2.2.1 canonical URL exists
      *          2.2.2 parse, save, Done
+     *
+     * @param job: link_id, url_id, url
+     * @param Done
+     *
      */
 
     processor : function (job, Done){

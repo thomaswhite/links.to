@@ -90,7 +90,7 @@ box.on('db.init', function( monk, Config, done ){
                 ]},
                 { fields:{links:false, page_id:false} },
                 function(err, oFound){
-                    callback(err, oFound, url == oFound.url );
+                    callback(err, oFound, oFound && url == oFound.url );
                 }
             );
         }
@@ -131,11 +131,9 @@ box.on('db.init', function( monk, Config, done ){
     });
 
 
-
-
     box.on('url.add-link-ids', function( id, aLinks, returnUpdated, callback){
         URLs.updateById( id,
-            {   $addToSet: {  "links" :aLinks } },
+            {   $addToSet: {  "links" : { $each: aLinks} } },
             function(err, u){
                 if( returnUpdated ){
                     URLs.findById(id, callback );
