@@ -150,9 +150,10 @@ function job_fetch_link( url, link_id,  url_id, Done ){
        })
         .on('complete', Done )
         .on('failed',   function(err) {
-            Done('job-error' )
+            Done('job-error' );
         })
         .priority('normal')
+        .attempts(100)
         .save( function( err, result ){
             process.nextTick(function(){
                 if( err ){
@@ -178,7 +179,7 @@ function link_process( url, collectionID, param, oLink, extra, Done ){
                 }
           });
         }
-    })
+    });
 }
 
 

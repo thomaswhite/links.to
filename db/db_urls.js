@@ -94,13 +94,12 @@ box.on('db.init', function( monk, Config, done ){
         URLs.updateById( id, { $set:oURL }, { safe: true }, callback );
     });
 
-    box.on('url.update-display-and-queued-links', function( id, display, callback ){
+    box.on('url.update-display-queued_and_new-links', function( id, toUpdate, callback ){
+        toUpdate.updated = new Date();
+        toUpdate.state = 'ready';
 
-        var oUpdate = {
-            state: 'ready',
-            display: display,
-            updated: new Date()
-        };
+        var oUpdate = { $set: toUpdate };
+
 
         URLs.updateById( id, oUpdate, function(err, n){
             if( err ){
@@ -111,11 +110,16 @@ box.on('db.init', function( monk, Config, done ){
                         callback(err);
                     }else{
                         box.db.coll.links.update(
-                            {_id : oURL.links, state: 'queued' },
-                            { $set:oUpdate},
+                            {_id : { $in: oURL.links},
+                                $or : [
+                                    {state: 'queued'  },
+                                    {state: 'new' }
+                                ]
+                            },
+                            oUpdate,
                             { multi : true },
                             function( err, updated ){
-                                callback(err, updated );
+                               callback(err, oURL, updated );
                             }
                         );
                     }

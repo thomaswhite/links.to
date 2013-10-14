@@ -171,7 +171,7 @@ box.on('db.init', function( monk, Config, done ){
                                  callback(err, 'updating url');
                              }else{
                                  box.db.coll.urls.findById(Link.url_id, function(err, oURL){
-                                     if( oURL && !oURL.links.length && !settings.collections.url.orphan_urls ){
+                                     if( oURL && !oURL.links.length && !settings.collections.urls.orphan_urls ){
                                         box.db.coll.pages.remove({_id:oURL.page_id}, {safe:false});
                                         box.db.coll.urls.remove( {_id:oURL._id},     {safe:false});
                                     }

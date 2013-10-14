@@ -1,7 +1,7 @@
 var box = require('../lib/box')
     , kue  = require('kue')
     , path = require('path')
-
+    , debug = require('debug')('plugin:kue')
     , jobs = kue.createQueue()
 
     , app
@@ -16,9 +16,13 @@ function removeJobs( err, aJobs){
     if( err ){
         console.error( err );
     }else if( aJobs ){
+        debug('Delete jobs:');
         aJobs.forEach(function(id){
-            kue.Job.remove(id, function(err,r){
-                var dummy = 1;
+            kue.Job.get(id, function(err, job){
+                debug(job);
+                kue.Job.remove(id, function(err,r){
+                    var dummy = 1;
+                });
             });
         });
     }
@@ -54,9 +58,10 @@ box.on('init', function (App, Config, done) {
     jobs.active(function(err,aJobs){
         var dummy = 1;
     });
- //   jobs.inactive(removeJobs);
+    jobs.active(removeJobs);
+    jobs.inactive(removeJobs);
     jobs.complete( removeJobs );
- //   jobs.failed( removeJobs );
+    jobs.failed( removeJobs );
 
     box.utils.later( done, null,  'plugin "KUE" initialised. Jobs registered:', jobs_id );
   /*  process.nextTick(function() {

@@ -16,14 +16,23 @@ var job_id = 'link-fetch'
 
 ;
 
-function make_link_display( oURL, oLink){
+function make_link_display( oURL, oURL2){
     //var tags = linkDisplay.tags();
     if( oURL ){
         return linkDisplay.update( oURL /*, tags*/);
     }else{
-        oLink.display.title = oLink.display.url;
-        oLink.display.notFound = true;
-        return oLink.display;
+        return {
+            state:'ready',
+            notFound : true,
+            display:{
+                statusCode: oURL2.statusCode,
+                title : 'Not found: ' + oURL2.url,
+                url:  oURL2.url,
+                description: 'This URL can not be found',
+                summary:'',
+                notFound : true
+            }
+        };
     }
 }
 
@@ -83,7 +92,8 @@ module.exports = {
                         update_link_display(o.Link, o.Url, Done );
                     }else {
                         // 1.2 this event will be fired when the URL is ready. It will update the .display section of all links that are in state "queued"
-                        box.once( '' + o.Url._id, Done );
+                        //box.once( '' + o.Url._id, Done );
+                        Done( 'still not ready' ); // fail the job so it will check later of the oURL is ready
                     }
                 }else{ // 2 o.Link.state == 'new'
                     if(o.Url.state == 'ready'){
@@ -94,12 +104,10 @@ module.exports = {
                             if( err || response.statusCode != 200 ){
                                 var notFound = {
                                     statusCode: response ? response.statusCode : -1 ,
-                                    result: 'error',
-                                    state: 'url-ping'
+                                    url: o.Url.url
                                 };
-                                box.emit('url.delete', oURL._id );
-                                box.emit('link.update-display', savedLink._id, make_link_display( null, savedLink), function(err2, updated_Link){
-                                    Done(  err2 || notFound, updated_Link);
+                                box.invoke('url.update-display-queued_and_new-links', o.Url._id, make_link_display( null, notFound  ), function(err2, oUpdated_URL, number_of_updated_links){
+                                    Done( err2 );
                                 });
                             } else{
                                 var canonicalURL = linkDisplay.find_canonical_url('' + page_HTML);
@@ -110,14 +118,13 @@ module.exports = {
                                                 Done(err );
                                         });
                                     }else{
-                                        var URL = canonicalURL || url;
+                                        URL = canonicalURL || URL;
                                         box.emit( 'page.save', page_HTML, URL, o.Url._id, function(err, added_page ){
                                             if( err ){
                                                 Done(err, 'page.save');
                                             }else{
-                                                box.invoke( 'pageScrape', URL, HTML, function(err, page_Parts ){
-                                                    box.invoke('url.update-display-and-queued-links', o.Url._id, linkDisplay.update( page_Parts ), function(err, o){
-                                                        box.emit( '' + o.Url._id);
+                                                box.invoke( 'pageScrape', URL, page_HTML, function(err, page_Parts ){
+                                                    box.invoke('url.update-display-queued_and_new-links', o.Url._id, {display:linkDisplay.update( page_Parts )}, function(err, oUpdated_URL, number_of_updated_links){
                                                         Done( err );
                                                     });
                                                 });

@@ -4,8 +4,6 @@ var box = require('../lib/box')
     , mongoStore = require('connect-mongo')(express)
     , path       = require('path')
 
-    , cons = box.cons = require('consolidate')
-
 //    , http = require('http')
     , config;
 
