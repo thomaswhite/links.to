@@ -82,6 +82,7 @@ function later(fn, a1,a2,a3,a4,a5,a6 ){
     for (var i = 1; i < arguments.length; i++) {
         A.push(arguments[i]);
     }
+    var args = Array.prototype.slice.call(arguments, 1);
     process.nextTick(function() {
         fn.apply(undefined, A );
     });

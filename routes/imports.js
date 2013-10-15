@@ -160,7 +160,7 @@ function Add(req, res) {
                             allNodes[n].importID = ID;
                         }
 
-                        box.invoke('add-nodes',  allNodes, function(err, result){
+                        box.invoke('import.add-nodes',  allNodes, function(err, result){
                             if( err ){
                                 console.error('Error saving import nodes for file ' + saved_import.title, err );
                             }else{
@@ -251,10 +251,14 @@ function perform_import( Import_id, user, req ){
                 })
                 .on('progress', function(progress){
                     req.io.emit('import.collection-process', { status:'progress', progress: progress, folder:oFolder} );
+                    process.stdout.write('\r  job #' + this.id + '.' + this.type + ' ' + progress + '% complete');
                 })
                 .priority('high')
                 .save( function( err, result ){
-                    process.nextTick(done); // go back to the async queue even if the folder is not processed.
+                    process.nextTick(function(){
+                        done(err, oFolder.folder.full_path); // go back to the async queue even if the folder is not processed.
+                    });
+                    //process.nextTick(done);
                 });
         }else{
             process.nextTick( done );

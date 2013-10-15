@@ -113,13 +113,13 @@ module.exports = {
                                 var canonicalURL = linkDisplay.find_canonical_url('' + page_HTML);
                                 box.emit('url.check-url', canonicalURL, function(err, found_same_url_oURL ){
                                     if( found_same_url_oURL ){
-                                        box.on('url.add-link-ids', found_same_url_oURL._id, [o.Link._id].concat(o.Url.links ), false, function(err, how_many_were_updated ){
+                                        box.invoke('url.add-link-ids', found_same_url_oURL._id, [o.Link._id].concat(o.Url.links ), false, function(err, how_many_were_updated ){
                                                 box.emit('url.delete', o.Url._id );
                                                 Done(err );
                                         });
                                     }else{
                                         URL = canonicalURL || URL;
-                                        box.emit( 'page.save', page_HTML, URL, o.Url._id, function(err, added_page ){
+                                        box.invoke( 'page.save', page_HTML, URL, o.Url._id, function(err, added_page ){
                                             if( err ){
                                                 Done(err, 'page.save');
                                             }else{

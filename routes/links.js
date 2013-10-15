@@ -5,12 +5,10 @@
 
 var  box = require('../lib/box')
    , _ = require('lodash')
-   , request = require('request')
    ,  util = require('util')
    , ShortId  = require('shortid').seed(96715652)
    , debug = require('debug')('linksTo:view.links')
    , breadcrumbs = require('./../lib/breadcrumbs')
-   , linkDisplay = require('../lib/link-make-display')
 
 
 // , sanitize = require('validator').sanitize
@@ -50,35 +48,6 @@ function Delete (req, res) {
 }
 
 
-// todo: take into account the link can be imported ie do not overwrite the title with the URL if we have the title already.
-function make_link_display( oURL, oLink){
-    var tags = linkDisplay.tags();
-    return oURL
-            ? linkDisplay.update( oURL, tags)
-            : {  notFound:true,  title:oLink.display.url }
-            ;
-}
-
-function find_canonical_url(html){
-    var regEx = [
-           /<link\s+rel=(?:"canonical"|'canonical')\s+href\s*=\s*(\"[^"]*\"|'[^']*')\s*(?:\/>|><\/link>)/gi,
-           /<meta[^>]*property\s*=\s*"og:url".*content\s*=\s*"([^"]*)/gi,
-           /<meta[^>]*name\s*=\s*"twitter:url".*content\s*=\s*"([^"]*)/gi
-        ]
-        , match
-        , result = null
-    ;
-
-    for( var i = 0; i < regEx.length; i++ ){
-        match = regEx[i].exec( html );
-        if( match ){
-            result = match[1];
-            break;
-        }
-    }
-    return result;
-}
-
 /**
  * Create a oLink and oURL (if it does not exists)
  * @param url
@@ -98,12 +67,13 @@ function link_add( url, collectionID, param, oLink, extra, Done ){
                 description: param.description || '',
                 owner_id:    param.owner_id,
                 owner_screen_name: param.owner_screen_name,
-                created:     param.add_date || null,
-                updated:     param.last_modified || null
-            }
+                created:     param.add_date,
+                updated:     param.last_modified,
+                origin:      param.origin || 'interactive'
+            },
+            extra
         )
     ;
-    link2save = _.merge( link2save, extra || {} );
     box.invoke( 'link.add2', link2save, function(err, oAdded_Link ){
         if( err ){
             Done( err, 'url.add2');
@@ -168,8 +138,8 @@ function link_process( url, collectionID, param, oLink, extra, Done ){
     link_add( url, collectionID, param, oLink, extra, function(err, oLink, oURL){
         if( err ){
             Done(err);
-        }else if( oLink.state == 'ready'){
-            Done( null, oLink );
+        }else if( oLink.state == 'ready' || param.do_not_fetch ){
+            Done( null, oLink, oURL );
         }else{
             job_fetch_link( url, oLink._id,  oURL._id, function(err){
                 if( err ){
@@ -186,10 +156,8 @@ function link_process( url, collectionID, param, oLink, extra, Done ){
 box.on('init', function (App, Config, done) {
     app = App;
     config = Config;
-
     queue = box.Queue;
     jobs = box.Jobs;
-
     process.nextTick(function() {
         done(null, 'route links.js initialised');
     });
@@ -199,13 +167,13 @@ box.on('init', function (App, Config, done) {
 box.on('init.attach', function (app, config,  done) {
     app.use(
         box.middler()
-//           .post('/link/new/:coll?',        Add)
            .get('/link/:id/delete/:coll?',  Delete)
            .handler
     );
 
-    box.on('link_process', link_process);
-    box.on('link_add', link_add );
+    box.on('link_process',  link_process);
+    box.on('link_add',      link_add );
+    box.on('link.fetch',    job_fetch_link);
 
     app.io.route('link', {
 

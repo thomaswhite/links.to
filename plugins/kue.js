@@ -32,10 +32,14 @@ function removeJobs( err, aJobs){
 jobs.on('job complete', function(id){
     kue.Job.get(id, function(err, job){
         if (err) return;
-        job.remove(function(err){
-            if (err) throw err;
-            console.info('Removed completed job #%d,  %j', job.id, job.data );
-        });
+        if( job ){
+            job.remove(function(err){
+                if (err) throw err;
+                console.info('Removed completed job #%d,  %s', job.id, box.utils.inspect(job.data, { showHidden: false, depth: null, colors:false }) );
+            });
+        }else{
+            var dummyu = 1;
+        }
     });
 });
 
@@ -43,16 +47,6 @@ jobs.on('job complete', function(id){
 box.on('init', function (App, Config, done) {
     app = App;
     config = Config.queue;
-
-    var jobs_id = [],
-        jobs_processors = box.utils.request_files_in_directory( path.join( Config.__dirname, config.jobs_dir ) )
-        ;
-
-    for(var i=0; jobs_processors && i < jobs_processors.length; i++){
-        var j = jobs_processors[i];
-        jobs.process( j.id, j.processor );
-        jobs_id.push(j.id);
-    }
 
 
     jobs.active(function(err,aJobs){
@@ -62,6 +56,18 @@ box.on('init', function (App, Config, done) {
     jobs.inactive(removeJobs);
     jobs.complete( removeJobs );
     jobs.failed( removeJobs );
+
+
+
+    var jobs_id = [],
+        jobs_processors = box.utils.request_files_in_directory( path.join( Config.__dirname, config.jobs_dir ) )
+        ;
+
+    for(var i=0; jobs_processors && i < jobs_processors.length; i++){
+        var j = jobs_processors[i];
+        jobs.process( j.id, 1, j.processor );
+        jobs_id.push(j.id);
+    }
 
     box.utils.later( done, null,  'plugin "KUE" initialised. Jobs registered:', jobs_id );
   /*  process.nextTick(function() {

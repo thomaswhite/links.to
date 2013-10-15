@@ -10,7 +10,7 @@ var   box = require('../lib/box')
     ;
 
 module.exports = {
-    id : 'import_folder',
+    id : 'import-folder',
     processor : function (job, Done){
         box.invoke('improt.links-in-folder', job.data.folder.importID, job.data.folder.folder.full_path, function(err, Links) {
             if( err ){
@@ -30,36 +30,11 @@ module.exports = {
                     }else{
                         function import_link(link, done){
                             //req.io.emit('import.link-start', { status:'start', link:link }  );
-                            jobs.create('import-link', {link:link, user:oData.user, collectionID: collection._id })
+                            box.Jobs.create('import-link', {link:link, user:oData.user, collectionID: collection._id })
                                 .on('complete', function(){
                                     aLinks.push( {  link_id: this.data.link._id });
                                     var link = this.data.link;
-  /*
-                                    //    1. fetch page
-                                    box.invoke('link_process',
-                                        link.display.url,
-                                        link.collection_id,
-                                        {
-                                            title:link.display.title,
-                                            no_pageScrap: true
-                                        },
-                                        function(err, Link2, oURL, existing_oURL){
-                                            //  2. additional task for pageScrap
-                                            box.invoke( 'pageScrape', url, body, function(err, new_oURL ){
-                                                new_oURL.links = oURL.links || [ savedLink._id ];
-                                                box.invoke('url.update', oURL._id, new_oURL, function(err, o){
-                                                    if( err ){
-                                                        Done(err);
-                                                    }else{
-                                                        box.emit('link.update-display', savedLink._id, make_link_display( new_oURL, savedLink), Done);
-                                                    }
-                                                });
-                                            });
-                                            //  3. additional task for tags
-                                        }
-                                    );
-*/
-
+                                    job.progress(aLinks.length, Links.length);
                                     if( aLinks.length == Links.length ){
                                         Done( Error, {
                                             collectionID : this.data.collectionID,
@@ -72,7 +47,13 @@ module.exports = {
                                     aLinks.push( this.data.link._id );
                                 })
                                 .priority('medium')
-                                .save( done )
+                                //.save( done )
+                                .save( function( err, result ){
+                                    process.nextTick(function(){
+                                        done(err);
+                                    });
+                                });
+
                             ;
                         }
                         async.mapLimit(Links, 5, import_link,
