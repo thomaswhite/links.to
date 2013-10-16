@@ -8,7 +8,7 @@
     "dbModules":"db/*.js",
     "collections":{
         "urls":{
-            "orphan_urls":false
+            "orphan_urls":true
         },
         "links":{},
         "collections":{},

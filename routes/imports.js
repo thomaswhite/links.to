@@ -235,22 +235,23 @@ function perform_import( Import_id, user, req ){
         oImport;
 
     function import_folder( oFolder, done ){
+        var folderInfo = {_id:oFolder._id, title: oFolder.title, path: oFolder.folder.full_path};
         if( oFolder.folder.this_links ){
-            req.io.emit('import.collection-start', { status:'start', folder:oFolder } );
+            req.io.emit('import.collection-start', _.merge( { status:'start'}, folderInfo));
             jobs.create('import-folder', {folder:oFolder, user:user })
                 .on('complete', function(){
-                    req.io.emit('import.collection-end', { status:'end', folder:oFolder }  );
+                    req.io.emit('import.collection-end', _.merge( { status:'end'}, folderInfo));
                     aReady.push(this.data.folder._id );
                     if( aFolders.length == aReady.length ){
-                        req.io.emit('import.process-end', { status:'end', import:oImport }  );
+                        req.io.emit('import.process-end', _.merge( { status:'end'},oImport ));
                         aFolders = aReady = oImport = null;
                     }
                 })
                 .on('failed', function(){
-                    req.io.emit('import.collection-error', { status:'error', folder:oFolder }  );
+                    req.io.emit('import.collection-error', _.merge( { status:'error'}, folderInfo));
                 })
                 .on('progress', function(progress){
-                    req.io.emit('import.collection-process', { status:'progress', progress: progress, folder:oFolder} );
+                    req.io.emit('import.collection-process', _.merge( { status:'progress', progress: progress}, folderInfo));
                     process.stdout.write('\r  job #' + this.id + '.' + this.type + ' ' + progress + '% complete');
                 })
                 .priority('high')
@@ -258,7 +259,6 @@ function perform_import( Import_id, user, req ){
                     process.nextTick(function(){
                         done(err, oFolder.folder.full_path); // go back to the async queue even if the folder is not processed.
                     });
-                    //process.nextTick(done);
                 });
         }else{
             process.nextTick( done );
@@ -266,8 +266,7 @@ function perform_import( Import_id, user, req ){
     }
     box.emit('import.get', Import_id, function(err, Import){
         oImport = Import;
-        req.io.emit('import.process-start', Import );
-
+        req.io.emit('import.process-start',  _.merge( { status:'start'}, Import ));
         box.emit('import.folders', Import_id, function(err, folders){
             aFolders = folders;
             async.mapLimit( folders, 10,
@@ -276,7 +275,7 @@ function perform_import( Import_id, user, req ){
                     if( err ){
                         console( err );
                     }else{
-                        req.io.emit('import.process-queued', { status:'queued', import:Import, err:err }  );
+                        req.io.emit('import.process-queued',  _.merge({ status:'queued', err:err }, Import));
                     }
                 }
             );

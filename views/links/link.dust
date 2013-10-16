@@ -1,7 +1,6 @@
 <div class="blocked-link" id="link_{_id}">
     {?display}
         {>"links/link_content" /}
-
     {/display}
     {^display}
        <div>No link data.</div>
