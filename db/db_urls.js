@@ -26,6 +26,7 @@ function new_url( url, link_id, extra ){
 box.on('db.init', function( monk, Config, done ){
     var URLs = box.db.coll.urls = monk.get('urls');
 
+    URLs.options.multi = true;
     URLs.index('url',  { unique: true });
     URLs.index('original_url', {background:true, sparse:1} );
     URLs.index('links', {background:true});

@@ -49,6 +49,7 @@ function myRender(tempateID, data, $target, contentAction) {
                     break;
 
                 case 'replace':
+                case 'replace-content':
                 default:
                     $target.html(out);
                     break;

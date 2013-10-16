@@ -32,8 +32,14 @@ function newImport ( name, size, owner ){
         title: name,
         size: size,
         created : new Date(),
+        folders:0,
+        foldersExcluded:0,
+        foldersQueued:0,
+        foldersImported:0,
         links:0,
-        folders:0
+        linksExcluded: 0,
+        linksQueued:0,
+        linksImported:0
     };
 }
 
@@ -242,6 +248,7 @@ function perform_import( Import_id, user, req ){
                 .on('complete', function(){
                     req.io.emit('import.collection-end', _.merge( { status:'end'}, folderInfo));
                     aReady.push(this.data.folder._id );
+                    box.emit('import.mark-as-imported', oFolder );
                     if( aFolders.length == aReady.length ){
                         req.io.emit('import.process-end', _.merge( { status:'end'},oImport ));
                         aFolders = aReady = oImport = null;
@@ -339,10 +346,13 @@ box.on('init.attach', function (app, config,  done) {
            });
        },
        'folder_exclude': function(req){
-            box.emit( 'import.folder_exclude', req.data.id, req.data.excluded, function( err, Import ){
+            box.emit( 'import.folder_exclude', req.data.id, req.data.excluded, function( err, Import, folder ){
                 req.io.respond({
                     req:req.data,
-                    result: Import,
+                    result: {
+                        import:Import,
+                        folder:folder
+                    },
                     error:err
                 });
             });

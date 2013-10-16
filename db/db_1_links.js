@@ -52,7 +52,7 @@ box.on('db.init', function( monk, Config, done ){
         , common_config = Config.common
         , Links = box.db.coll.links = monk.get('links')
         ;
-
+    Links.options.multi = true;
     Links.ensureIndex( { updated: -1, created: -1 }, {background:true} ); // coll_id ?
 
     // Returns an array of the links for a collection

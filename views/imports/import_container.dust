@@ -3,7 +3,7 @@
 <div class="row">
     <div class="span8" id="title">
         <h1 class="eip" id="title"><span class="coll-title-prefix">Import </span> {title}</h1>
-        <p>Size:{import.size}, imported on {@timeStamp time="{import.created}" format="YYYY-MM-DD HH:mm" /}, {@timeFromNow time="{import.created}"/}</p>
+        <p>Size:{import.size}, uploaded on {@timeStamp time="{import.created}" format="YYYY-MM-DD HH:mm" /}, {@timeFromNow time="{import.created}"/}</p>
         <span id="importBtn">
         <a class="btn btn-danger btn-small"  href="/imports/{import._id}/delete?back=/imports"><i class="icon-trash icon-white"></i> Delete</a>
         <a class="btn btn-primary btn-small import-btn"  href="#"><i class="icon-play icon-white"></i>&nbsp;Import</a>
@@ -13,34 +13,11 @@
         </span>
     </div>
 </div>
-<div id="beforeContent">
-  <table class="table table-condensed " id="importDetails" style="margin:10px 0; width:auto" >
-    <thead>
-        <tr>
-            <th></th>
-            <th></th>
-            <th>Excluded</th>
-            <th>Queued</th>
-            <th>Imported</th>
-        </tr>
-    </thead>
-    <tbody>
-       <tr align="right">
-         <td align="left">Folders:</td>
-         <td>{import.folders}</td>
-         <td>{import.foldersExcluded}</td>
-         <td>{import.foldersQueued}</td>
-         <td id="importedFolders">{import.foldersImported}</td>
-       </tr>
-       <tr align="right">
-         <td align="left">Links:</td>
-           <td>{import.links}</td>
-           <td>{import.linksExcluded}</td>
-           <td>{import.linksQueued}</td>
-         <td id="importedLinks">{import.linksImported}</td>
-       </tr>
-    </tbody>
-  </table>
-</div>
+<div id="beforeContent">{>"imports/import_summary"/}</div>
+<ul class="nav nav-tabs">
+  <li class="active"><a href="#">Loaded</a></li>
+  <li><a href="#">Imported</a></li>
+  <li><a href="#">Excluded</a></li>
+</ul>
 <div id="content">{>"imports/import"/}</div>
 

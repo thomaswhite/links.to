@@ -17,7 +17,7 @@ box.on('db.init', function( monk, Config, done ){
         , common_config = Config.common
         , Imports = box.db.coll.Imports = monk.get('Imports')
         ;
-
+    Imports.options.multi = true;
     Imports.ensureIndex( { excluded:1, importID: 1, parent:1 } ); // , {background:true}, {sparse:1}
     Imports.ensureIndex( { folder: 1,  importID: 1, parent:1 }, {sparse:1} ); // , {background:true}
 
@@ -107,30 +107,35 @@ box.on('db.init', function( monk, Config, done ){
         Imports.findById(id, callback );
     });
 
+    box.on('import.mark-as-imported', function( oFolder, callback){
+        Imports.updateById(oFolder._id, {$set:{imported:true}}, {safe:false} );
+        Imports.updateById(oFolder.importID, {$inc:{foldersImported:1}}, {safe:false} );
+    });
+
 
     box.on('import.folder_exclude', function(id, excluded, callback){
         if( !id ){
             throw "Import ID expected!";
         }else{
-            Imports.updateById( id, {$set: { excluded:excluded} },    function(err, updated ){
+            Imports.updateById( id, {$set: { excluded:excluded} }, function(err, updated ){
                 if( err ){
                     callback(err);
                 }else{
                     Imports.findById( id, function(err, folder ){
                         Imports.update(
-                            { importID:folder.importID, folder: { $exists: true}, parent: new RegExp('^' + folder.folder.full_path, 'i')},
+                            { importID:folder.importID,  parent: new RegExp('^' + folder.folder.full_path, 'i')},
                             {$set: { excluded:excluded} },
-                            function(err2, result2){
-/*
-                                Imports.find(
-                                    { importID:folder.importID, excluded:true},
-
-                                )
-
-*/
-
-
-                                callback(err2, folder);
+                            {multi:true},
+                            function(err2, excluded_updated){
+                                Imports.count({ importID:folder.importID, excluded:true, folder: { $exists: true} }, function (err3, folders_excluded) {
+                                    Imports.count({ importID:folder.importID, excluded:true, folder: { $exists: false} }, function (err4, links_excluded) {
+                                        Imports.updateById(folder.importID, {$set:{foldersExcluded:folders_excluded, linksExcluded:links_excluded}}, function(err5, resutl){
+                                            Imports.findById(folder.importID, function(err6, import_updated ){
+                                                callback(err2, import_updated, folder );
+                                            });
+                                        });
+                                    });
+                                });
                             }
                         );
                     });

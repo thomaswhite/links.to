@@ -81,6 +81,7 @@ $(document).ready(function() {
                 id   : o.id,
                 excluded : o.excluded
             }, function(data){
+                debug.log ('import.folder_excluded:',  data);
                 o.$this.removeAttr('disabled');
                 if(o.excluded ){
                     o.$row.addClass('excluded');
@@ -89,7 +90,7 @@ $(document).ready(function() {
                     o.$row.removeClass('excluded');
                     o.$i.removeClass( 'icon-ban-circle text-error').addClass('icon-expand-alt');
                 }
-                debug.log ('import.folder_excluded:',  data);
+                myRender('imports/import_summary', data.result, $('#beforeContent'), 'replace-content');
             });
         })
         .on('click', '.import-btn', function(event){

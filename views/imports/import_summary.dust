@@ -1,0 +1,27 @@
+  <table class="table table-condensed " id="importDetails" style="margin:10px 0; width:auto" >
+    <thead>
+        <tr>
+            <th></th>
+            <th></th>
+            <th>Excluded</th>
+            <th>Queued</th>
+            <th>Imported</th>
+        </tr>
+    </thead>
+    <tbody>
+       <tr align="right">
+         <td align="left">Folders:</td>
+         <td>{import.folders}</td>
+         <td>{import.foldersExcluded}</td>
+         <td>{import.foldersQueued}</td>
+         <td id="importedFolders">{import.foldersImported}</td>
+       </tr>
+       <tr align="right">
+         <td align="left">Links:</td>
+           <td>{import.links}</td>
+           <td>{import.linksExcluded}</td>
+           <td>{import.linksQueued}</td>
+         <td id="importedLinks">{import.linksImported}</td>
+       </tr>
+    </tbody>
+  </table>
