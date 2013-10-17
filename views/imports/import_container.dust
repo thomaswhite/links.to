@@ -14,10 +14,13 @@
     </div>
 </div>
 <div id="beforeContent">{>"imports/import_summary"/}</div>
-<ul class="nav nav-tabs">
-  <li class="active"><a href="#">All</a></li>
-  <li><a href="#">Imported</a></li>
-  <li><a href="#">Excluded</a></li>
+<ul id="tabs" class="nav nav-tabs" style="margin-bottom:0">
+  <li class="active"><a href="#content" id="tab-content" data-toggle="tab">All</a></li>
+  <li><a href="#imported" id="tab-imported" data-toggle="tab">Imported</a></li>
+  <li><a href="#excluded" id="tab-excluded" data-toggle="tab">Excluded</a></li>
 </ul>
-<div id="content">{>"imports/import"/}</div>
-
+<div class="tab-content">
+  <div id="content" class="tab-pane active">{>"imports/import"/}</div>
+  <div id="imported" class="tab-pane">&nbsp;</div>
+  <div id="excluded"  class="tab-pane">&nbsp;</div>
+</div>

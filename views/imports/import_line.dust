@@ -1,5 +1,5 @@
-<div class="row {#excluded}excluded{/excluded}" id="import_{_id}" data-id="{_id}">
-      <div class="span5 coll-title">
+<div class="folder {#excluded}excluded{/excluded}" id="import_{_id}" data-id="{_id}">
+      <div class=" coll-title">
           <span>
               {#folder}
                 {#excluded}
@@ -29,6 +29,6 @@
               {/imported}
           {/folder}
       </div>
-      <div class="links-cont span8"></div>
+      <div class="links-cont"></div>
 </div>
 

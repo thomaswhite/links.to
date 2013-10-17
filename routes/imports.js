@@ -63,7 +63,7 @@ function importLists_data( filter, param, user, callBack ){
             addButton:{
                 type:'file',
                 placeholder:'Select a bookmark file',
-                buttonText:'Import',
+                buttonText:'Upload',
                 action:'/imports/new',
                 form_id:'upload'
             }
@@ -170,7 +170,7 @@ function Add(req, res) {
                             if( err ){
                                 console.error('Error saving import nodes for file ' + saved_import.title, err );
                             }else{
-                                console.info('Import nodes for file "' +  + saved_import.title + '" saved OK', saved_import );
+                                console.info('Import nodes for file "' +  saved_import.title + '" saved OK', saved_import );
                             }
                         });
                     }
@@ -241,24 +241,27 @@ function perform_import( Import_id, user, req ){
         oImport;
 
     function import_folder( oFolder, done ){
-        var folderInfo = {_id:oFolder._id, title: oFolder.title, path: oFolder.folder.full_path};
+        var folderInfo = {_id:oFolder._id, title: oFolder.title, parent: oFolder.parent};
         if( oFolder.folder.this_links ){
-            req.io.emit('import.collection-start', _.merge( { status:'start'}, folderInfo));
+            req.io.emit('import.collection-start', _.merge( { status:'start', progress:0}, folderInfo));
             jobs.create('import-folder', {folder:oFolder, user:user })
                 .on('complete', function(){
-                    req.io.emit('import.collection-end', _.merge( { status:'end'}, folderInfo));
+                    req.io.emit('import.collection-end', _.merge( { status:'end', progress:100, imported:true}, folderInfo));
+                    req.io.emit('import.process-progress', {done:aReady.length, total:aFolders.length});
                     aReady.push(this.data.folder._id );
                     box.emit('import.mark-as-imported', oFolder );
                     if( aFolders.length == aReady.length ){
-                        req.io.emit('import.process-end', _.merge( { status:'end'},oImport ));
-                        aFolders = aReady = oImport = null;
+                        box.invoke('import.get', Import_id, function( err, oImport){
+                            req.io.emit('import.process-end', _.merge( { status:'end'}, oImport ));
+                            aFolders = aReady = oImport = null;
+                        });
                     }
                 })
                 .on('failed', function(){
-                    req.io.emit('import.collection-error', _.merge( { status:'error'}, folderInfo));
+                    req.io.emit('import.collection-error', _.merge( { status:'error', progress:0}, folderInfo));
                 })
                 .on('progress', function(progress){
-                    req.io.emit('import.collection-process', _.merge( { status:'progress', progress: progress}, folderInfo));
+                    req.io.emit('import.collection-progress', _.merge( { status:'progress', progress: progress}, folderInfo));
                     process.stdout.write('\r  job #' + this.id + '.' + this.type + ' ' + progress + '% complete');
                 })
                 .priority('high')

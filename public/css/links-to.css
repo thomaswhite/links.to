@@ -654,6 +654,20 @@ input.excluded {
   text-align: right;
   vertical-align: middle;
 }
+ul.nav.nav-tabs {
+  margin-bottom: 0;
+}
+ul.nav.nav-tabs a {
+  min-width: 4em;
+  text-align: center;
+}
+div.tab-content {
+  background-color: white;
+  padding: 1em;
+}
+.progress {
+  margin-bottom: 5px;
+}
 .row.table-header {
   margin-top: .8em;
 }

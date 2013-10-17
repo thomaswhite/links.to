@@ -16,7 +16,7 @@ module.exports = {
             if( err ){
                 done(err);
             }else{
-                job.progress(0, Links.length );
+                //job.progress(0, Links.length );
                 var oData = job.data
                     , req = job.req
                     , aLinks = []
@@ -56,7 +56,7 @@ module.exports = {
 
                             ;
                         }
-                        async.mapLimit(Links, 5, import_link,
+                        async.mapLimit(Links, 10, import_link,
                             function(err, links_results){
                                 // links_results contain list of folder/links
                                 if( err ){

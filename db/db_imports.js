@@ -91,7 +91,7 @@ box.on('db.init', function( monk, Config, done ){
     });
 
     box.on('import.add-nodes', function( importNodes, callback){
-        Imports.insert( importNodes,  { safe: false }, callback );
+        Imports.insert( importNodes,  { safe: true }, callback );
     });
 
     box.on('import.get-with-root-level-folders', function( id, callback){
@@ -147,7 +147,7 @@ box.on('db.init', function( monk, Config, done ){
 
     box.on('import.folders', function( import_id,  callback){
         Imports.find(
-            {importID: Imports.col.ObjectID(import_id), excluded: false, folder: { $exists: true} },
+            {importID: Imports.col.ObjectID(import_id), excluded: false, imported:false, folder: { $exists: true} },
             { sort:{ parent:1, add_date:-1,  last_modified:-1 }},
             callback
         );

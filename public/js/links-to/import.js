@@ -17,9 +17,21 @@ function disableSelection( $o ){
         }).bind('selectstart', function(){ return false; });
 }
 
+function import_folder_progress_3( data ){
+    var $bar = $('#folder_' + data._id + ' .progress-bar');
+    $bar.attr('aria-valuenow',data.progress).width(data.progress + '%');
+    $bar.find('.sr-only').text( data.progress + '% Complete');
+}
+function import_folder_progress( data ){
+    var $bar = $('#folder_' + data._id + ' .bar');
+    $bar.width(data.progress + '%');
+    $bar.find('span').text( data.progress + '%');
+}
+
+
 function get_import_parts(dom){
     var $this = $(dom)
-        , $row = $this.closest('.row')
+        , $row = $this.closest('.folder')
         , $i = $row.find('> div > span > i')
         , $excluded =  $row.find('> div > input:checkbox.excluded')
         , o = {
@@ -113,23 +125,35 @@ $(document).ready(function() {
                     }
                 }
             });
-
-
             return false;
+        });
+/*
+        .on('click', '.nav .nav-tabs a#tab-imported', function(event){
+            var $this = $(this)
+                , contentID = $this.attr('href')
+                , $ul = $this.closest('ul')
+                , $content
+            ;
+            $ul.find('li').removeClass('active');
+            $this.addClass('active');
         })
+*/
 
-    ;
+
 
     disableSelection( $('.coll-title'));
 
     socket.on('import.process-start', function(data){
         debug.log ( 'import.process-start:', data );
+        $('#tab-imported').trigger('click');
     });
+
     socket.on('import.process-progress', function(data){
         debug.log ( 'import.process-progress:', data );
     });
     socket.on('import.process-end', function(data){
         debug.log ( 'import.process-end:', data );
+        myRender('imports/import_summary', {import:data}, $('#beforeContent'), 'replace-content');
     });
     socket.on('import.process-error', function(data){
         debug.log ( 'import.process-end:', data );
@@ -141,12 +165,18 @@ $(document).ready(function() {
 
     socket.on('import.collection-start', function(data){
         debug.log ( 'import.collection-start:', data );
+        $('#tab-imported').trigger('click');
+        myRender('imports/import_imported_line', data, $('#imported'), 'prepend');
     });
+
     socket.on('import.collection-progress', function(data){
         debug.log ( 'import.collection-progress:', data );
+        import_folder_progress( data );
     });
+
     socket.on('import.collection-end', function(data){
         debug.log ( 'import.collection-end:', data );
+        myRender('imports/import_imported_line', data, $('#folder_' + data._id ), '$replace');
     });
     socket.on('import.collection-error', function(data){
         debug.log ( 'import.collection-error:', data );
