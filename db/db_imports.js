@@ -109,7 +109,8 @@ box.on('db.init', function( monk, Config, done ){
 
     box.on('import.mark-as-imported', function( oFolder, callback){
         Imports.updateById(oFolder._id, {$set:{imported:true}}, {safe:false} );
-        Imports.updateById(oFolder.importID, {$inc:{foldersImported:1}}, {safe:false} );
+        Imports.updateById(oFolder.importID, {$inc:{foldersImported:1, linksImported: oFolder.folder.this_links}}, {safe:false} );
+        Imports.update( { importID:oFolder.importID,  parent: new RegExp('^' + oFolder.folder.full_path, 'i')}, {$set:{imported:true}}, { safe:false, multi : true });
     });
 
 

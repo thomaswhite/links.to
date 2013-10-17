@@ -15,7 +15,7 @@
 </div>
 <div id="beforeContent">{>"imports/import_summary"/}</div>
 <ul class="nav nav-tabs">
-  <li class="active"><a href="#">Loaded</a></li>
+  <li class="active"><a href="#">All</a></li>
   <li><a href="#">Imported</a></li>
   <li><a href="#">Excluded</a></li>
 </ul>

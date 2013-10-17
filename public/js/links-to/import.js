@@ -21,14 +21,14 @@ function get_import_parts(dom){
     var $this = $(dom)
         , $row = $this.closest('.row')
         , $i = $row.find('> div > span > i')
-        , $excluded =  $row.find('> div > input.excluded')
+        , $excluded =  $row.find('> div > input:checkbox.excluded')
         , o = {
             $this   : $this,
             $row    : $row,
             $i      : $i,
             $linkCont : $row.find('>div.links-cont'),
             $excluded : $excluded,
-            excluded : !$excluded.is(':checked'),
+            excluded : $excluded.length && !$excluded.is(':checked'),
             id      : $row.data('id'),
             state   : $i.hasClass( 'icon-expand-alt' ) ? 'closed' : 'expanded'
         }

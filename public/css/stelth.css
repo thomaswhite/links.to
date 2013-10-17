@@ -10,17 +10,20 @@
 h1,h2,h3{
     color:#e8e8e8;
 }
-.breadcrumb a{
-   color:#ddd;
-}
+body,
+.breadcrumb *,
+p,
+a, #content, #beforeContent,
+#importDetails,
+.user-badge-box *,
+.btn,
+.dropdown-menu *,
+input
+{  color:#ddd !important; }
 
-a, #content, #beforeContent{
-    color:#ddd;
-}
+.dropdown-menu, .breadcrumb, .nav-tabs * {  background-color: transparent !important; border:0 }
+.auth-icon32, .missing-user96, .missing-user27{background: none; border:0}
 
-#importDetails{
-    border-color:#ddd;
-}
 
 .navbar .brand, .navbar .brand a{
     color:#eee !important;
@@ -29,9 +32,6 @@ a, #content, #beforeContent{
    color:#eee;
 }
 
-.breadcrumb {
-    background-color: none;
-}
 .row.table-header > div {
     border-bottom: none;
     background-color: none;

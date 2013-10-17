@@ -17,7 +17,16 @@
             {#add_date}
               <span class="updated"  title='{@timeStamp time="{.}" format="YYYY-MM-DD HH:mm" /}' >, {@timeFromNow time="{.}"/}</span>
             {/add_date}
-            <input type="checkbox" class="excluded" {#excluded}{:else}checked="checked"{/excluded} >
+            {#imported}
+                <i class="icon-ok"></i>
+            {:else}
+                <input type="checkbox" class="excluded" {#excluded}{:else}checked="checked"{/excluded} >
+            {/imported}
+
+          {:else}
+              {#imported}
+                 <i class="icon-ok"></i>
+              {/imported}
           {/folder}
       </div>
       <div class="links-cont span8"></div>
