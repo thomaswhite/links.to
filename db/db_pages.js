@@ -17,14 +17,24 @@ box.on('db.init', function( monk, Config, done ){
         , Pages = box.db.coll.pages = monk.get('pages')
         ;
 
-    box.on('page.save', function( HTML, uri, url_id,  callback){
-        Pages.insert(  {
+    Pages.index('url'); // ,  { unique: true }
+
+
+    box.on('page.save', function( HTML, URL, canonicalURL, url_id,  callback){
+        var page =          {
                 url_id: url_id,
-                uri: uri,
                 updated : new Date(),
-                html : HTML
-            },
-            function( err, added_page){
+                html : HTML,
+                urls:[],
+                url : URL
+            };
+        if( canonicalURL ){
+            page.url = canonicalURL;
+            page.canonical = true;
+            page.urls = [URL]
+        }
+
+        Pages.insert( page,  function( err, added_page){
                 if( err ){
                     callback(err);
                 }else{
@@ -38,12 +48,21 @@ box.on('db.init', function( monk, Config, done ){
                     );
                 }
             }
-
         );
     });
 
     box.on('page.get', function( id,  callback){
         Pages.findById(id, callback);
+    });
+
+    box.on('page.find', function( url, canonicalURL, callback){
+        Pages.findOne(
+            {$or : [
+                {url: url },
+                {url:canonicalURL}
+            ]},
+            { fields:{url:false} },
+            callback  );
     });
 
     process.nextTick(function() {

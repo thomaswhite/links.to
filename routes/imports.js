@@ -241,35 +241,41 @@ function perform_import( Import_id, user, req ){
         oImport;
 
     function import_folder( oFolder, done ){
-        var folderInfo = {_id:oFolder._id, title: oFolder.title, parent: oFolder.parent};
         if( oFolder.folder.this_links ){
-            req.io.emit('import.collection-start', _.merge( { status:'start', progress:0}, folderInfo));
-            jobs.create('import-folder', {folder:oFolder, user:user })
-                .on('complete', function(){
-                    req.io.emit('import.collection-end', _.merge( { status:'end', progress:100, imported:true}, folderInfo));
-                    req.io.emit('import.process-progress', {done:aReady.length, total:aFolders.length});
-                    aReady.push(this.data.folder._id );
-                    box.emit('import.mark-as-imported', oFolder );
-                    if( aFolders.length == aReady.length ){
-                        box.invoke('import.get', Import_id, function( err, oImport){
-                            req.io.emit('import.process-end', _.merge( { status:'end'}, oImport ));
-                            aFolders = aReady = oImport = null;
+            box.emit('add_collection', user, oFolder.title, oFolder.description || '', function(err, collection ) {
+                if( err ){
+                    done(err);
+                }else{
+                    var folderInfo = {_id:collection._id, title: collection.title, parent: oFolder.parent, folder_id:oFolder._id};
+                    req.io.emit('import.collection-start', _.merge( { status:'start', progress:0}, folderInfo));
+                    jobs.create('import-folder', { folder:oFolder, user:user, coll:collection })
+                        .on('complete', function(){
+                            req.io.emit('import.collection-end', _.merge( { status:'end', progress:100, imported:true}, folderInfo));
+                            req.io.emit('import.process-progress', {done:aReady.length, total:aFolders.length});
+                            aReady.push(this.data.folder._id );
+                            box.emit('import.mark-as-imported', oFolder );
+                            if( aFolders.length == aReady.length ){
+                                box.invoke('import.get', Import_id, function( err, oImport){
+                                    req.io.emit('import.process-end', _.merge( { status:'end'}, oImport ));
+                                    aFolders = aReady = oImport = null;
+                                });
+                            }
+                        })
+                        .on('failed', function(){
+                            req.io.emit('import.collection-error', _.merge( { status:'error', progress:0}, folderInfo));
+                        })
+                        .on('progress', function(progress){
+                            req.io.emit('import.collection-progress', _.merge( { status:'progress', progress: progress}, folderInfo));
+                            process.stdout.write('\r  job #' + this.id + '.' + this.type + ' ' + progress + '% complete');
+                        })
+                        .priority('high')
+                        .save( function( err, result ){
+                            process.nextTick(function(){
+                                done(err, oFolder.folder.full_path); // go back to the async queue even if the folder is not processed.
+                            });
                         });
-                    }
-                })
-                .on('failed', function(){
-                    req.io.emit('import.collection-error', _.merge( { status:'error', progress:0}, folderInfo));
-                })
-                .on('progress', function(progress){
-                    req.io.emit('import.collection-progress', _.merge( { status:'progress', progress: progress}, folderInfo));
-                    process.stdout.write('\r  job #' + this.id + '.' + this.type + ' ' + progress + '% complete');
-                })
-                .priority('high')
-                .save( function( err, result ){
-                    process.nextTick(function(){
-                        done(err, oFolder.folder.full_path); // go back to the async queue even if the folder is not processed.
-                    });
-                });
+                }
+            })
         }else{
             process.nextTick( done );
         }

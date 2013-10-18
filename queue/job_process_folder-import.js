@@ -18,56 +18,51 @@ module.exports = {
             }else{
                 //job.progress(0, Links.length );
                 var oData = job.data
+                    , collection = oData.coll
                     , req = job.req
                     , aLinks = []
                     , Error = null
                     ;
 
-                // Add a collection for this folder, event captured in collections.js
-                box.emit('add_collection', job.data.user, job.data.folder.title, job.data.folder.description || '', function(err, collection ) {
-                    if( err ){
-                        done(err);
-                    }else{
-                        function import_link(link, done){
-                            //req.io.emit('import.link-start', { status:'start', link:link }  );
-                            box.Jobs.create('import-link', {link:link, user:oData.user, collectionID: collection._id })
-                                .on('complete', function(){
-                                    aLinks.push( {  link_id: this.data.link._id });
-                                    var link = this.data.link;
-                                    job.progress(aLinks.length, Links.length);
-                                    if( aLinks.length == Links.length ){
-                                        Done( Error, {
-                                            collectionID : this.data.collectionID,
-                                            folderID : job.data.folder._id,
-                                            links: aLinks
-                                        });
-                                    }
-                                })
-                                .on('failed', function(a){
-                                    aLinks.push( this.data.link._id );
-                                })
-                                .priority('medium')
-                                //.save( done )
-                                .save( function( err, result ){
-                                    process.nextTick(function(){
-                                        done(err);
-                                    });
+                function import_link(link, done){
+                    //req.io.emit('import.link-start', { status:'start', link:link }  );
+                    box.Jobs.create('import-link', {link:link, user:oData.user, collectionID: collection._id })
+                        .on('complete', function(){
+                            aLinks.push( {  link_id: this.data.link._id });
+                            var link = this.data.link;
+                            job.collection_id = collection._id;
+                            job.progress(aLinks.length, Links.length);
+                            if( aLinks.length == Links.length ){
+                                Done( Error, {
+                                    collectionID : this.data.collectionID,
+                                    folderID : job.data.folder._id,
+                                    links: aLinks
                                 });
-
-                            ;
-                        }
-                        async.mapLimit(Links, 10, import_link,
-                            function(err, links_results){
-                                // links_results contain list of folder/links
-                                if( err ){
-                                    console.warn( err );
-                                    Error = err;
-                                }
-                                // Done( err, collection);
                             }
-                        );
+                        })
+                        .on('failed', function(a){
+                            aLinks.push( this.data.link._id );
+                        })
+                        .priority('medium')
+                        //.save( done )
+                        .save( function( err, result ){
+                            process.nextTick(function(){
+                                done(err);
+                            });
+                        });
+
+                    ;
+                }
+                async.mapLimit(Links, 10, import_link,
+                    function(err, links_results){
+                        // links_results contain list of folder/links
+                        if( err ){
+                            console.warn( err );
+                            Error = err;
+                        }
+                        // Done( err, collection);
                     }
-                });
+                );
             }
         });
     }

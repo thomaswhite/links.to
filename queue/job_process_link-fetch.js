@@ -118,15 +118,28 @@ module.exports = {
                                                 Done(err );
                                         });
                                     }else{
-                                        URL = canonicalURL || URL;
-                                        box.invoke( 'page.save', page_HTML, URL, o.Url._id, function(err, added_page ){
+                                        box.invoke('page.find', URL, canonicalURL, function(err, Page ){
                                             if( err ){
                                                 Done(err, 'page.save');
-                                            }else{
-                                                box.invoke( 'pageScrape', URL, page_HTML, function(err, page_Parts ){
-                                                    box.invoke('url.update-display-queued_and_new-links', o.Url._id, {display:linkDisplay.update( page_Parts )}, function(err, oUpdated_URL, number_of_updated_links){
-                                                        Done( err );
+                                            }else if( Page ){
+                                                box.on('url.update-fast', {page_id:Page._id}, function(err, i){
+                                                    box.invoke( 'pageScrape', URL, page_HTML, function(err, page_Parts ){
+                                                        box.invoke('url.update-display-queued_and_new-links', o.Url._id, {display:linkDisplay.update( page_Parts )}, function(err, oUpdated_URL, number_of_updated_links){
+                                                            Done( err );
+                                                        });
                                                     });
+                                                });
+                                            }else{
+                                                box.invoke( 'page.save', page_HTML, URL, canonicalURL, o.Url._id, function(err, added_page ){
+                                                    if( err ){
+                                                        Done(err, 'page.save');
+                                                    }else{
+                                                        box.invoke( 'pageScrape', URL, page_HTML, function(err, page_Parts ){
+                                                            box.invoke('url.update-display-queued_and_new-links', o.Url._id, {display:linkDisplay.update( page_Parts )}, function(err, oUpdated_URL, number_of_updated_links){
+                                                                Done( err );
+                                                            });
+                                                        });
+                                                    }
                                                 });
                                             }
                                         });

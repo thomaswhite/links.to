@@ -94,6 +94,10 @@ box.on('db.init', function( monk, Config, done ){
     box.on('url.update', function( id, oURL, callback ){
         URLs.updateById( id, { $set:oURL }, { safe: true }, callback );
     });
+    box.on('url.update-fast', function( id, oURL, callback ){
+        URLs.updateById( id, { $set:oURL }, { safe: false }, callback );
+    });
+
 
     box.on('url.update-display-queued_and_new-links', function( id, toUpdate, callback ){
         toUpdate.updated = new Date();

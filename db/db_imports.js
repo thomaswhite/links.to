@@ -108,9 +108,10 @@ box.on('db.init', function( monk, Config, done ){
     });
 
     box.on('import.mark-as-imported', function( oFolder, callback){
-        Imports.updateById(oFolder._id, {$set:{imported:true}}, {safe:false} );
+        var now = new Date();
+        Imports.updateById(oFolder._id, {$set:{imported:now}}, {safe:false} );
         Imports.updateById(oFolder.importID, {$inc:{foldersImported:1, linksImported: oFolder.folder.this_links}}, {safe:false} );
-        Imports.update( { importID:oFolder.importID,  parent: new RegExp('^' + oFolder.folder.full_path, 'i')}, {$set:{imported:true}}, { safe:false, multi : true });
+        Imports.update( { importID:oFolder.importID,  parent: new RegExp('^' + oFolder.folder.full_path, 'i')}, {$set:{imported:now}}, { safe:false, multi : true });
     });
 
 
@@ -147,7 +148,7 @@ box.on('db.init', function( monk, Config, done ){
 
     box.on('import.folders', function( import_id,  callback){
         Imports.find(
-            {importID: Imports.col.ObjectID(import_id), excluded: false, imported:false, folder: { $exists: true} },
+            {importID: Imports.col.ObjectID(import_id), excluded: false, imported:{ $exists: false}, folder: { $exists: true} },
             { sort:{ parent:1, add_date:-1,  last_modified:-1 }},
             callback
         );

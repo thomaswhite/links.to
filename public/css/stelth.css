@@ -37,18 +37,14 @@ input
     background-color: none;
 }
 
-.input-append input{
+div.tab-content,
+.input-append input,
+.btn
+{
     background: none;
 }
 
-.btn{
-    background: none;
-}
-
-.my-collection {
-    color: inherit;
-}
-
+.my-collection,
 a.deleteIcon:link, a.deleteIcon:visited, a.deleteIcon:hover, a.deleteIcon:active {
     color: inherit;
 }
