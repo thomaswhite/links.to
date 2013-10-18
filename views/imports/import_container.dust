@@ -5,8 +5,9 @@
         <h1 class="eip" id="title"><span class="coll-title-prefix">Import </span> {title}</h1>
         <p>Size:{import.size}, uploaded on {@timeStamp time="{import.created}" format="YYYY-MM-DD HH:mm" /}, {@timeFromNow time="{import.created}"/}</p>
         <span id="importBtn">
-        <a class="btn btn-danger btn-small"  href="/imports/{import._id}/delete?back=/imports"><i class="icon-trash icon-white"></i> Delete</a>
-        <a class="btn btn-primary btn-small import-btn"  href="#"><i class="icon-play icon-white"></i>&nbsp;Import</a>
+            <a class="btn btn-danger btn-small"  href="/imports/{import._id}/delete?back=/imports"><i class="icon-trash icon-white"></i> Delete</a>
+            <a class="btn btn-primary btn-small import-btn"  href="#"><i class="icon-play icon-white"></i>&nbsp;Import</a>
+            <br/><input type="checkbox" id="fetch_links"><label for="fetch_links">Fetch all links.</label>
         </span>
         <span id="processBtn" style="display:none">
         <a class="btn btn-danger btn-small"  href="#" id="cancelImport"><i class="icon-stop icon-white"></i> Cancel</a>

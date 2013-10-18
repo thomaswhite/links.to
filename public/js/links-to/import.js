@@ -49,7 +49,7 @@ function get_import_parts(dom){
 }
 
 
-$(document).ready(function() {
+head.ready(function() {
     $('body')
         .on('click', '.coll-title', function(event){
             var o = get_import_parts(this);
@@ -112,9 +112,9 @@ $(document).ready(function() {
             $('#processBtn').show();
             $('#content').empty();
 
-
             socket.emit('imports:process', {
-                id   : pageParam.id
+                id   : pageParam.id,
+                fetch_links: $('#fetch_links').is(':checked')
             }, function( response ){
                 if (!response.success){
                     debug.error('Bad import', response);
@@ -147,7 +147,6 @@ $(document).ready(function() {
         debug.log ( 'import.process-start:', data );
         $('#tab-imported').trigger('click');
     });
-
     socket.on('import.process-progress', function(data){
         debug.log ( 'import.process-progress:', data );
     });

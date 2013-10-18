@@ -12,6 +12,7 @@
         "/js/edit-in-place.js",
         "/js/tw-textarea-autoGrow.js",
         "/js/autoGrowInput.js"
+        , "/js/links-to/collection.js"
         //, "/js/collection-link-edit.js"
       );
     </script>

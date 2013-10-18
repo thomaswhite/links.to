@@ -315,7 +315,15 @@ box.on('init.attach', function (app, config,  done) {
                    req.io.emit('collection.deleted', {param:req.data, result:result} );
                });
            }
+       },
+
+       fetchNotReadyLinks: function(req){
+           req.io.respond({
+               result:'ok',
+               request:req.data
+           });
        }
+
     });
 
 

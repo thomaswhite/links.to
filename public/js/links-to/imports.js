@@ -6,7 +6,7 @@
  */
 
 
-$(document).ready(function() {
+head.ready(function() {
     $('body')
         .on('change', '.fakeFileCont input:file', function(){
             var $this = $(this);

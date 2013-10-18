@@ -34,7 +34,7 @@ input
 
 .row.table-header > div {
     border-bottom: none;
-    background-color: none;
+    background-color: transparent;
 }
 
 div.tab-content,

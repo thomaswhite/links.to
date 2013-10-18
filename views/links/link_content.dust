@@ -1,4 +1,4 @@
-<div class="row link-title {^images.length}noImg{/images.length}">
+<div class="row link-title {^images.length}noImg{/images.length} {@ne key="{state}" value="ready"}notReady{/ne}" data-id="{_id}">
     {#display}
         <div class="span8 link-content">
             {?thumbnail}

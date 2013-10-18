@@ -24,7 +24,7 @@ module.exports = {
                     updated: link.last_modified,
                     origin:'imported',
                     owner_screen_name: user.screen_name,
-                    do_not_fetch: job.data.do_not_fetch
+                    do_not_fetch: !job.data.fetch_links
             }
         ;
         // todo imported_from will be removed after the import becomes stable

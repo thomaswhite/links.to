@@ -235,7 +235,7 @@ function Get_One (req, res) {
 
 // link:link, user:oData.user, collectionID: collection._id
 
-function perform_import( Import_id, user, req ){
+function perform_import( Import_id, fetch_links, user, req ){
     var aReady = [],
         aFolders,
         oImport;
@@ -248,7 +248,7 @@ function perform_import( Import_id, user, req ){
                 }else{
                     var folderInfo = {_id:collection._id, title: collection.title, parent: oFolder.parent, folder_id:oFolder._id};
                     req.io.emit('import.collection-start', _.merge( { status:'start', progress:0}, folderInfo));
-                    jobs.create('import-folder', { folder:oFolder, user:user, coll:collection })
+                    jobs.create('import-folder', { folder:oFolder, user:user, coll:collection, fetch_links: fetch_links })
                         .on('complete', function(){
                             req.io.emit('import.collection-end', _.merge( { status:'end', progress:100, imported:true}, folderInfo));
                             req.io.emit('import.process-progress', {done:aReady.length, total:aFolders.length});
@@ -386,7 +386,7 @@ box.on('init.attach', function (app, config,  done) {
                    go_to:'/coll'
                });
            }else{
-               perform_import( req.data.id, User, req );
+               perform_import( req.data.id, req.data.fetch_links, User, req );
            }
        }
     });

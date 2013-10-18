@@ -695,6 +695,10 @@ h5 {
   float: left;
   margin-right: .5em;
 }
+.label {
+  display: inline-block !important;
+  vertical-align: middle;
+}
 a.deleteIcon:link,
 a.deleteIcon:visited,
 a.deleteIcon:hover,
