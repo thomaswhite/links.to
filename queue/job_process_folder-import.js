@@ -26,7 +26,7 @@ module.exports = {
 
                 function import_link(link, done){
                     //req.io.emit('import.link-start', { status:'start', link:link }  );
-                    box.Jobs.create('import-link', {link:link, user:oData.user, collectionID: collection._id })
+                    box.Jobs.create('import-link', { import_id: job.data.import_id, link:link, user:oData.user, collectionID: collection._id })
                         .on('complete', function(){
                             aLinks.push( {  link_id: this.data.link._id });
                             var link = this.data.link;

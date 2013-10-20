@@ -69,6 +69,30 @@ box.on('init', function (App, Config, done) {
         jobs_id.push(j.id);
     }
 
+    box.on('cancel-import-tasks', function( import_id,  callback){
+        jobs.active(function(err, aJobs){
+                if( err ){
+                    console.error( err );
+                }else if( aJobs ){
+                    debug('Cancel Import jobs:');
+                    aJobs.forEach(function(id){
+                        kue.Job.get(id, function(err, job){
+                            if( job.data.import_id && job.data.import_id == import_id ){
+                                kue.Job.remove(id, function(err,r){
+                                    var dummy = 1;
+                                });
+                                debug("Cancel import job ", job);
+                            }else{
+                                debug("Error canceling import job ", job);
+                            }
+                        });
+                    });
+                    callback( null );
+                }
+        });
+    });
+
+
     box.utils.later( done, null,  'plugin "KUE" initialised. Jobs registered:', jobs_id );
   /*  process.nextTick(function() {
         done(null, 'plugin "KUE" initialised. Jobs registered:' + jobs_id.join(', '));

@@ -80,6 +80,9 @@ module.exports = {
                       },
                 Url : function(cb){
                        box.invoke('url.get', job.data.url_id, cb );
+                },
+                Page: function(cd){
+                    box.invoke('page.find', URL, null, cb );
                 }
             },
             function(err, o){
@@ -88,54 +91,67 @@ module.exports = {
                 }else if(o.Link.state == 'ready' ){ // queued and the URL become ready before this job was called
                     Done( null );
                 }else if(o.Link.state == 'queued'){
-                    if(o.Url.state == 'ready'){ // 1.1
+                    if(o.URL.state == 'ready'){ // 1.1
                         update_link_display(o.Link, o.Url, Done );
                     }else {
                         // 1.2 this event will be fired when the URL is ready. It will update the .display section of all links that are in state "queued"
-                        //box.once( '' + o.Url._id, Done );
+                        //box.once( '' + o.URL._id, Done );
                         Done( 'still not ready' ); // fail the job so it will check later of the oURL is ready
                     }
                 }else{ // 2 o.Link.state == 'new'
-                    if(o.Url.state == 'ready'){
+                    if(o.URL.state == 'ready'){
                         update_link_display(o.Link, o.Url, Done );
+                    }else if( Page ){
+                        box.invoke('url.set-page-id', o.URL._id, o.Page._id, function(err, i){
+                            box.invoke( 'pageScrape', URL, Page.html, function(err, page_Parts ){
+                                box.invoke('url.update-display-queued_and_new-links', o.URL._id, {display:linkDisplay.update( page_Parts )}, function(err, oUpdated_URL, number_of_updated_links){
+                                    Done( err );
+                                });
+                            });
+                        });
                     }else {
-                       // 2.2 fetching
+                         // 2.2 fetching
+
+                         // job.data.do_not_fetch
                         request(request_options, function (err, response, page_HTML) {
                             if( err || response.statusCode != 200 ){
                                 var notFound = {
                                     statusCode: response ? response.statusCode : -1 ,
-                                    url: o.Url.url
+                                    url: o.URL.url
                                 };
-                                box.invoke('url.update-display-queued_and_new-links', o.Url._id, make_link_display( null, notFound  ), function(err2, oUpdated_URL, number_of_updated_links){
+                                box.invoke('url.update-display-queued_and_new-links', o.URL._id, make_link_display( null, notFound  ), function(err2, oUpdated_URL, number_of_updated_links){
                                     Done( err2 );
                                 });
                             } else{
                                 var canonicalURL = linkDisplay.find_canonical_url('' + page_HTML);
                                 box.emit('url.check-url', canonicalURL, function(err, found_same_url_oURL ){
                                     if( found_same_url_oURL ){
-                                        box.invoke('url.add-link-ids', found_same_url_oURL._id, [o.Link._id].concat(o.Url.links ), false, function(err, how_many_were_updated ){
-                                                box.emit('url.delete', o.Url._id );
+                                        box.invoke('url.add-link-ids', found_same_url_oURL._id, [o.Link._id].concat(o.URL.links ), false, function(err, how_many_were_updated ){
+                                            box.emit('url.delete', o.URL._id );
+                                            box.invoke('url.update-display-queued_and_new-links', found_same_url_oURL._id, null, function( err, oURL_updated, updated_links_number){
                                                 Done(err );
+                                            });
+
                                         });
                                     }else{
-                                        box.invoke('page.find', URL, canonicalURL, function(err, Page ){
+                                        box.invoke('page.find', null, canonicalURL, function(err, Page ){
                                             if( err ){
                                                 Done(err, 'page.save');
                                             }else if( Page ){
-                                                box.on('url.update-fast', {page_id:Page._id}, function(err, i){
-                                                    box.invoke( 'pageScrape', URL, page_HTML, function(err, page_Parts ){
-                                                        box.invoke('url.update-display-queued_and_new-links', o.Url._id, {display:linkDisplay.update( page_Parts )}, function(err, oUpdated_URL, number_of_updated_links){
+                                                box.invoke('url.set-page-id', o.URL._id, Page._id, function(err, i){
+                                                    box.invoke( 'pageScrape', URL, Page.html, function(err, page_Parts ){
+                                                        box.invoke('url.update-display-queued_and_new-links', o.URL._id, {display:linkDisplay.update( page_Parts )}, function(err, oUpdated_URL, number_of_updated_links){
                                                             Done( err );
                                                         });
                                                     });
                                                 });
                                             }else{
-                                                box.invoke( 'page.save', page_HTML, URL, canonicalURL, o.Url._id, function(err, added_page ){
+                                                box.invoke( 'page.save', page_HTML, URL, canonicalURL, o.URL._id, function(err, added_page ){
                                                     if( err ){
                                                         Done(err, 'page.save');
                                                     }else{
                                                         box.invoke( 'pageScrape', URL, page_HTML, function(err, page_Parts ){
-                                                            box.invoke('url.update-display-queued_and_new-links', o.Url._id, {display:linkDisplay.update( page_Parts )}, function(err, oUpdated_URL, number_of_updated_links){
+                                                            box.invoke('url.update-display-queued_and_new-links', o.URL._id, {display:linkDisplay.update( page_Parts )}, function(err, oUpdated_URL, number_of_updated_links){
                                                                 Done( err );
                                                             });
                                                         });

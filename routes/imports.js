@@ -248,7 +248,7 @@ function perform_import( Import_id, fetch_links, user, req ){
                 }else{
                     var folderInfo = {_id:collection._id, title: collection.title, parent: oFolder.parent, folder_id:oFolder._id};
                     req.io.emit('import.collection-start', _.merge( { status:'start', progress:0}, folderInfo));
-                    jobs.create('import-folder', { folder:oFolder, user:user, coll:collection, fetch_links: fetch_links })
+                    jobs.create('import-folder', { import_id:Import_id, folder:oFolder, user:user, coll:collection, fetch_links: fetch_links })
                         .on('complete', function(){
                             req.io.emit('import.collection-end', _.merge( { status:'end', progress:100, imported:true}, folderInfo));
                             req.io.emit('import.process-progress', {done:aReady.length, total:aFolders.length});

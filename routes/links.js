@@ -111,13 +111,9 @@ function link_add( url, collectionID, param, oLink, extra, Done ){
 }
 
 
-function job_fetch_link( url, link_id,  url_id, Done ){
-    jobs.create('link-fetch', {
-        url:url,
-        url_id: url_id,
-        link_id : link_id,
-        default_request_settings: config.request
-       })
+function job_fetch_link( param, Done ){
+    param.default_request_settings = config.request;
+    jobs.create('link-fetch', param )
         .on('complete', Done )
         .on('failed',   function(err) {
             Done('job-error' );
@@ -133,15 +129,24 @@ function job_fetch_link( url, link_id,  url_id, Done ){
         });
 }
 
-
+/**
+ *
+ * @param url
+ * @param collectionID
+ * @param param
+ * @param oLink if we have prepared oLink object somewhere else
+ * @param extra extra fieleds to be added to the oLink
+ * @param Done
+ */
 function link_process( url, collectionID, param, oLink, extra, Done ){
+    param = param || {};
     link_add( url, collectionID, param, oLink, extra, function(err, oLink, oURL){
         if( err ){
             Done(err);
         }else if( oLink.state == 'ready' || param.do_not_fetch ){
             Done( null, oLink, oURL );
         }else{
-            job_fetch_link( url, oLink._id,  oURL._id, function(err){
+            job_fetch_link(_.merge({ url:url, link_id : oLink._id, url_id: oURL._id }, param), function(err){
                 if( err ){
                     Done(err);
                 }else{

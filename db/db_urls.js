@@ -23,6 +23,39 @@ function new_url( url, link_id, extra ){
     return _.merge( url2save, extra );
 }
 
+function update_links_display( id, all, callback ){
+    URLs.findById( id, function( err, oURL ){
+        if( err ){
+            callback(err);
+        }else{
+            var oUpdate = { $set: {
+                    display :  oURL.display,
+                    updated : new Date(),
+                    state   : 'ready'
+                }}
+                , condition = {
+                    _id : { $in: oURL.links},
+                    $or : [
+                        {state: 'queued'  },
+                        {state: 'new' }
+                    ]
+                }
+            ;
+            if( all ){
+                delete condition.$or;
+            }
+            box.db.coll.links.update(
+                condition,
+                oUpdate,
+                { multi : true },
+                function( err, updated ){
+                    callback(err, oURL, updated );
+                }
+            );
+        }
+    });
+}
+
 box.on('db.init', function( monk, Config, done ){
     var URLs = box.db.coll.urls = monk.get('urls');
 
@@ -55,6 +88,9 @@ box.on('db.init', function( monk, Config, done ){
     // TODO: DO not delete URL thst is used in any active link
     box.on('url.delete', function( url_id, callback){
         URLs.remove( {_id: url_id || -1 }, { safe: false } );
+        if( typeof callback == 'function'){
+            callback();
+        }
     });
 
     box.on('url.get', function( id,  callback){
@@ -98,6 +134,11 @@ box.on('db.init', function( monk, Config, done ){
         URLs.updateById( id, { $set:oURL }, { safe: false }, callback );
     });
 
+    box.on('url.set-page-id', function( id, page_id, callback ){
+        URLs.updateById( id, { $set: {page_id:page_id }}, { safe: false });
+        box.db.coll.pages.updateById(  page_id, { $set:{url_id: URLs.col.ObjectID(id)}},{ safe: false });
+        callback(null);
+    });
 
     box.on('url.update-display-queued_and_new-links', function( id, toUpdate, callback ){
         toUpdate.updated = new Date();
@@ -105,34 +146,22 @@ box.on('db.init', function( monk, Config, done ){
 
         var oUpdate = { $set: toUpdate };
 
-
-        URLs.updateById( id, oUpdate, function(err, n){
-            if( err ){
-                callback(err);
-            }else{
-                URLs.findById( id, function( err, oURL ){
-                    if( err ){
-                        callback(err);
-                    }else{
-                        box.db.coll.links.update(
-                            {_id : { $in: oURL.links},
-                                $or : [
-                                    {state: 'queued'  },
-                                    {state: 'new' }
-                                ]
-                            },
-                            oUpdate,
-                            { multi : true },
-                            function( err, updated ){
-                               callback(err, oURL, updated );
-                            }
-                        );
-                    }
-                });
-            }
-        });
+        if( toUpdate ){
+            URLs.updateById( id, oUpdate, function(err, n){
+                if( err ){
+                    callback(err);
+                }else{
+                    update_links_display( id, false, callback);
+                }
+            });
+        }else{
+            update_links_display( id, false, callback);
+        }
     });
 
+    box.on('url.update-links', function( id, all, callback ){
+        update_links_display( id, all, callback);
+    });
 
     box.on('url.add-link-ids', function( id, aLinks, returnUpdated, callback){
         URLs.updateById( id,
