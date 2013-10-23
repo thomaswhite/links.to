@@ -92,9 +92,11 @@ function request_files_in_directory(dir){
     var plugins = [];
     new glob( dir + '/*.js' , { sync:true, cache:true, nosort :true}, function (err, files ) {
         for(var i=0; files && i < files.length; i++){
-            plugins.push(
-                require(path.resolve(files[i]))
-            );
+            var r = require(path.resolve(files[i]));
+            if( typeof r.init == 'function'){
+                r.init(config);
+            }
+            plugins.push( r );
         }
     });
     return plugins;

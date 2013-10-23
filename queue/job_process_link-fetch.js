@@ -13,7 +13,7 @@ var job_id = 'link-fetch'
     , request = require('request')
     , _ = require('lodash')
     , linkDisplay = require('../lib/link-make-display')
-
+    , config
 ;
 
 function make_link_display( oURL, oURL2){
@@ -46,10 +46,12 @@ function update_link_display( oLink, oURL, done ){
 }
 
 
-
-
-module.exports = {
+    module.exports = {
     id : job_id,
+
+    init: function(Config){
+        config = Config;
+    },
 
     /**
      * At this moment we have oLink and oURL.
@@ -71,7 +73,7 @@ module.exports = {
      */
 
     processor : function (job, Done){
-        var sURL = job.data.url, request_options = _.merge( {}, job.data.default_request_settings, {uri:sURL, jar:request.jar()  });
+        var sURL = job.data.url, request_options = _.merge( {}, config.request.default_request_settings, {uri:sURL, jar:request.jar()  });
         async.parallel({
 //                       Link: async.apply( box.invoke, 'link.get', job.data.link_id ),
 //                       Url:  async.apply( box.invoke, 'url.get', job.data.url_id )
