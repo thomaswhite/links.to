@@ -48,14 +48,14 @@ var pages = {
         routeIO:'collection:remove',
         closest:'.row',
         id_prefix:'coll_',
-        eventDone:'collectionDelete'
+        eventDone:'slideUpDeleted'
     },
 
     '/link/delete':{
         routeIO:'link:remove',
         closest:'.blocked-link',
         id_prefix:'link_',
-        eventDone:'collectionDelete'
+        eventDone:'slideUpDeleted'
     },
     '/link/new':{
         routeIO:'link:add',
@@ -70,6 +70,14 @@ var pages = {
             containerID:'#grid',
             contentAction:'prepend'
         }
+    },    
+    '/link/updated':{
+        interactive:false,  // used in fetchNorReadyLinks 
+        routeIO:'link:add',
+        tempateID:'links/link',
+        //containerID:'!_id',
+        contentAction:'$replace',
+        eventDone:'linkUpdated'
     }
 };
 
@@ -86,6 +94,9 @@ function page_context(that, event, context, route ){
 
     page    = pages[route];
 
+    if( !page ){
+        throw 'Missing route:' + route;
+    }
     o =  {
         page       : page,
         data       : context,

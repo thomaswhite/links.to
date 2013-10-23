@@ -7,6 +7,7 @@
 var box = require('../lib/box')
     , _ = require('lodash')
     ,  util = require('util')
+    , async = require('async')
     , debug = require('debug')('linksTo:view.collections')
     , breadcrumbs = require('./../lib/breadcrumbs.js')
     , ShortId  = require('shortid').seed(96715)
@@ -318,10 +319,52 @@ box.on('init.attach', function (app, config,  done) {
        },
 
        fetchNotReadyLinks: function(req){
-           req.io.respond({
-               result:'ok',
-               request:req.data
+
+           var resp_param = _.merge({}, req.data);
+           delete resp_param.notReadyID;
+           box.invoke('link.ids-for-fetch', req.data.notReadyID || [], function(err, aLinks) {
+               if( err ){
+                   done(err);
+               }else{
+                   async.mapLimit(aLinks, 10,
+                       function(link, done){
+                           link.link_id = link._id;
+                           delete link._id;
+                           box.invoke('link.fetch',  link, function(err, o){
+                                if(err){
+                                    done(err);
+                                }else{
+                                    box.invoke('link.get', link.link_id, function(err, oLink){
+                                        req.io.emit( 'link.updated', {
+                                            result:'ok',
+                                            param: resp_param,
+                                            link: oLink
+                                        });
+                                        done(null, oLink  );
+                                    });
+                                }
+                           });
+                       },
+                       function(err, links_results){
+                           // links_results contain list of links_id
+                           if( err ){
+                               console.warn( err );
+                               Error = err;
+                           }else{
+                               req.io.respond({
+                                   result:'ok',
+                                   request:req.data,
+                                   data: links_results
+                               });
+
+                           }
+                           // Done( err, collection);
+                       }
+                   );
+               }
            });
+
+
        }
 
     });

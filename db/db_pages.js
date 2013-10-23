@@ -56,13 +56,19 @@ box.on('db.init', function( monk, Config, done ){
     });
 
     box.on('page.find', function( url, canonicalURL, callback){
-        Pages.findOne(
-            {$or : [
+        var condition = null;
+        if( url && canonicalURL ){
+            condition =  {$or : [
                 {url: url },
                 {url:canonicalURL}
-            ]},
-            { fields:{url:false} },
-            callback  );
+            ]};
+        }else if( url ){
+            condition =  { url: url };
+        }else if( canonicalURL ){
+            condition =  { url: canonicalURL };
+        }
+
+        Pages.findOne( condition,  callback  ); //  { fields:{url:false} },
     });
 
     process.nextTick(function() {

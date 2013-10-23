@@ -9,6 +9,7 @@
 var   box = require('../lib/box')
     , debug = require('debug')('linksTo:db:urls')
     , _ = require('lodash')
+    , URLs
     ;
 
 
@@ -24,6 +25,9 @@ function new_url( url, link_id, extra ){
 }
 
 function update_links_display( id, all, callback ){
+    if( !id ){
+        throw 'Missing ID';
+    }
     URLs.findById( id, function( err, oURL ){
         if( err ){
             callback(err);
@@ -41,6 +45,11 @@ function update_links_display( id, all, callback ){
                     ]
                 }
             ;
+
+            if( !oURL.links.length ){
+                throw 'Missing links';
+            }
+
             if( all ){
                 delete condition.$or;
             }
@@ -56,8 +65,23 @@ function update_links_display( id, all, callback ){
     });
 }
 
+function add_link_ids( id, aLinks, returnUpdated, callback){
+    URLs.updateById( id,
+        {   $addToSet: {  "links" : { $each: aLinks} } },
+        function(err, u){
+            if( returnUpdated ){
+                URLs.findById(id, callback );
+            }else{
+                callback(err);
+            }
+        }
+    );
+};
+
+
+
 box.on('db.init', function( monk, Config, done ){
-    var URLs = box.db.coll.urls = monk.get('urls');
+    URLs = box.db.coll.urls = monk.get('urls');
 
     URLs.options.multi = true;
     URLs.index('url',  { unique: true });
@@ -98,13 +122,16 @@ box.on('db.init', function( monk, Config, done ){
     });
 
 
-    box.on('url.check-url', function( url, callback){
+    box.on('url.check-url', function( url, exclude_id, callback){
         if( !url ){
             process.nextTick(function() {
                 callback(null, null);
             });
         }else{
-            URLs.findOne( {url: url }, { fields:{links:false, page_id:false} }, callback  );
+            URLs.findOne(
+                {url: url, _id:{ $not: exclude_id } },
+           //  { fields:{links:false, page_id:false} },
+                callback  );
         }
     });
 
@@ -119,7 +146,7 @@ box.on('db.init', function( monk, Config, done ){
                     {url: url },
                     {original_url:url}
                 ]},
-                { fields:{links:false, page_id:false} },
+                // { fields:{links:false, page_id:false} },
                 function(err, oFound){
                     callback(err, oFound, oFound && url == oFound.url );
                 }
@@ -134,20 +161,16 @@ box.on('db.init', function( monk, Config, done ){
         URLs.updateById( id, { $set:oURL }, { safe: false }, callback );
     });
 
-    box.on('url.set-page-id', function( id, page_id, callback ){
-        URLs.updateById( id, { $set: {page_id:page_id }}, { safe: false });
-        box.db.coll.pages.updateById(  page_id, { $set:{url_id: URLs.col.ObjectID(id)}},{ safe: false });
-        callback(null);
+    box.on('url.set-page-id', function( id, page_id, callback  ){
+        box.db.coll.pages.updateById(  page_id, { $set:{url_id: id}},{ safe: false }); // URLs.col.ObjectID()
+        URLs.updateById( id, { $set: {page_id:page_id }}, callback );
     });
 
     box.on('url.update-display-queued_and_new-links', function( id, toUpdate, callback ){
-        toUpdate.updated = new Date();
-        toUpdate.state = 'ready';
-
-        var oUpdate = { $set: toUpdate };
-
         if( toUpdate ){
-            URLs.updateById( id, oUpdate, function(err, n){
+            toUpdate.updated = new Date();
+            toUpdate.state = 'ready';
+            URLs.updateById( id,  { $set: toUpdate }, function(err, n){
                 if( err ){
                     callback(err);
                 }else{
@@ -159,22 +182,8 @@ box.on('db.init', function( monk, Config, done ){
         }
     });
 
-    box.on('url.update-links', function( id, all, callback ){
-        update_links_display( id, all, callback);
-    });
-
-    box.on('url.add-link-ids', function( id, aLinks, returnUpdated, callback){
-        URLs.updateById( id,
-            {   $addToSet: {  "links" : { $each: aLinks} } },
-            function(err, u){
-                if( returnUpdated ){
-                    URLs.findById(id, callback );
-                }else{
-                    callback(err);
-                }
-            }
-        );
-    });
+    box.on('url.update-links', update_links_display );
+    box.on('url.add-link-ids', add_link_ids );
 
     // invoked
     box.on('url.add-link', function( url, newLink, callback){
@@ -189,41 +198,31 @@ box.on('db.init', function( monk, Config, done ){
             { fields:{links:false, page_id:false} },
             function(err, exisitng_URL ){
                 if( exisitng_URL ){
-                    URLs.update(
-                        { _id: exisitng_URL._id, "links" :{ $ne : link_id }},
-                        {  $push: {  "links" : link_id } },
-                        function( err, number_of_updated ){
-                            if( err ){
-                                callback( err );
-                            }else{
-                                var oUpdate = {
-                                    url_id  : exisitng_URL._id,
-                                    state   : 'queued'
-                                };
-                                if(  exisitng_URL.state == 'ready' ){
-                                    oUpdate.state   = 'ready';
-                                    oUpdate.display = exisitng_URL.display;
-                                }
-                                box.db.coll.links.updateById(  link_id, { $set:oUpdate},
-                                    function( err, result ){
-                                        callback(err, exisitng_URL, true ); // true indicates it is an existing URL
-                                    }
-                                );
+                    add_link_ids( exisitng_URL._id, [link_id], false, function(err){
+                        if( err ){
+                            callback( err );
+                        }else{
+                            var oUpdate = {
+                                url_id  : exisitng_URL._id,
+                                state   : 'queued'
+                            };
+                            if(  exisitng_URL.state == 'ready' ){
+                                oUpdate.state   = 'ready';
+                                oUpdate.display = exisitng_URL.display;
                             }
+                            box.db.coll.links.updateById(  link_id, { $set:oUpdate}, function( err, result ){
+                                 callback(err, exisitng_URL, true ); // true indicates it is an existing URL
+                            });
                         }
-                    );
+                    })
                 }else{
                     URLs.insert( new_url(url, link_id), function(err, insertedURL){
                         if( err ){
                             callback( err );
                         }else{
-                            box.db.coll.links.updateById(
-                                link_id,
-                                { $set: { url_id:insertedURL._id }},
-                                function( err, result ){
+                            box.db.coll.links.updateById( link_id, { $set: { url_id:insertedURL._id }}, function( err, result ){
                                     callback(err, insertedURL, false );
-                                }
-                            );
+                            });
                         }
                     });
                 }

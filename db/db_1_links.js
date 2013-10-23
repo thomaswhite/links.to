@@ -31,6 +31,7 @@ function new_link( url, collection_id, param, extra  ){
         created: param.add_date || new Date(),
         origin: param.origin || 'interactive',
         state:'new',
+        url:url,
         display:{
             title: param.title || url,
             title_type:'imported',
@@ -184,6 +185,18 @@ box.on('db.init', function( monk, Config, done ){
                  }
             });
         }
+    });
+
+
+
+    box.on('link.ids-for-fetch', function( aIDs, callback){
+        for(var i=0; i < aIDs.length; i++){
+            aIDs[i] = Links.col.ObjectID( aIDs[i] );
+        }
+        Links.find( { _id :  { $in :aIDs } },
+            { fields:{_id:true, url_id:true, state:true, url:true }},
+            callback
+        );
     });
 
 

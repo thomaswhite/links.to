@@ -34,9 +34,6 @@ socket.on('link.ready', function( data, x ){
     debug.log ('link.ready', data);
     //render("links/link", data.data.link, null, 0);
 });
-socket.on('link.saved', function( data ){
-    debug.log ('link.saved', data);
-});
 
 socket.on('link-not-found', function( data ){
     debug.log ('link-not-found', data);
@@ -52,9 +49,15 @@ socket.on('link-adding', function( data ){
     // display waiting sign
 });
 socket.on('link-added', function( data ){
-    debug.log ('link-added', added);
+    debug.log ('link-added', data);
     // replace the waiting sign with the new link content
 });
+socket.on('link.updated', function( data ){
+    debug.log ('link.updated', data);
+    // replace the waiting sign with the new link content
+});
+
+
 
 // ============================================================
 

@@ -116,7 +116,7 @@ function job_fetch_link( param, Done ){
     jobs.create('link-fetch', param )
         .on('complete', Done )
         .on('failed',   function(err) {
-            Done('job-error' );
+            Done('job-error', err );
         })
         .priority('normal')
         .attempts(100)
@@ -146,7 +146,7 @@ function link_process( url, collectionID, param, oLink, extra, Done ){
         }else if( oLink.state == 'ready' || param.do_not_fetch ){
             Done( null, oLink, oURL );
         }else{
-            job_fetch_link(_.merge({ url:url, link_id : oLink._id, url_id: oURL._id }, param), function(err){
+            job_fetch_link(_.merge(param, { url:url, link_id : oLink._id, url_id: oURL._id } ), function(err){
                 if( err ){
                     Done(err);
                 }else{

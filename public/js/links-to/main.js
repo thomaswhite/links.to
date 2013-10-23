@@ -61,20 +61,21 @@ function myRender(tempateID, data, $target, contentAction) {
 
 
 var pageEvents = {
-    renderContent:function(event, data, routeIO, Context){
-        Context = Context || page_context(null,null, routeIO);
+    renderContent:function(event, data, Context, routeIO){
+        //Context = Context || page_context(null,null, routeIO);
         myRender( Context.page.tempateID, data, Context.$container, Context.page.contentAction);
     },
 
-    collectionDelete:function(event, data, routeIO, Context){
-        Context = Context || page_context(null,null, routeIO);
+    slideUpDeleted:function(event, data, Context, routeIO){
         $('#' + Context.page.id_prefix + data.param.id ).slideUp(500, function(){
             $(this).remove();
         });
     },
-    insertLink:function(event, data, routeIO, Context){
-        Context = Context || page_context(null,null, routeIO);
+    insertLink:function(event, data, Context, routeIO){
         myRender( Context.page.tempateID, data, $("#token_" + data.param.token  ) , 'replace-slide'); // Context.page.contentAction
+    },
+    linkUpdated:function(event, data, Context, routeIO){
+        myRender( Context.page.tempateID, data.link, $("#link_" + data.link._id  ) , Context.page.contentAction); // Context.page.contentAction
     }
 };
 
@@ -135,10 +136,14 @@ function addDustHelpers(){
     };
 }
 
+/**
+ * Prepares the context needed for the event related to this route
+ * @param data
+ */
 function socketEvent_common(data){
     var Context = page_context( null,null, null, data.param.route );
     debug.log ( 'socketEvent_common, data:', data, ' context:', Context );
-    $('body').trigger(Context.page.eventDone, [ data, data.param.route, Context] );
+    $('body').trigger(Context.page.eventDone, [ data, Context, data.param.route ] );
 }
 
 function page_init() {
@@ -159,5 +164,6 @@ function page_init() {
     socket.on('collection.deleted', socketEvent_common);
     socket.on('link.deleted',       socketEvent_common);
     socket.on('link.saved',         socketEvent_common);
+    socket.on('link.updated',       socketEvent_common);
 
 }
