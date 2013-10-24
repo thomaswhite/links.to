@@ -32,11 +32,16 @@ function update_links_display( id, all, callback ){
         if( err ){
             callback(err);
         }else{
-            var oUpdate = { $set: {
-                    display :  oURL.display,
-                    updated : new Date(),
-                    state   : 'ready'
-                }}
+            var oUpdate = {
+                    $set: {
+                        display :  oURL.display,
+                        updated : new Date(),
+                        state   : 'ready'
+                   },
+                    $unset:{
+                        url:""
+                    }
+                }
                 , condition = {
                     _id : { $in: oURL.links},
                     $or : [
