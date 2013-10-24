@@ -13,17 +13,8 @@ var job_id = 'link-fetch'
     , request = require('request')
     , _ = require('lodash')
     , linkDisplay = require('../lib/link-make-display')
-    , cheerio = require('cheerio')
     , config
 ;
-
-
-var cherioParam = {
-    ignoreWhitespace: false,
-    xmlMode: true,
-    lowerCaseTags: true
-};
-
 
 
 function make_link_display( oURL, oURL2){
