@@ -32,7 +32,5 @@ box.on('init', function (App, Config, done) {
     app.use(passport.session());
     app.use(app.router);
 
-    process.nextTick(function() {
-        done(null, 'plugin "Passport" initiated');
-    });
+    box.utils.later( done, null, 'plugin "Passport" has been initialised');
 });

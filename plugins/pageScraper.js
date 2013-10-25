@@ -4,7 +4,5 @@ var box = require('../lib/box')
 
 box.on('init', function (app, config, done) {
     pageScraper.init( config.request );
-    process.nextTick(function() {
-        done(null, 'plugin "pageScraper" initialised');
-    });
+    box.utils.later( done, null, 'plugin "pageScraper" has been initialised');
 });

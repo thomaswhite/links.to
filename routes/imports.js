@@ -270,9 +270,7 @@ function perform_import( Import_id, fetch_links, user, req ){
                         })
                         .priority('high')
                         .save( function( err, result ){
-                            process.nextTick(function(){
-                                done(err, oFolder.folder.full_path); // go back to the async queue even if the folder is not processed.
-                            });
+                            box.utils.later( done, err , oFolder.folder.full_path); // go back to the async queue even if the folder is not processed.
                         });
                 }
             })
@@ -306,10 +304,7 @@ box.on('init', function (App, Config, done) {
     kue = box.Queue;
     jobs = box.Jobs;
 
-    process.nextTick(function() {
-        done(null, 'route imports.js initialised');
-    });
-
+    box.utils.later( done, null, 'route imports.js initialised');
 });
 
 box.on('init.attach', function (app, config,  done) {
@@ -392,8 +387,6 @@ box.on('init.attach', function (app, config,  done) {
     });
 
    // kue.app.listen(3001);
-    process.nextTick(function() {
-        done(null, 'route "imports.js" attached'  );
-    });
 
+    box.utils.later( done, null,  'route "imports.js" attached'  );
 });

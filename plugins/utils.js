@@ -76,15 +76,11 @@ function removeAll(s, regEx ){
     return s;
 }
 
-function later(fn, a1,a2,a3,a4,a5,a6 ){
-    //arguments.shift();
-    var A = [];
-    for (var i = 1; i < arguments.length; i++) {
-        A.push(arguments[i]);
-    }
+function later( fn ){
     var args = Array.prototype.slice.call(arguments, 1);
+    args = args || [];
     process.nextTick(function() {
-        fn.apply(undefined, A );
+        fn.apply(undefined, args );
     });
 }
 
@@ -122,8 +118,5 @@ box.utils = {
 box.on('init', function (app, conf, done) {
 
     config = conf;
-
-    process.nextTick(function() {
-        done(null, 'plugin utils initialised');
-    });
+    box.utils.later( done, null, 'plugin "utils" has been initialised');
 });

@@ -1,3 +1,5 @@
+console.log('Loading app.js...' );
+
 var debug = require('debug')('linksTo:app')
     , dummy = debug('Application is loading...')
     , box = require('./lib/box')
@@ -26,7 +28,7 @@ app.locals.config = config;
 config.less.paths.push ( path.join( path.join(__dirname, 'node_modules', 'bootstrap') , 'less') );
 // config.__dirname = __dirname;
 
-debug('Application is initialising...');
+console.log('Application is initialising...');
 box.series('init', app, config, function(err, result){
     if (err) {
         return box.emit('error', err);

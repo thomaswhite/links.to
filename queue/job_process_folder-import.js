@@ -46,9 +46,7 @@ module.exports = {
                         .priority('medium')
                         //.save( done )
                         .save( function( err, result ){
-                            process.nextTick(function(){
-                                done(err);
-                            });
+                            box.utils.later( done, err);
                         });
 
                     ;

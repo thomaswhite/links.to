@@ -129,9 +129,7 @@ box.on('db.init', function( monk, Config, done ){
 
     box.on('url.check-url', function( url, exclude_id, callback){
         if( !url ){
-            process.nextTick(function() {
-                callback(null, null);
-            });
+            box.utils.later( callback );
         }else{
             URLs.findOne(
                 {url: url, _id:{ $not: exclude_id } },
@@ -142,9 +140,7 @@ box.on('db.init', function( monk, Config, done ){
 
     box.on('url.check-url-and-original_url', function( url, callback){
         if( !url ){
-            process.nextTick(function() {
-                callback(null, null);
-            });
+            box.utils.later(callback );
         }else{
             URLs.findOne(
                 {$or : [
@@ -235,9 +231,7 @@ box.on('db.init', function( monk, Config, done ){
         );
     });
 
-    process.nextTick(function() {
-      done(null, 'db:URLs initialised.');
-    });
+    box.utils.later( done, null, 'db:URLs initialised.');
 });
 
 /*

@@ -82,9 +82,6 @@ box.on('init.attach', function(app, config, done){
             : chunk;
     };
 
-
-    process.nextTick(function() {
-        done(null, 'plugin kleiDust attached');
-    });
+    box.utils.later( done, null, 'plugin "kleiDust" has been attached');
 
 });

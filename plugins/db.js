@@ -45,9 +45,7 @@ box.on('init', function (App, Config, initDone) {
         var settings = Config.db
             , common_config = Config.common;
 
-        process.nextTick(function() {
-            done(null, 'db:session and db:authTemp initialised.');
-        });
+        box.utils.later( done, null, 'db:session and db:authTemp initialised.');
     });
 
 

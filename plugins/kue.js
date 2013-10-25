@@ -94,10 +94,6 @@ box.on('init', function (App, Config, done) {
 
 
     box.utils.later( done, null,  'plugin "KUE" initialised. Jobs registered:', jobs_id );
-  /*  process.nextTick(function() {
-        done(null, 'plugin "KUE" initialised. Jobs registered:' + jobs_id.join(', '));
-    });
-  */
 });
 
 /*

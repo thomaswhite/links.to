@@ -121,11 +121,7 @@ function job_fetch_link( param, Done ){
         .priority('normal')
         .attempts(100)
         .save( function( err, result ){
-            process.nextTick(function(){
-                if( err ){
-                    Done(err);
-                }
-            });
+            box.utils.later( Done, err);
         });
 }
 
@@ -163,9 +159,7 @@ box.on('init', function (App, Config, done) {
     config = Config;
     queue = box.Queue;
     jobs = box.Jobs;
-    process.nextTick(function() {
-        done(null, 'route links.js initialised');
-    });
+    box.utils.later( done, null, 'route links.js initialised');
 });
 
 
@@ -237,7 +231,5 @@ box.on('init.attach', function (app, config,  done) {
         }
     });
 
-    process.nextTick(function() {
-        done(null, 'route links.js attached'  ); //
-    });
+    box.utils.later( done, null,  'route "links.js" has been attached'  );
 });

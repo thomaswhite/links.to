@@ -163,8 +163,6 @@ box.on('db.init', function( monk, Config, done ){
         );
     });
 
-    process.nextTick(function() {
-        done(null, 'db:Imports initialised.');
-    });
+    box.utils.later( done, null, 'db:imports initialised.');
 });
 

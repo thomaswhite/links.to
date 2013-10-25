@@ -147,10 +147,7 @@ function upload (req, res) {
 box.on('init', function (App, Config, done) {
     app = App;
     config = Config;
-
-    process.nextTick(function() {
-        done(null, 'route upload.js initialised');
-    });
+    box.utils.later( done, null, 'route upload.js initialised');
 });
 
 
@@ -162,9 +159,8 @@ box.on('init.attach', function (app, config,  done) {
             result:'not implemented yet'
         });
     });
-    process.nextTick(function() {
-        done(null, 'route upload attached'  );
-    });
+
+    box.utils.later( done, null,  'route "upload" has been attached'  );
 });
 
 

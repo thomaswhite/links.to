@@ -78,9 +78,7 @@ box.on('db.init', function( monk, Config, done ){
         }, callback);
     });
 
-    process.nextTick(function() {
-        done(null, 'db:users initialised.');
-    });
+    box.utils.later( done, null, 'db:users initialised.');
 
 });
 
