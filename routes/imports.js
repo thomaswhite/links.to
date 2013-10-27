@@ -248,7 +248,7 @@ function perform_import( Import_id, fetch_links, user, req ){
                 }else{
                     var folderInfo = {_id:collection._id, title: collection.title, parent: oFolder.parent, folder_id:oFolder._id};
                     req.io.emit('import.collection-start', _.merge( { status:'start', progress:0}, folderInfo));
-                    jobs.create('import-folder', { import_id:Import_id, folder:oFolder, user:user, coll:collection, fetch_links: fetch_links })
+                    jobs.create('import-folder', { import_id:Import_id, folder:oFolder, user:user, coll:collection, do_not_fetch: !fetch_links  })
                         .on('complete', function(){
                             req.io.emit('import.collection-end', _.merge( { status:'end', progress:100, imported:true}, folderInfo));
                             req.io.emit('import.process-progress', {done:aReady.length, total:aFolders.length});
@@ -266,14 +266,14 @@ function perform_import( Import_id, fetch_links, user, req ){
                         })
                         .on('progress', function(progress){
                             req.io.emit('import.collection-progress', _.merge( { status:'progress', progress: progress}, folderInfo));
-                            process.stdout.write('\r  job #' + this.id + '.' + this.type + ' ' + progress + '% complete');
+                            //process.stdout.write('\r  job #' + this.id + '.' + this.type + ' ' + progress + '% complete');
                         })
                         .priority('high')
                         .save( function( err, result ){
                             box.utils.later( done, err , oFolder.folder.full_path); // go back to the async queue even if the folder is not processed.
                         });
                 }
-            })
+            });
         }else{
             process.nextTick( done );
         }
@@ -381,7 +381,7 @@ box.on('init.attach', function (app, config,  done) {
                    go_to:'/coll'
                });
            }else{
-               perform_import( req.data.id, req.data.fetch_links, User, req );
+               perform_import( req.data.id, !!req.data.fetch_links, User, req );
            }
        }
     });

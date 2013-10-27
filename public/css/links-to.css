@@ -536,6 +536,11 @@ body.collection h1 {
   position: relative;
   top: .15em;
 }
+a.notFound,
+a.notFound:link {
+  text-decoration: line-through;
+  color: red;
+}
 .my-collection {
   color: cornflowerblue;
 }

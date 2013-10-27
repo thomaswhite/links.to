@@ -36,17 +36,17 @@ function update_links_display( id, all, callback ){
                     $set: {
                         display :  oURL.display,
                         updated : new Date(),
-                        state   : 'ready'
-                   },
-                    $unset:{
-                        url:""
-                    }
+                        state   : 'ready',
+                        url     : oURL.url
+                   }
                 }
                 , condition = {
                     _id : { $in: oURL.links},
                     $or : [
                         {state: 'queued'  },
-                        {state: 'new' }
+                        {state: 'new' },
+                        {state: 'refresh' },
+                        {state: 'hard-refresh' }
                     ]
                 }
             ;
@@ -81,7 +81,7 @@ function add_link_ids( id, aLinks, returnUpdated, callback){
             }
         }
     );
-};
+}
 
 
 
@@ -215,7 +215,7 @@ box.on('db.init', function( monk, Config, done ){
                                  callback(err, exisitng_URL, true ); // true indicates it is an existing URL
                             });
                         }
-                    })
+                    });
                 }else{
                     URLs.insert( new_url(url, link_id), function(err, insertedURL){
                         if( err ){

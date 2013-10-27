@@ -1,33 +1,33 @@
 
-function fetchNorReadyLinks( ){
+function fetchNorReadyLinks( event, selector, refresh  ){
+    if( event){
+        selector = event.data.selector;
+        refresh  = event.data.refresh;
+    }
+    selector =  selector || '.row'; // refresh the whole collection
     var IDs = []
-        , $notReady = $('.row.notReady').each( function(i,o){
-            IDs.push($(this).data('id'));
+        , $notReady = $(selector).each( function(i,o){
+            var id = $(this).data('id');
+            if( id ){
+                IDs.push(id);
+            }
         })
         ;
 
     if( IDs.length ){
         socket.emit('collection:fetchNotReadyLinks', {
+                emitted:'collection:fetchNotReadyLinks',
                 coll_id    : pageParam.coll_id,
                 notReadyID : IDs,
+                refresh : !!refresh, //'hard',
                 route:'/link/updated'
             },
-            function( response ){
-                debug.log ( 'collection:fetchNotReadyLinks:', response );
-                return;
-
-            if (!response.success){
-                debug.error('Bad import', response);
-            }else{
-                debug.info('Import started', response);
-                if( response.go_to ){
-                    page(  response.go_to  );
-                }
-            }
-        });
+            socketResponseCommon
+        );
     }
 }
 
 head.ready(function() {
-    fetchNorReadyLinks();
+    fetchNorReadyLinks(null, '.row.notReady');
+    $('.refresh-coll').click({selector:'.row', refresh:true}, fetchNorReadyLinks );
 });

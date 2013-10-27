@@ -70,7 +70,7 @@ var pages = {
             containerID:'#grid',
             contentAction:'prepend'
         }
-    },    
+    },
     '/link/updated':{
         interactive:false,  // used in fetchNorReadyLinks 
         routeIO:'link:add',

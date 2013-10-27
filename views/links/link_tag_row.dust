@@ -3,20 +3,19 @@
         {@ne key="{state}" value="ready"}
             <i class="icon-refresh icon-spin "></i>
         {/ne}
-
         <span class="link-tools-block">
             <span>{@timeFromNow time="{updated}"/}</span>
             {@eq key="{owner_id}" value="{user._id}" }
+               {?notFound}
+               {:else}
                <a class="btn btn-success btn-mini "  href="#" >Edit</a>
-               <a class="btn btn-warning btn-mini edit-btn " href="/link/{_id}/refresh" title="refresh"><i class="icon-refresh"></i></a>
+               {/notFound}
                <a class="btn btn-danger btn-mini linkDelete" data-context='{~lb}"route":"/link/delete", "id":"{_id}"{~rb}' >Delete</a>
             {/eq}
         </span>
         {#display}
             <span class="tags">
-            {#tags}
-                 <a href="#" title="Found {count} times">{word}</a>
-            {/tags}
+            {#tags}<a href="#" title="Found {count} times">{word}</a>{/tags}
             </span>
         {/display}
         {!  ?canEdit} <button class="btn btn-mini"><i class="icon-plus"></i></button>{/canEdit !}

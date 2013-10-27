@@ -20,18 +20,22 @@ module.exports = {
                 var oData = job.data
                     , collection = oData.coll
                     , req = job.req
+                    , aLinksQueued = []
                     , aLinks = []
                     , Error = null
+                    , progressTotal = Links.length * 2
                     ;
 
                 function import_link(link, done){
                     //req.io.emit('import.link-start', { status:'start', link:link }  );
-                    box.Jobs.create('import-link', { import_id: job.data.import_id, link:link, user:oData.user, collectionID: collection._id })
+                    aLinksQueued.push(1);
+                    job.progress(aLinksQueued.length, progressTotal );
+                    box.Jobs.create('import-link', { import_id: oData.import_id, link:link, user:oData.user, collectionID: collection._id, do_not_fetch:oData.do_not_fetch })
                         .on('complete', function(){
                             aLinks.push( {  link_id: this.data.link._id });
                             var link = this.data.link;
                             job.collection_id = collection._id;
-                            job.progress(aLinks.length, Links.length);
+                            job.progress(aLinksQueued.length + aLinks.length, progressTotal);
                             if( aLinks.length == Links.length ){
                                 Done( Error, {
                                     collectionID : this.data.collectionID,
@@ -47,11 +51,10 @@ module.exports = {
                         //.save( done )
                         .save( function( err, result ){
                             box.utils.later( done, err);
-                        });
-
+                        })
                     ;
                 }
-                async.mapLimit(Links, 10, import_link,
+                async.mapLimit(Links, 50, import_link,
                     function(err, links_results){
                         // links_results contain list of folder/links
                         if( err ){

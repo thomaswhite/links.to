@@ -31,14 +31,16 @@ function removeJobs( err, aJobs){
 
 jobs.on('job complete', function(id){
     kue.Job.get(id, function(err, job){
-        if (err) return;
+        if (err) {
+            console.info('Error removed completed job #%d, type:%s  %j', id );
+        }
         if( job ){
             job.remove(function(err){
                 if (err) throw err;
-                console.info('Removed completed job #%d,  %s', job.id, box.utils.inspect(job.data, { showHidden: false, depth: null, colors:false }) );
+                console.info('Removed completed job #%d, type:%s  %j', job.id, job.type, job.data );
             });
         }else{
-            var dummyu = 1;
+            console.info('Missing job #%d', id );
         }
     });
 });
@@ -65,7 +67,7 @@ box.on('init', function (App, Config, done) {
 
     for(var i=0; jobs_processors && i < jobs_processors.length; i++){
         var j = jobs_processors[i];
-        jobs.process( j.id, 20, j.processor );
+        jobs.process( j.id, 50, j.processor );
         jobs_id.push(j.id);
     }
 

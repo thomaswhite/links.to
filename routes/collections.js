@@ -317,47 +317,58 @@ box.on('init.attach', function (app, config,  done) {
 
        fetchNotReadyLinks: function(req){
 
+           var User = req.session.User;
+
+           if( !User && req.data.refresh){
+               req.io.respond({ result:'timeout', refresh:true, param:req.data });
+               return;
+           }
+
            var resp_param = _.merge({}, req.data);
            delete resp_param.notReadyID;
            box.invoke('link.ids-for-fetch', req.data.notReadyID || [], function(err, aLinks) {
                if( err ){
                    done(err);
                }else{
-                   async.mapLimit(aLinks, 10,
-                       function(link, done){
-                           link.link_id = link._id;
-                           delete link._id;
-                           box.invoke('link.fetch',  link, function(err, o){
-                                if(err){
-                                    done(err);
-                                }else{
-                                    box.invoke('link.get', link.link_id, function(err, oLink){
-                                        req.io.emit( 'link.updated', {
-                                            result:'ok',
-                                            param: resp_param,
-                                            link: oLink
-                                        });
-                                        done(null, oLink  );
-                                    });
-                                }
-                           });
-                       },
-                       function(err, links_results){
-                           // links_results contain list of links_id
-                           if( err ){
-                               console.warn( err );
-                               Error = err;
-                           }else{
-                               req.io.respond({
-                                   result:'ok',
-                                   request:req.data,
-                                   data: links_results
-                               });
 
+                   function fetch(link, done){
+                       link.link_id = link._id;
+                       delete link._id;
+                       link.refresh = resp_param.refresh;
+                       box.invoke('link.fetch',  link, function(err, o){
+                           if(err){
+                               done(err);
+                           }else{
+                               box.invoke('link.get', link.link_id, function(err, oLink){
+                                   req.io.emit( 'link.updated', {
+                                       result:'ok',
+                                       param: resp_param,
+                                       link: oLink
+                                   });
+                                   done(null, oLink  );
+                               });
                            }
-                           // Done( err, collection);
-                       }
-                   );
+                       });
+                   }
+                   if( req.data.refresh ){
+                       box.invoke('link.mark-for-refresh', req.data.notReadyID, req.data.refresh, function( err ){
+                           async.mapLimit(aLinks, 5, fetch, function(err, links_results){// links_results contain list of links_id
+                                   if( err ){
+                                       req.io.respond({ result:'error', request:req.data, err: err });
+                                   }else{
+                                       req.io.respond({ result:'ok', request:req.data, data: links_results });
+                                   }
+                           });
+                       });
+                   }else{
+                       async.mapLimit(aLinks, 10, fetch, function(err, links_results){// links_results contain list of links_id
+                               if( err ){
+                                   req.io.respond({ result:'error', request:req.data, err: err });
+                               }else{
+                                   req.io.respond({ result:'ok', request:req.data, data: links_results });
+                               }
+                        });
+                   }
                }
            });
 

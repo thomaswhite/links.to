@@ -1,7 +1,7 @@
 <div id="breadcrumbs">{>"navigation/breadcrumbs"/}</div>
 
 <div class="row">
-    <div class="span8" id="title">
+    <div class="span12" id="title">
         <h1 class="eip" id="title"><span class="coll-title-prefix">Import </span> {title}</h1>
         <p>Size:{import.size}, uploaded on {@timeStamp time="{import.created}" format="YYYY-MM-DD HH:mm" /}, {@timeFromNow time="{import.created}"/}</p>
         <span id="importBtn">

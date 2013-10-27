@@ -8,7 +8,7 @@
 
 var   box = require('../lib/box')
     , debug = require('debug')('linksTo:db:page')
-
+    , _ = require('lodash')
     ;
 
 box.on('db.init', function( monk, Config, done ){
@@ -19,15 +19,17 @@ box.on('db.init', function( monk, Config, done ){
 
     Pages.index('url'); // ,  { unique: true }
 
-
-    box.on('page.save', function( HTML, URL, canonicalURL, url_id,  callback){
-        var page =          {
+    box.on('page.save', function( o, URL, canonicalURL, url_id,  callback){
+        var page = _.merge( {
                 url_id: url_id,
                 updated : new Date(),
-                html : HTML,
                 urls:[],
                 url : URL
-            };
+              },
+              o
+           )
+        ;
+
         if( canonicalURL ){
             page.url = canonicalURL;
             page.canonical = true;
@@ -40,15 +42,23 @@ box.on('db.init', function( monk, Config, done ){
                 }else{
                     box.db.coll.urls.updateById(
                         url_id,
-                        { $set:{ page_id: added_page._id, state:'saved'}},
+                        { $set:{ page_id: added_page._id }},
                         { safe: true },
-                        function(err2, r ){
-                           callback(err2, added_page);
-                        }
+                        callback
                     );
                 }
             }
         );
+    });
+
+    box.on('page.update', function( page_id, o, URL, canonicalURL, callback){
+        var page = _.merge( { updated : new Date(),  url : URL }, o );
+        if( canonicalURL ){
+            page.url = canonicalURL;
+            page.canonical = true;
+            page.urls = [URL];
+        }
+        Pages.updateById( page_id, {$set:page}, callback );
     });
 
     box.on('page.get', function( id,  callback){
@@ -57,7 +67,10 @@ box.on('db.init', function( monk, Config, done ){
 
     box.on('page.find', function( url, canonicalURL, callback){
         var condition = null;
-        if( url && canonicalURL ){
+        if( !url && !canonicalURL){
+            box.utils.later( callback );
+            return;
+        }else if( url && canonicalURL ){
             condition =  {$or : [
                 {url: url },
                 {url:canonicalURL}
@@ -67,7 +80,6 @@ box.on('db.init', function( monk, Config, done ){
         }else if( canonicalURL ){
             condition =  { url: canonicalURL };
         }
-
         Pages.findOne( condition,  callback  ); //  { fields:{url:false} },
     });
 

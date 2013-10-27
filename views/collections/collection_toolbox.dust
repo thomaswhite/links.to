@@ -8,13 +8,15 @@
                 <a href="#" class="btn btn-primary" title="Add to favorites"><i class="icon-white icon-heart"></i></a>
                 <a href="#" class="btn btn-primary" title="Share"><i class="icon-white icon-share-alt"></i></a>
                </span>
-               !}
-          {@eq key="{collection.owner}" value="{user._id}" }
-            {^collection.links}
-                      <span class="btn-group">
-                        <a class="btn btn-danger btn-mini"  href="/coll/{collection._id}/delete" title="Delete"><i class="icon-white icon-trash"></i></a>
-                      </span>
-            {/collection.links}
+              !}
+            {@eq key="{collection.owner}" value="{user._id}" }
+              {^collection.links}
+                    <span class="btn-group">
+                      <a class="btn btn-danger"  href="/coll/{collection._id}/delete" title="Delete"><i class="icon-white icon-trash"></i></a>
+                    </span>
+               {:else}
+                 <a class="btn btn-warning edit-btn refresh-coll" href="#refresh" title="refresh"><i class="icon-refresh"></i></a>
+              {/collection.links}
             {/eq}
             </span>
     </div>

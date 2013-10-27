@@ -9,7 +9,7 @@
 var   box = require('../lib/box')
     , debug = require('debug')('linksTo:db:links')
     , _ = require('lodash')
-
+    , ObjectID = null
     ;
 
 /**
@@ -55,7 +55,7 @@ box.on('db.init', function( monk, Config, done ){
         ;
     Links.options.multi = true;
     Links.ensureIndex( { updated: -1, created: -1 }, {background:true} ); // coll_id ?
-
+    ObjectID = Links.col.ObjectID;
     // Returns an array of the links for a collection
 
     box.on('link.new', new_link); // to be invoked
@@ -188,13 +188,28 @@ box.on('db.init', function( monk, Config, done ){
     });
 
 
+    function sID_2_oID(aIDs){
+        for(var id, i=0; i < aIDs.length; i++){
+            id = aIDs[i];
+            if( 'string' == typeof id && (id.length == 12 || id.length == 24) ){
+                aIDs[i] = ObjectID( id );
+            }
+        }
+        return aIDs;
+    }
 
     box.on('link.ids-for-fetch', function( aIDs, callback){
-        for(var i=0; i < aIDs.length; i++){
-            aIDs[i] = Links.col.ObjectID( aIDs[i] );
-        }
+        aIDs = sID_2_oID(aIDs);
         Links.find( { _id :  { $in :aIDs } },
             { fields:{_id:true, url_id:true, state:true, url:true }},
+            callback
+        );
+    });
+
+    box.on('link.mark-for-refresh', function( aIDs, refresh, callback){
+        aIDs = sID_2_oID(aIDs);
+        Links.update( { _id :  { $in :aIDs } },
+            {$set:{ state: refresh == 'hard' ? 'hard-refresh' : 'refresh'}},
             callback
         );
     });

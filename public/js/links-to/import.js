@@ -165,7 +165,7 @@ head.ready(function() {
     socket.on('import.collection-start', function(data){
         debug.log ( 'import.collection-start:', data );
         $('#tab-imported').trigger('click');
-        myRender('imports/import_imported_line', data, $('#imported'), 'prepend');
+        myRender('imports/import_imported_line', data, $('#imported'), 'append');
     });
 
     socket.on('import.collection-progress', function(data){

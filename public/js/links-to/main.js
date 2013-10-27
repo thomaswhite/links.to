@@ -146,6 +146,21 @@ function socketEvent_common(data){
     $('body').trigger(Context.page.eventDone, [ data, Context, data.param.route ] );
 }
 
+function socketResponseCommon( response, on, noLog ){
+    if( !noLog ){
+        debug.log ( on, response );
+    }
+    on = on || (response.param && response.param.emitted ? response.param.emitted :'') || '?socketResponseCommon?';
+    if( !response ){
+        debug.warn('Missing response for "' + on + '"!');
+    }else if( response.go_to ){
+        page(  response.go_to  );
+    }else if( response.refresh  ){
+        location.reload(true);
+    }
+    return;
+}
+
 function page_init() {
     addDustHelpers();
 
