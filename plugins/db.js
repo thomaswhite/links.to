@@ -11,6 +11,7 @@ var   box = require('../lib/box')
 
     , glob = require('glob').Glob
     , path = require('path')
+    , request_files_from_directory = require('../lib/request_files_from_directory')
 
 
     , app
@@ -48,8 +49,14 @@ box.on('init', function (App, Config, initDone) {
         box.utils.later( done, null, 'db:session and db:authTemp initialised.');
     });
 
-
-
+    //get : function(path, excludeNames, initParams, Done)
+    var modules = request_files_from_directory.get( settings.dbModules, [], {});
+    box.parallel('db.init', monk, Config, function(err, result){
+        var ts2   = new Date().getTime();
+        result.push( 'plugin db initialised: ' + (ts2 - ts) + ' ms')     ;
+        initDone(null, result );
+    });
+/*
     new glob( settings.dbModules, { sync:true, cache:true }, function (er, files) {
         if( er ){
             initDone(er);
@@ -66,7 +73,7 @@ box.on('init', function (App, Config, initDone) {
         }
     });
 
-
+*/
 
 
 /*

@@ -4,6 +4,7 @@ var debug = require('debug')('linksTo:app')
     , dummy = debug('Application is loading...')
     , box = require('./lib/box')
     , glob = require('glob').Glob
+    , request_files_from_directory = require('./lib/request_files_from_directory')
     , path = require('path')
     , async = require('async')
     , config = box.config = require('./config').init(  'dev', __dirname )

@@ -3,6 +3,7 @@ var box = require('../lib/box')
     , path = require('path')
     , debug = require('debug')('plugin:kue')
     , jobs = kue.createQueue()
+    , request_files_from_directory = require('../lib/request_files_from_directory')
 
     , app
     , config
@@ -62,7 +63,7 @@ box.on('init', function (App, Config, done) {
 
 
     var jobs_id = [],
-        jobs_processors = box.utils.request_files_in_directory( path.join( Config.__dirname, config.jobs_dir ) )
+        jobs_processors = request_files_from_directory.get( path.join( Config.__dirname, config.jobs_dir ) )
         ;
 
     for(var i=0; jobs_processors && i < jobs_processors.length; i++){
