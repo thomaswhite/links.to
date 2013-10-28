@@ -13,7 +13,6 @@ var   box = require('../lib/box')
     , path = require('path')
     , request_files_from_directory = require('../lib/request_files_from_directory')
 
-
     , app
     , settings
     , common_config
@@ -34,6 +33,7 @@ box.on('init', function (App, Config, initDone) {
         Dummy : monk.get('dummy'),
         coll:{}
     };
+
     var AuthTemp   = monk.get('auth_temp');
     AuthTemp.index({expires: 1}, { expireAfterSeconds: 60 });
     AuthTemp.options.safe = false;
@@ -46,50 +46,15 @@ box.on('init', function (App, Config, initDone) {
         var settings = Config.db
             , common_config = Config.common;
 
-        box.utils.later( done, null, 'db:session and db:authTemp initialised.');
+        box.utils.later( done, null, 'db:session');
     });
 
-    //get : function(path, excludeNames, initParams, Done)
-    var modules = request_files_from_directory.get( settings.dbModules, [], {});
+    //get : function(path, excludeNames, initParams)
+    var modules = request_files_from_directory.get( settings.dbModules, [], Config);
     box.parallel('db.init', monk, Config, function(err, result){
         var ts2   = new Date().getTime();
-        result.push( 'plugin db initialised: ' + (ts2 - ts) + ' ms')     ;
-        initDone(null, result );
+        initDone(null,  '+' + ( new Date().getTime() - ts) + 'ms plugin "db" initialised [' + result.join(', ') + ']');
     });
-/*
-    new glob( settings.dbModules, { sync:true, cache:true }, function (er, files) {
-        if( er ){
-            initDone(er);
-        }else{
-            for(var i=0; i < files.length; i++){
-                 require(path.resolve(files[i]));
-            }
-             box.parallel('db.init', monk, Config, function(err, result){
-                 var ts2   = new Date().getTime();
-                 result.push( 'plugin db initialised: ' + (ts2 - ts) + ' ms')     ;
-                 initDone(null, result );
-             });
-
-        }
-    });
-
-*/
-
-
-/*
-    var search = new glob( settings.dbModules );
-    search.on('match', function (file) {
-            require( path.resolve(file) );
-    });
-    search.once('error', initDone );
-    search.once('end', function () {
-        box.parallel('db.init', monk, Config, function(err, result){
-            var ts2   = new Date().getTime();
-            result.push( 'plugin db initialised: ' + (ts2 - ts) + ' ms')     ;
-            initDone(null, result );
-        });
-    });
-*/
 
 });
 

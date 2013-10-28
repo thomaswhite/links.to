@@ -13,6 +13,7 @@ box.kleiDust = kleiDust;
 
 
 box.on('init', function (App, Config, done) {
+    var ts   = new Date().getTime();
     config = Config;
 
     kleiDust.setOptions({
@@ -32,8 +33,8 @@ box.on('init', function (App, Config, done) {
         path.join(config.__dirname, 'public/templates'),
         '.dust',
         function(err, result ){
-            result.unshift( 'plugin kleiDust initialised.');
-            done(null, result );
+            var ts2   = new Date().getTime();
+            done( null, '+' + ( new Date().getTime() - ts) + 'ms plugin "kleiDust" initialised [' + result.join(', ') + ']');
         }
     );
 });

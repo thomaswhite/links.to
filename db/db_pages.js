@@ -83,5 +83,5 @@ box.on('db.init', function( monk, Config, done ){
         Pages.findOne( condition,  callback  ); //  { fields:{url:false} },
     });
 
-    box.utils.later( done, null, 'db:page initialised.');
+    box.utils.later( done, null, 'db:page');
 });

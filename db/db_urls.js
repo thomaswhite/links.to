@@ -231,7 +231,7 @@ box.on('db.init', function( monk, Config, done ){
         );
     });
 
-    box.utils.later( done, null, 'db:URLs initialised.');
+    box.utils.later( done, null, 'db:URLs');
 });
 
 /*

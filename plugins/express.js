@@ -15,6 +15,7 @@ app.configure('development', function () {
 });
 
 box.on('init', function (App, Config, done) {
+    var ts   = new Date().getTime();
     config = Config;
 
     app.set('port', config.port );
@@ -76,6 +77,6 @@ box.on('init', function (App, Config, done) {
         box.utils.later( cb, null, 'express.io listening on port #' +config.port );
     });
 
-    box.utils.later( done, null, 'plugin "express.io" initialised');
+    box.utils.later( done, null, '+' + ( new Date().getTime() - ts) + 'ms plugin "express.io" initialised.');
 
 });

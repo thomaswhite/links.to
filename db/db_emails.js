@@ -66,7 +66,7 @@ box.on('db.init', function( monk, Config, done ){
         });
 
     });
-    box.utils.later( done, null, 'db:emails initialised.');
+    box.utils.later( done, null, 'db:emails');
 
 });
 

@@ -26,11 +26,11 @@ passport.deserializeUser(function(json, done) {
 });
 
 box.on('init', function (App, Config, done) {
+    var ts = new Date().getTime();
     app = App;
     config = Config.passport;
     app.use(passport.initialize());
     app.use(passport.session());
     app.use(app.router);
-
-    box.utils.later( done, null, 'plugin "Passport" has been initialised');
+    box.utils.later( done, null, '+' + ( new Date().getTime() - ts) + 'ms plugin "Passport" initialised.');
 });

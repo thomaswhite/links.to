@@ -51,6 +51,8 @@ box.on('init', function (App, Config, done) {
     app = App;
     config = Config.queue;
 
+    var ts = new Date().getTime();
+
 
     jobs.active(function(err,aJobs){
         var dummy = 1;
@@ -95,8 +97,7 @@ box.on('init', function (App, Config, done) {
         });
     });
 
-
-    box.utils.later( done, null,  'plugin "KUE" initialised. Jobs registered:', jobs_id );
+    box.utils.later( done, null, '+' + ( new Date().getTime() - ts) + 'ms plugin "KUE" initialised. Jobs registered:[' + jobs_id.join(', ') + ']');
 });
 
 /*

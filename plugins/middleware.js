@@ -3,6 +3,7 @@ var box = require('../lib/box')
   ;
 
 box.on('init', function (app, conf, done) {
+    var ts = new Date().getTime();
     box.middleware = middler(box.app);
-    box.utils.later( done, null, 'plugin "middleware" has been initialised');
+    box.utils.later( done, null, '+' + ( new Date().getTime() - ts) + 'ms plugin "middleware" initialised.');
 });

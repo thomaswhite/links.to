@@ -79,5 +79,5 @@ box.on('db.init', function( monk, Config, done ){
         );
     });
 
-    box.utils.later( done, null, 'db:openID initialised.');
+    box.utils.later( done, null, 'db:openID');
 });
