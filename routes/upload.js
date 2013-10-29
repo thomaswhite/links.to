@@ -145,22 +145,22 @@ function upload (req, res) {
 
 
 box.on('init', function (App, Config, done) {
+    var ts = new Date().getTime();
     app = App;
     config = Config;
-    box.utils.later( done, null, 'route upload.js initialised');
+    box.utils.later( done, null, '+' + ( new Date().getTime() - ts) + 'ms route "upload.js" initialised.');
 });
 
 
 box.on('init.attach', function (app, config,  done) {
-
+    var ts = new Date().getTime();
     app.post('/upload', upload);
     app.io.route('upload',  function(req) {
         req.io.respond({
             result:'not implemented yet'
         });
     });
-
-    box.utils.later( done, null,  'route "upload" has been attached'  );
+    box.utils.later( done, null, '+' + ( new Date().getTime() - ts) + 'ms route "upload.js" attached.');
 });
 
 

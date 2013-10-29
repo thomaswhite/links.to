@@ -39,7 +39,7 @@ box.on('init', function (App, Config, done) {
 });
 
 box.on('init.attach', function(app, config, done){
-
+    var ts   = new Date().getTime();
     box.dust = {
         render: function( res, template, context) {
             var opt = kleiDust.getOptions(),
@@ -81,7 +81,5 @@ box.on('init.attach', function(app, config, done){
         return time ? chunk.write( moment(time).format(format) )
             : chunk;
     };
-
-    box.utils.later( done, null, 'plugin "kleiDust" has been attached');
-
+    box.utils.later( done, null, '+' + ( new Date().getTime() - ts) + 'ms plugin "kleiDust" attached.');
 });

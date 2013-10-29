@@ -8,7 +8,7 @@
 var   box = require('../lib/box')
     , Monk  = require('monk')
     , path = require('path')
-    , request_files_from_directory = require('../lib/request_files_from_directory')
+    , request_directory = require('../lib/request_directory')
 
     , app
     , settings
@@ -47,7 +47,7 @@ box.on('init', function (App, Config, initDone) {
     });
 
     //get : function(path, excludeNames, initParams)
-    var modules = request_files_from_directory.get( settings.dbModules, [], Config);
+    var modules = request_directory.get( settings.dbModules, [], Config);
     box.parallel('db.init', Config, function(err, result){
         var ts2   = new Date().getTime();
         initDone(null,  '+' + ( new Date().getTime() - ts) + 'ms plugin "db" initialised [' + result.join(', ') + ']');

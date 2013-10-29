@@ -299,16 +299,16 @@ function perform_import( Import_id, fetch_links, user, req ){
 
 
 box.on('init', function (App, Config, done) {
+    var ts = new Date().getTime();
     app = App;
     config = Config;
     kue = box.Queue;
     jobs = box.Jobs;
-
-    box.utils.later( done, null, 'route imports.js initialised');
+    box.utils.later( done, null, '+' + ( new Date().getTime() - ts) + 'ms route "imports.js" initialised.');
 });
 
 box.on('init.attach', function (app, config,  done) {
-
+    var ts = new Date().getTime();
     app.use(
         box.middler()
             .get('/imports',            All)
@@ -386,7 +386,7 @@ box.on('init.attach', function (app, config,  done) {
        }
     });
 
-   // kue.app.listen(3001);
+  // kue.app.listen(3001);
+    box.utils.later( done, null, '+' + ( new Date().getTime() - ts) + 'ms route "imports.js" attached.');
 
-    box.utils.later( done, null,  'route "imports.js" attached'  );
 });

@@ -236,12 +236,14 @@ box.on( 'add_collection', function( user, name, description, done ){
 });
 
 box.on('init', function (App, Config, done) {
+    var ts = new Date().getTime();
     app = App;
     config = Config;
-    box.utils.later( done, null, 'route collections.js initialised');
+    box.utils.later( done, null, '+' + ( new Date().getTime() - ts) + 'ms route "collections.js" initialised.');
 });
 
 box.on('init.attach', function (app, config,  done) {
+    var ts = new Date().getTime();
     app.use(
         box.middler()
             .get('/coll/mine',       Mine)
@@ -387,5 +389,6 @@ box.on('init.attach', function (app, config,  done) {
     //    app.get('/tags',        routes.collections.tags);
     //    app.get('/tags/mine',   routes.collections.tags_mine);
 
-    box.utils.later( done, null,  'route collections attached'  );
+    box.utils.later( done, null, '+' + ( new Date().getTime() - ts) + 'ms route "collections.js" attached.');
+
 });

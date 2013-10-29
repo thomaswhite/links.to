@@ -64,17 +64,19 @@ box.on('init', function (App, Config, done) {
 
     box.app.on('error', box.emit.bind(box, 'error'));
 
-    box.on('init.attach', function (app, config, cb) {
+    box.on('init.attach', function (app, config, done) {
+        var ts   = new Date().getTime();
         app.use(require('less-middleware')( config.less ));
         app.use(express.static(path.join(config.__dirname, 'public')));
-        box.utils.later(cb, null, 'route "public directory" attached' );
+        box.utils.later( done, null, '+' + ( new Date().getTime() - ts) + 'ms route "public directory" attached.');
     });
 
-    box.on('init.listen', function (cb) {
+    box.on('init.listen', function (done) {
+        var ts   = new Date().getTime();
           app.listen( config.port );
           // box.server.listen(config.port);
           // box.emit('init.server', box.server);
-        box.utils.later( cb, null, 'express.io listening on port #' +config.port );
+        box.utils.later( done, null, '+' + ( new Date().getTime() - ts) + 'ms express.io listens on port #' + config.port);
     });
 
     box.utils.later( done, null, '+' + ( new Date().getTime() - ts) + 'ms plugin "express.io" initialised.');

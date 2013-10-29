@@ -155,15 +155,17 @@ function link_process( url, collectionID, param, oLink, extra, Done ){
 
 
 box.on('init', function (App, Config, done) {
+    var ts = new Date().getTime();
     app = App;
     config = Config;
     queue = box.Queue;
     jobs = box.Jobs;
-    box.utils.later( done, null, 'route links.js initialised');
+    box.utils.later( done, null, '+' + ( new Date().getTime() - ts) + 'ms route "links.js" initialised.');
 });
 
 
 box.on('init.attach', function (app, config,  done) {
+    var ts = new Date().getTime();
     app.use(
         box.middler()
            .get('/link/:id/delete/:coll?',  Delete)
@@ -230,6 +232,5 @@ box.on('init.attach', function (app, config,  done) {
             );
         }
     });
-
-    box.utils.later( done, null,  'route "links.js" has been attached'  );
+    box.utils.later( done, null, '+' + ( new Date().getTime() - ts) + 'ms route "links.js" attached.');
 });
