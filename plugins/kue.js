@@ -17,10 +17,13 @@ function removeJobs( err, aJobs){
     if( err ){
         console.error( err );
     }else if( aJobs ){
-        debug('Delete jobs:');
+        debug('Delete jobs:%d', aJobs.length );
         aJobs.forEach(function(id){
             kue.Job.get(id, function(err, job){
-                debug(job);
+                if( !job ){
+                    return;
+                }
+                debug('Job:%j', job);
                 kue.Job.remove(id, function(err,r){
                     var dummy = 1;
                 });
@@ -62,8 +65,6 @@ box.on('init', function (App, Config, done) {
     jobs.complete( removeJobs );
     jobs.failed( removeJobs );
 
-
-
     var jobs_id = [],
         jobs_processors = request_files_from_directory.get( path.join( Config.__dirname, config.jobs_dir ) )
         ;
@@ -86,9 +87,9 @@ box.on('init', function (App, Config, done) {
                                 kue.Job.remove(id, function(err,r){
                                     var dummy = 1;
                                 });
-                                debug("Cancel import job ", job);
+                                debug("Cancel import job %j", job);
                             }else{
-                                debug("Error canceling import job ", job);
+                                debug("Error canceling import job %j", job);
                             }
                         });
                     });

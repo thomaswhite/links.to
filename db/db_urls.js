@@ -85,8 +85,8 @@ function add_link_ids( id, aLinks, returnUpdated, callback){
 
 
 
-box.on('db.init', function( monk, Config, done ){
-    URLs = box.db.coll.urls = monk.get('urls');
+box.on('db.init', function( Config, done ){
+    URLs = box.db.coll.urls = box.db.monk.get('urls');
 
     URLs.options.multi = true;
     URLs.index('url',  { unique: true });

@@ -36,10 +36,10 @@ function newUser  ( OpenID ){
 
 
 
-box.on('db.init', function( monk, Config, done ){
+box.on('db.init', function(  Config, done ){
     var   settings = Config.db
         , common_config = Config.common
-        , Users = box.db.coll.users = monk.get('users')
+        , Users = box.db.coll.users = box.db.monk.get('users')
         ;
 
     Users.ensureIndex( { email: 1, openIDs: 1, shortID:1 }); // , {background:true}

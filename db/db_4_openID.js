@@ -11,11 +11,11 @@ var   box = require('../lib/box')
 
     ;
 
-box.on('db.init', function( monk, Config, done ){
+box.on('db.init', function(  Config, done ){
     var   settings = Config.db
         , common_config = Config.common
-        , OpenIDs = box.db.coll.openIDs = monk.get('openID')
-        , AuthTemp   = monk.get('auth_temp')
+        , OpenIDs = box.db.coll.openIDs = box.db.monk.get('openID')
+        , AuthTemp   = box.db.monk.get('auth_temp')
         ;
 
     OpenIDs.ensureIndex( { provider: 1, id:1, email:1 }); // , {background:true}

@@ -6,10 +6,7 @@
  */
 
 var   box = require('../lib/box')
-    , debug = require('debug')('linksTo:db')
     , Monk  = require('monk')
-
-    , glob = require('glob').Glob
     , path = require('path')
     , request_files_from_directory = require('../lib/request_files_from_directory')
 
@@ -42,7 +39,7 @@ box.on('init', function (App, Config, initDone) {
     session.index({expires: 1}, { expireAfterSeconds: common_config.session.maxAgeSeconds });
     session.options.safe = false;
 
-    box.on('db.init', function( monk2, Config, done ){
+    box.on('db.init', function( Config, done ){
         var settings = Config.db
             , common_config = Config.common;
 
@@ -51,7 +48,7 @@ box.on('init', function (App, Config, initDone) {
 
     //get : function(path, excludeNames, initParams)
     var modules = request_files_from_directory.get( settings.dbModules, [], Config);
-    box.parallel('db.init', monk, Config, function(err, result){
+    box.parallel('db.init', Config, function(err, result){
         var ts2   = new Date().getTime();
         initDone(null,  '+' + ( new Date().getTime() - ts) + 'ms plugin "db" initialised [' + result.join(', ') + ']');
     });

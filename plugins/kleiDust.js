@@ -4,7 +4,6 @@ var box = require('../lib/box')
     , helpers = require('dustjs-helpers')
     , moment = require('moment')
     , util = require('util')
-    , debug = require('debug')('linksTo:plugin:kleiDust')
     , config;
 
 box.kleiDust = kleiDust;

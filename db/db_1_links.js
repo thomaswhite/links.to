@@ -44,14 +44,14 @@ function new_link( url, collection_id, param, extra  ){
             tags:[]
         }
     };
-
     return _.merge( L, extra );
 }
 
-box.on('db.init', function( monk, Config, done ){
+//
+box.on('db.init', function(  Config, done ){
     var   settings = Config.db
         , common_config = Config.common
-        , Links = box.db.coll.links = monk.get('links')
+        , Links = box.db.coll.links = box.db.monk.get('links')
         ;
     Links.options.multi = true;
     Links.ensureIndex( { updated: -1, created: -1 }, {background:true} ); // coll_id ?

@@ -6,6 +6,7 @@
  todo: navigation tags (when import folders) and import tags
  todo: Import real data
  todo: Pagination (bottomless scroll)
+ todo: go to next/previous collection buttons
 
  todo: When delete a link make sure if there is a pending job it is canceled properly.
 
@@ -27,4 +28,7 @@
  todo: Filter
  todo: Search
 
+
+ DEBUG = monk:-*,  jobs:*, plugin:*, linksTo:*, linksTo:app, linskTo:db, linksTo:view.collections
+ DEBUG_COLORS = 1
  */

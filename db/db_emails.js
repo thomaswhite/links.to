@@ -22,10 +22,10 @@ function newEmail ( email, userID, openID, provider ){
     }
 };
 
-box.on('db.init', function( monk, Config, done ){
+box.on('db.init', function(  Config, done ){
     var   settings = Config.db
         , common_config = Config.common
-        , Emails = box.db.coll.emails = monk.get('emails')
+        , Emails = box.db.coll.emails = box.db.monk.get('emails')
         ;
 
     box.on('not-in-use.email.pinged' , function(email, userID, openID, provider, callback ){

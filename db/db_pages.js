@@ -11,10 +11,10 @@ var   box = require('../lib/box')
     , _ = require('lodash')
     ;
 
-box.on('db.init', function( monk, Config, done ){
+box.on('db.init', function(  Config, done ){
     var   settings = Config.db
         , common_config = Config.common
-        , Pages = box.db.coll.pages = monk.get('pages')
+        , Pages = box.db.coll.pages = box.db.monk.get('pages')
         ;
 
     Pages.index('url'); // ,  { unique: true }

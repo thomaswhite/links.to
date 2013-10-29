@@ -11,10 +11,10 @@ var   box = require('../lib/box')
     ;
 
 
-box.on('db.init', function( monk, Config, done ){
+box.on('db.init', function(  Config, done ){
     var   settings = Config.db
         , common_config = Config.common
-        , Collections = box.db.coll.collections = monk.get('collections')
+        , Collections = box.db.coll.collections = box.db.monk.get('collections')
         ;
 
     Collections.index('owner', {background:true} );

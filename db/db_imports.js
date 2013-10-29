@@ -12,10 +12,10 @@ var   box = require('../lib/box')
 
 
 
-box.on('db.init', function( monk, Config, done ){
+box.on('db.init', function(  Config, done ){
     var   settings = Config.db
         , common_config = Config.common
-        , Imports = box.db.coll.Imports = monk.get('Imports')
+        , Imports = box.db.coll.Imports = box.db.monk.get('Imports')
         ;
     Imports.options.multi = true;
     Imports.ensureIndex( { excluded:1, importID: 1, parent:1 } ); // , {background:true}, {sparse:1}

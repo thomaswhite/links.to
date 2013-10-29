@@ -11,11 +11,11 @@ var   box = require('../lib/box')
 
     ;
 
-box.on('db.init', function( monk, Config, done ){
+box.on('db.init', function(  Config, done ){
     var   settings = Config.db
         , common_config = Config.common
-        , Tags = box.db.coll.tags = monk.get('tags')
-        , Dummy = monk.get('dummy')
+        , Tags = box.db.coll.tags = box.db.monk.get('tags')
+        , Dummy = box.db.monk.get('dummy')
         ;
 
     // Returns an array of the links for a collection
