@@ -1,6 +1,7 @@
 var box = require('../lib/box')
     , path = require('path')
     , kleiDust = require('klei-dust')
+//    , Dust = require('dustjs-linkedin')
     , helpers = require('dustjs-helpers')
     , moment = require('moment')
     , util = require('util')
@@ -17,7 +18,7 @@ box.on('init', function (App, Config, done) {
 
     kleiDust.setOptions({
           root: path.join(config.__dirname, 'views'),
-          relativeToFile: true,
+          relativeToFile: false,
           keepWhiteSpace: true,
           useHelpers: false,
           cache: false,
