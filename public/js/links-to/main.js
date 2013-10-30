@@ -161,6 +161,76 @@ function socketResponseCommon( response, on, noLog ){
     return;
 }
 
+
+
+function detect_bottom( $marker  ){
+    var $document = $(document)
+        , $window = $(window)
+        , $body = $('body')
+        , distance = 200    // px from the bottom
+        , sleepTime = 1000// wait for 1s before trigger again
+        , interval = 150
+
+        , lastScrollTS = new Date().getTime()
+        , lastScrollTop = 0
+        , triggeredTS = 0
+        , lastWindowHeight = 0
+        , timer
+    ;
+
+    if( !$marker || !$marker instanceof(jQuery)){
+        $marker = $('<div id="bottom-marker">&nbsp; ------ bottom marker ------- </div>').appendTo( $body );
+    }
+
+    function again(){
+        //debug.info('delayed check');
+        check_if_bottom();
+    }
+
+
+    function check_if_bottom (event){
+        var nowTS = new Date().getTime();
+        clearTimeout(timer);
+        if( event && event.type == 'resize' && lastWindowHeight){
+            lastWindowHeight = 0; // new window size. check again
+            debug.info('Clear lastWindowHeight');
+        }
+        if(  nowTS - lastScrollTS  < interval ){
+            timer = setTimeout( again, nowTS - lastScrollTS  + 25);
+            // come back here to check if something changed between the calls
+            return;
+        }else if( nowTS - triggeredTS < sleepTime ){
+            debug.info( 'Sleeping: check again in ' + (nowTS - triggeredTS  + 25 ) + 'ms');
+            timer = setTimeout( again,  nowTS - triggeredTS + 25);
+            // come back here to check if something changed between the calls
+            return;
+        }else{
+            lastScrollTS = nowTS;
+            var window_height = $window.height(),
+                footerHeight = window_height - ($marker.offset().top + $marker.height()),
+                thisScrollTop = $document.scrollTop();
+
+            if( triggeredTS && window_height - lastWindowHeight < 10 ){
+                debug.info("Canceled. The window has not grown since the last 'page_bottom' event.");
+            }else if ( (thisScrollTop - lastScrollTop > 10) && // moving down
+                 ( thisScrollTop + window_height + distance) >= window_height - footerHeight) {
+                $body.trigger('page_bottom');
+                debug.info( 'page bottom: lastScrollTop:' + lastScrollTop + ', thisScrollTop:' + thisScrollTop );
+                triggeredTS = nowTS;
+            }else{
+                triggeredTS = 0;
+            }
+            lastScrollTop = thisScrollTop;
+            lastWindowHeight = window_height;
+        }
+    };
+
+    $window.scroll( check_if_bottom );
+    $window.resize( check_if_bottom );
+    check_if_bottom();
+};
+
+
 function page_init() {
     addDustHelpers();
 
@@ -173,7 +243,10 @@ function page_init() {
         $('body').on(id, fn);
     });
 
-    // TODO if the current page is /collections/mine, just replace the waiting sign with the new collection name
+
+    detect_bottom();
+
+        // TODO if the current page is /collections/mine, just replace the waiting sign with the new collection name
 // else go to /collections/mine
     socket.on('collection.added',   socketEvent_common);
     socket.on('collection.deleted', socketEvent_common);
