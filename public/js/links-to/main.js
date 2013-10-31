@@ -79,7 +79,7 @@ var pageEvents = {
     }
 };
 
-// TODO: make sure adding the collection in in coll/mine
+// TODO: make sure adding the collection in coll/mine
 function fnBtnAdd(event){
     var Context = page_context(this, event);
     Context.$this.attr('disabled', true );
@@ -167,9 +167,9 @@ function detect_bottom( $marker  ){
     var $document = $(document)
         , $window = $(window)
         , $body = $('body')
-        , distance = 200    // px from the bottom
+        , distance = 20    // px from the bottom
         , sleepTime = 1000// wait for 1s before trigger again
-        , interval = 150
+        , interval = 200
 
         , lastScrollTS = new Date().getTime()
         , lastScrollTop = 0
@@ -183,26 +183,27 @@ function detect_bottom( $marker  ){
     }
 
     function again(){
-        //debug.info('delayed check');
+     //   debug.info('delayed check');
         check_if_bottom();
     }
 
 
     function check_if_bottom (event){
-        var nowTS = new Date().getTime();
         clearTimeout(timer);
-        if( event && event.type == 'resize' && lastWindowHeight){
-            lastWindowHeight = 0; // new window size. check again
-            debug.info('Clear lastWindowHeight');
+        var nowTS = new Date().getTime();
+        if( event && event.type == 'resize' ){
+            lastWindowHeight = lastScrollTop = 0; // new window size. check again
+            debug.info('Resizing wait... ');
+            lastScrollTS = nowTS;
         }
         if(  nowTS - lastScrollTS  < interval ){
-            timer = setTimeout( again, nowTS - lastScrollTS  + 25);
-            // come back here to check if something changed between the calls
+            timer = setTimeout( again, nowTS - lastScrollTS  +  interval /2 );
             return;
+
+
         }else if( nowTS - triggeredTS < sleepTime ){
-            debug.info( 'Sleeping: check again in ' + (nowTS - triggeredTS  + 25 ) + 'ms');
-            timer = setTimeout( again,  nowTS - triggeredTS + 25);
-            // come back here to check if something changed between the calls
+            // debug.info( 'Sleeping: check again in ' + (nowTS - triggeredTS  + interval /2 ) + 'ms');
+            timer = setTimeout( again,  nowTS - triggeredTS + interval /2);
             return;
         }else{
             lastScrollTS = nowTS;
@@ -210,12 +211,13 @@ function detect_bottom( $marker  ){
                 footerHeight = window_height - ($marker.offset().top + $marker.height()),
                 thisScrollTop = $document.scrollTop();
 
-            if( triggeredTS && window_height - lastWindowHeight < 10 ){
+            if( thisScrollTop - lastScrollTop < 1 ){
+                //debug.info("Canceled. Not moving down");
+            }else if( triggeredTS && window_height - lastWindowHeight < 10 ){
                 debug.info("Canceled. The window has not grown since the last 'page_bottom' event.");
-            }else if ( (thisScrollTop - lastScrollTop > 10) && // moving down
-                 ( thisScrollTop + window_height + distance) >= window_height - footerHeight) {
+            }else if( (thisScrollTop + window_height + distance) >= window_height - footerHeight) {
                 $body.trigger('page_bottom');
-                debug.info( 'page bottom: lastScrollTop:' + lastScrollTop + ', thisScrollTop:' + thisScrollTop );
+                debug.info( 'page bottom: lastScrollTop:' + lastScrollTop + ', thisScrollTop:' + thisScrollTop  + ' -------------------------------- ');
                 triggeredTS = nowTS;
             }else{
                 triggeredTS = 0;
@@ -223,12 +225,12 @@ function detect_bottom( $marker  ){
             lastScrollTop = thisScrollTop;
             lastWindowHeight = window_height;
         }
-    };
+    }
 
     $window.scroll( check_if_bottom );
     $window.resize( check_if_bottom );
     check_if_bottom();
-};
+}
 
 
 function page_init() {
