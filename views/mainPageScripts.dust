@@ -8,6 +8,8 @@
       {page:"/js/page.js"},
       {main: "/js/links-to/main.js"},
       {pages:"/js/links-to/pages.js"},
+      {detect_bottom:"/js/links-to/detect_bottom.js"},
+
       function(){
           pageAddRoutes();
           page_init();
