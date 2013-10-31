@@ -4,29 +4,31 @@
 
 /**
  *
- * @param $marker - an element placed in end of the page used to determine if we reached the bottom of the screen
+ *
  */
 
-function detect_bottom( event, $marker  ){
-    var   // parameters
+function detect_bottom( event ){
+
+    var // parameters
         distance = 20    // px from the bottom
-        , sleepTime = 1000// wait for 1s before trigger again
-        , interval = 200
+        , sleepTime = 1000// wait for 1s before trigger check
+        , interval = 250
         , explain = true
 
-
-// runtime variables
+        // runtime variables
         , myDebug = !explain
             ? function(){}
             : debug && $.isFunction(debug.info)
-                ? debug.info
-                : window.console && console.log
-                    ? console.log
-                    : function(){}
+            ? debug.info
+            : window.console && console.log
+            ? console.log
+            : function(){}
 
         , $document = $(document)
         , $window = $(window)
         , $body = $('body')
+        , $marker = $('<div id="bottom-marker" style="text-align:center"><span>&nbsp; ------ bottom marker ------- </span></div>').appendTo( $body )
+        , marker_height = $marker.height()
         , lastScrollTS = new Date().getTime()
         , lastScrollTop = 0
         , lastWindowHeight = 0
@@ -34,63 +36,64 @@ function detect_bottom( event, $marker  ){
         , triggeredTS = 0
         , triggeredWindowHeight = 0
         , timer
-        ;
+    ;
 
 
-    if( !$marker || !$marker instanceof(jQuery)){
-        // TODO add spinner ?
-        // TODO center
-        $marker = $('<div id="bottom-marker" style="align:center"><span>&nbsp; ------ bottom marker ------- </span></div>').appendTo( $body );
-    }
-
-    function again(){
-        //   myDebug('delayed check');
-        check_if_bottom();
-    }
-
-
-    function check_if_bottom (event){
+   function check (event){
         clearTimeout(timer);
-        var nowTS = new Date().getTime();
+        var nowTS = new Date().getTime(), t;
         if( event && event.type == 'resize' ){
-            lastWindowHeight = lastScrollTop = 0; // new window size. check again
-            // myDebug('Resizing wait... ');
-            lastScrollTS = nowTS; // this is to trigger interval delay, next bellow
-        }
-        if(  nowTS - lastScrollTS  < interval ){
-            timer = setTimeout( again, nowTS - lastScrollTS  +  interval /2 );
-            return;
-
-
+            lastWindowHeight = lastScrollTop = 0; // new window size. check check
+            timer = setTimeout( check, interval );
+            myDebug('Resizing wait... ');
+        }else if(  nowTS - lastScrollTS  < interval ){
+            t = nowTS - lastScrollTS  +  interval /2;
+            timer = setTimeout( check, t );
+            //myDebug( 'Throttle calls: check again in ' + t + 'ms');
         }else if( nowTS - triggeredTS < sleepTime ){
-            // myDebug( 'Sleeping: check again in ' + (nowTS - triggeredTS  + interval /2 ) + 'ms');
-            timer = setTimeout( again,  nowTS - triggeredTS + interval /2);
-            return;
+            t = nowTS - triggeredTS  + interval /2;
+            timer = setTimeout( check,  t );
+            myDebug( 'Sleep for another ' + t + 'ms after the "page_bottom_detected" event, before checking again.');
         }else{
-            lastScrollTS = nowTS;
             var window_height = $window.height(),
-                footerHeight = window_height - ($marker.offset().top + $marker.height()),
+                footerHeight  = window_height - ($marker.offset().top + marker_height),
                 thisScrollTop = $document.scrollTop();
 
             if( thisScrollTop - lastScrollTop < 1 ){
-                //myDebug("Canceled. Not moving down");
-            }else if( triggeredTS && window_height - lastWindowHeight < 10 ){
-                myDebug("Canceled. The window has not grown since the last 'page_bottom' event.");
+                //myDebug("Canceled. Moving Up.");
+//            }else if( triggeredTS && ( triggeredWindowHeight >=  window_height   )){ // ||  window_height - lastWindowHeight < 10
+//                myDebug("Canceled. The window has not grown since the last 'page_bottom' event.");
+            }else if(triggeredTS) {
+                myDebug("Canceled. Wait for 'page_updated' event");
             }else if( (thisScrollTop + window_height + distance) >= window_height - footerHeight) {
                 myDebug( 'page_bottom_detected triggered, window_height:' + window_height );
                 $body.trigger('page_bottom_detected', [nowTS, window_height]);
                 triggeredTS = nowTS;
                 triggeredWindowHeight = window_height;
-            }else{
-                triggeredTS = 0;
             }
-            lastScrollTop = thisScrollTop;
-            lastWindowHeight = window_height;
-        }
-    }
 
-    $window.scroll( check_if_bottom );
-    $window.resize( check_if_bottom );
-    check_if_bottom();
+            lastScrollTop    = thisScrollTop;
+            lastWindowHeight = window_height;
+            lastScrollTS     = nowTS;
+
+            if( window_height > triggeredWindowHeight + distance ){
+                triggeredTS = triggeredWindowHeight = 0;
+                // now the event can trigger again
+            }
+        }
+   }
+
+    $window.scroll( check );
+    $window.resize( check );
+    check();
+
+    /**
+     *  this allow the 'page_bottom_detected' to be triggered again
+     */
+    $body.on('page_updated', function(event){
+        lastWindowHeight = lastScrollTS = triggeredTS = triggeredWindowHeight = 0;
+        check();
+    });
+
 }
 $('body').on('page_bottom_detection', detect_bottom);
