@@ -163,6 +163,13 @@ box.on('init', function (App, Config, done) {
     box.utils.later( done, null, '+' + ( new Date().getTime() - ts) + 'ms route "links.js" initialised.');
 });
 
+function link_delete( req, id ){
+    id = id || req.data.id;
+    box.invoke('link.delete2',id, function(err, found ){
+        req.io.emit('link.deleted', { param:req.data, error:err, found:found } );
+    });
+}
+
 
 box.on('init.attach', function (app, config,  done) {
     var ts = new Date().getTime();
@@ -172,17 +179,15 @@ box.on('init.attach', function (app, config,  done) {
            .handler
     );
 
-    box.on('link_process',  link_process);
-    box.on('link_add',      link_add );
-    box.on('link.fetch',    job_fetch_link);
+    box.on('Link__Process',  link_process);
+    box.on('Link__Add',      link_add );
+    box.on('Link__Fetch',    job_fetch_link);
+    box.on('Link__Delete',   link_delete);
+
 
     app.io.route('link', {
 
-        remove: function(req){
-            box.invoke('link.delete2', req.data.id, function(err, found ){
-                req.io.emit('link.deleted', { param:req.data, error:err, found:found } );
-            });
-        },
+        remove: link_delete,
 
         add:function(req){
             var url = req.data.value.trim()

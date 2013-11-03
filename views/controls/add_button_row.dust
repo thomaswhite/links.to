@@ -1,6 +1,7 @@
 {#user Collection="{collection}"}
-    <div class="row">
-        <div class="span12 button">
+  {@eq value="{user._id}" key="{owner}"}
+     <div class="row">
+        <div class="span8 vTop">
             {@select key="{pageParam.route}"}
                 {@eq value="collection:list" }
                     {>"controls/add_button_{addButton.type}"/}
@@ -14,6 +15,9 @@
                     {>"controls/add_button_{addButton.type}"/}
                 {/eq}
             {/select}
+              {+extraButtons/}
         </div>
-    </div>
+     </div>
+ {/eq}
 {/user}
+

@@ -1,19 +1,21 @@
 
+function rowIDs($rows){
+   var IDs = [], id;
+    $rows.each( function(i,o){
+        if( (id = $(this).data('id'))){
+            IDs.push(id);
+        }
+    });
+    return IDs;
+}
+
 function fetchNorReadyLinks( event, selector, refresh  ){
     if( event){
         selector = event.data.selector;
         refresh  = event.data.refresh;
     }
     selector =  selector || '.row'; // refresh the whole collection
-    var IDs = []
-        , $notReady = $(selector).each( function(i,o){
-            var id = $(this).data('id');
-            if( id ){
-                IDs.push(id);
-            }
-        })
-        ;
-
+    var IDs = rowIDs( $(selector) );
     if( IDs.length ){
         socket.emit('collection:fetchNotReadyLinks', {
                 emitted:'collection:fetchNotReadyLinks',
@@ -27,7 +29,37 @@ function fetchNorReadyLinks( event, selector, refresh  ){
     }
 }
 
+function deleteNoFoundLinks(event ){
+    var IDs = rowIDs($('#grid div.link-content a.notFound').closest('.row')),
+        btn = event.target,
+        $btn = $(btn);
+
+    if( IDs.length ){
+        socket.emit('collection:deleteMissingLinks', {
+                emitted:'collection:deleteMissingLinks',
+                coll_id    : pageParam.coll_id,
+                missingID : IDs,
+                route:'/coll/remove404'
+            },
+            function( response ){
+                 socketResponseCommon(response);
+                 $btn.hide(400);
+            }
+        );
+    }
+    return false;
+}
+
+var notFound;
+
 head.ready(function() {
     fetchNorReadyLinks(null, '.row.notReady');
     $('.refresh-coll').click({selector:'.row', refresh:true}, fetchNorReadyLinks );
+
+    notFound = $('#grid div.link-content a.notFound');
+    if( notFound.length ){
+        $('#delete404').css('display', 'inline-block');
+        $('body').on('click', '#delete404',     deleteNoFoundLinks);
+    }
+
 });

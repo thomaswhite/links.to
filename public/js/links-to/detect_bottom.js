@@ -20,7 +20,7 @@ function detect_bottom( event, options ){
         , $document = $(document)
         , $window = $(window)
         , $body = $('body')
-        , $marker = options.$marker && (options.$marker instanceof jQuery )? options.$marker: ('<div id="bottom-marker" style="text-align:center"><span>&nbsp; ------ bottom marker ------- </span></div>').appendTo( $body )
+        , $marker = options.$marker && (options.$marker instanceof jQuery )? options.$marker: $('<div id="bottom-marker" style="text-align:center"><span>&nbsp; ------ bottom marker ------- </span></div>').appendTo( $body )
         , marker_height = $marker.height()
         , lastScrollTS = new Date().getTime()
         , lastScrollTop = 0

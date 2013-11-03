@@ -541,6 +541,12 @@ a.notFound:link {
   text-decoration: line-through;
   color: red;
 }
+.vTop * {
+  vertical-align: top;
+}
+.hidden2 {
+  display: none;
+}
 .my-collection {
   color: cornflowerblue;
 }

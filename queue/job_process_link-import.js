@@ -29,7 +29,7 @@ module.exports = {
             }
         ;
         // todo imported_from will be removed after the import becomes stable
-        box.invoke('link_process',   link.href, job.data.collectionID, param, null, {import: link}, function(err, oAdded_Link, oURL ){
+        box.invoke('Link__Process',   link.href, job.data.collectionID, param, null, {import: link}, function(err, oAdded_Link, oURL ){
             Done(err);
         });
     }

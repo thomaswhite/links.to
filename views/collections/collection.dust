@@ -1,3 +1,14 @@
+{<extraButtons}
+    {^collection.links}
+          <span class="btn-group">
+            <a class="btn btn-danger"  href="/coll/{collection._id}/delete" title="Delete"><i class="icon-white icon-trash"></i></a>
+          </span>
+     {:else}
+       <a class="btn btn-warning edit-btn refresh-coll" href="#refresh" title="refresh"><i class="icon-refresh"></i></a>
+       <a class="btn btn-danger delete-btn delete-404  hidden2" id="delete404"  href="#delete404" title="Delete missing links"><i class="icon-trash"></i> Missing</a>
+    {/collection.links}
+{/extraButtons}
+
 {#collection}
 <div id="{contentID}">
   <div class="row">

@@ -303,9 +303,7 @@ box.on('init.attach', function (app, config,  done) {
            var User = req.session.User;
 
            if( !User ){
-               req.io.respond({
-                   result:'timeout'
-               });
+               req.io.respond({ result:'timeout' });
            }else{
                box.emit('collection.delete', req.data.id, function(err, result){
                    req.io.respond({
@@ -313,6 +311,33 @@ box.on('init.attach', function (app, config,  done) {
                        error:err
                    });
                    req.io.emit('collection.deleted', {param:req.data, result:result} );
+               });
+           }
+       },
+
+       deleteMissingLinks:function(req){
+           var User = req.session.User, param;
+           if( !User ){
+               req.io.respond({ result:'timeout' });
+           }else{
+               param = _.merge({}, req.data);
+               box.emit( 'collection.get.one', param.coll_id, function( err, collection ){
+                   if( collection.owner != User._id ){
+                       req.io.respond({ result:'timeout' });
+                   }else{
+                       async.map(
+                           param.missingID,
+                           function(id, done){
+                               box.emit('Link__Delete', req, id, done);
+                           },
+                           function(err, results){
+                               req.io.respond({ result:err?'error':'ok', request:req.data, err: err, data: results });
+                               if( err ){
+                                   debug('deleteMissingLinks error %j', err );
+                               }
+                           }
+                       );
+                   }
                });
            }
        },
@@ -337,7 +362,7 @@ box.on('init.attach', function (app, config,  done) {
                        link.link_id = link._id;
                        delete link._id;
                        link.refresh = resp_param.refresh;
-                       box.invoke('link.fetch',  link, function(err, o){
+                       box.invoke('Link__Fetch',  link, function(err, o){
                            if(err){
                                done(err);
                            }else{
@@ -355,20 +380,12 @@ box.on('init.attach', function (app, config,  done) {
                    if( req.data.refresh ){
                        box.invoke('link.mark-for-refresh', req.data.notReadyID, req.data.refresh, function( err ){
                            async.mapLimit(aLinks, 5, fetch, function(err, links_results){// links_results contain list of links_id
-                                   if( err ){
-                                       req.io.respond({ result:'error', request:req.data, err: err });
-                                   }else{
-                                       req.io.respond({ result:'ok', request:req.data, data: links_results });
-                                   }
+                               req.io.respond({ result:err?'error':'ok', request:req.data, err: err, data: links_results });
                            });
                        });
                    }else{
                        async.mapLimit(aLinks, 10, fetch, function(err, links_results){// links_results contain list of links_id
-                               if( err ){
-                                   req.io.respond({ result:'error', request:req.data, err: err });
-                               }else{
-                                   req.io.respond({ result:'ok', request:req.data, data: links_results });
-                               }
+                           req.io.respond({ result:err?'error':'ok', request:req.data, err: err, data: links_results });
                         });
                    }
                }
