@@ -214,5 +214,18 @@ box.on('db.init', function(  Config, done ){
         );
     });
 
+    box.on('link.set-state', function( id, state, callback ){
+        if( callback ){
+            Links.updateById( id, { $set:{state:state }}, callback);
+        }else{
+            Links.updateById( id, { $set:{state:state }}, { safe: false });
+        }
+    });
+
+    box.on('link.update-fast', function( id, o ){
+        Links.updateById( id, { $set:o }, { safe: false } );
+    });
+
+
     box.utils.later( done, null, 'db:links');
 });

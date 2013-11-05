@@ -158,9 +158,25 @@ box.on('db.init', function( Config, done ){
     box.on('url.update', function( id, oURL, callback ){
         URLs.updateById( id, { $set:oURL }, { safe: true }, callback );
     });
-    box.on('url.update-fast', function( id, oURL, callback ){
-        URLs.updateById( id, { $set:oURL }, { safe: false }, callback );
+    box.on('url.update-fast', function( id, oURL ){
+        URLs.updateById( id, { $set:oURL }, { safe: false } );
     });
+
+    box.on('url.set-state', function( id, state, callback ){
+        var u = {
+            state:state,
+            updated: new Date()
+        };
+        if(  state === 'fetching' ){
+            u.start_fetching = new Date();
+        }
+        if( callback ){
+            URLs.updateById( id, { $set:u }, callback);
+        }else{
+            URLs.updateById( id, { $set:u}, { safe: false });
+        }
+    });
+
 
     box.on('url.set-page-id', function( id, page_id, callback  ){
         box.db.coll.pages.updateById(  page_id, { $set:{url_id: id}},{ safe: false }); // URLs.col.ObjectID()
