@@ -679,6 +679,9 @@ div.tab-content {
 .progress {
   margin-bottom: 5px;
 }
+.breadcrumb {
+  padding-left: 0;
+}
 .row.table-header {
   margin-top: .8em;
 }

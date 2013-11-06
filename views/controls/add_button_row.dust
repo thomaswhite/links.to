@@ -15,7 +15,7 @@
                     {>"controls/add_button_{addButton.type}"/}
                 {/eq}
             {/select}
-              {+extraButtons/}
+            {+extraButtons/}
         </div>
      </div>
  {/eq}

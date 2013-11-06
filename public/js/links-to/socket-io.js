@@ -52,10 +52,7 @@ socket.on('link-added', function( data ){
     debug.log ('link-added', data);
     // replace the waiting sign with the new link content
 });
-socket.on('link.updated', function( data ){
-    debug.log ('link.updated', data);
-    // replace the waiting sign with the new link content
-});
+
 
 
 

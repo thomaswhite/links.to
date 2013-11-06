@@ -1,6 +1,12 @@
 /**
  * 25/10/2013
 
+ todo: fix delete link
+ todo: Delete missing 404
+ todo: collections - next page
+ todo: collections - prev/next collection buttons/panel on the right
+
+
  todo: Import cancel
  todo: parse the Head only when fetch the page. body parse and  content tags as jobs or when the folder is opened.
  todo: navigation tags (when import folders) and import tags
