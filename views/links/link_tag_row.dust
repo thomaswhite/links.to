@@ -10,6 +10,7 @@
                {:else}
                <a class="btn btn-success btn-mini "  href="#" >Edit</a>
                {/notFound}
+
                <a class="btn btn-danger btn-mini linkDelete" data-context='{~lb}"route":"/link/delete", "id":"{_id}"{~rb}' >Delete</a>
             {/eq}
         </span>
