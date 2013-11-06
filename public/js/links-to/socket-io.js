@@ -9,16 +9,14 @@ var socket = io.connect(''),
     socketData = {} // saved by pager URL
     ;
 
-
-
-socket.on('connecting',     function() {     debug.log('socket.io connecting...');});
-socket.on('reconnecting',   function() {     debug.log('socket.io reconnecting...');});
-socket.on('connect',        function() {     debug.log('socket.io connected!');});
-socket.on('reconnect',      function() {     debug.log('socket.io reconnect');});
-socket.on('disconnect',     function () {          debug.log('socket.io disconnected');});
-socket.on('error',          function (data ) {     debug.log('socket.io error', data);});
-socket.on('reconnect_failed', function () {     debug.log('socket.io reconnect failed');});
-socket.on('connect_failed', function () {       debug.log('socket.io connect failed');}); // "connect_failed" is emitted when socket.io fails to establish a connection to the server and has no more transports to fallback to.
+socket.on('connecting',     function() {    debug || debug.log('socket.io connecting...');});
+socket.on('reconnecting',   function() {    debug ||  debug.log('socket.io reconnecting...');});
+socket.on('connect',        function() {    debug ||  debug.log('socket.io connected!');});
+socket.on('reconnect',      function() {    debug ||  debug.log('socket.io reconnect');});
+socket.on('disconnect',     function () {   debug ||  debug.log('socket.io disconnected');});
+socket.on('error',          function (data ) {  debug || debug.log('socket.io error', data);});
+socket.on('reconnect_failed', function () {     debug || debug.log('socket.io reconnect failed');});
+socket.on('connect_failed', function () {       debug || debug.log('socket.io connect failed');}); // "connect_failed" is emitted when socket.io fails to establish a connection to the server and has no more transports to fallback to.
 
 socket.on('collection.adding', function( data ){
     debug.log ('collection-adding', data);

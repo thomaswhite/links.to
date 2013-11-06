@@ -1,0 +1,9 @@
+{#user Collection="{collection}"}
+     <div class="row">
+        <div class="span8 vTop">
+            {>"controls/add_button_{addButton.type}"/}
+            {+extraButtons/}
+        </div>
+     </div>
+{/user}
+

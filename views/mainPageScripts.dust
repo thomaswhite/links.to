@@ -2,7 +2,7 @@
   head.js(
       {jquery:"//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.js"},
       {dust:"/js/dust-core-2.0.3.js"},
-      {dust_helpers:"/js/dust-helpers.js"},
+      {dust_helpers:"/js/dust-helpers-1.1.1.js"},
       {moment:"/js/moment.js"},
       {dust_templates: "/templates/all.js"},
       {page:"/js/page.js"},

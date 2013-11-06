@@ -94,7 +94,7 @@ window.debug = (function(){
       that[ method ] = function() {
         log_level !== 0 && con && con[ method ]
           && con[ method ].apply( con, arguments );
-      }
+      };
       
     })( pass_methods[idx] );
   }

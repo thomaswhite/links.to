@@ -56,7 +56,7 @@ box.on('init', function (App, Config, done) {
     });
 
     app.io.configure(function() {
-            app.io.enable('browser client minification');  // send minified client
+           //  app.io.enable('browser client minification');  // send minified client
             //    app.io.enable('browser client gzip');          // gzip the file
             // app.io.set('log level', 1);                    // reduce logging
     });

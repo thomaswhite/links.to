@@ -12,7 +12,7 @@
  * @param target
  * @param contentAction: 1 or append, -1 or prepend, 0 or replace
  */
-function myRender(tempateID, data, $target, contentAction) {
+function myRender(tempateID, data, $target, contentAction, done ) {
     if (!tempateID) { return; }
 
     var base = dust.makeBase({
@@ -55,8 +55,10 @@ function myRender(tempateID, data, $target, contentAction) {
                         $target.html(out);
                         break;
                 }
+                if($.isFunction(done)){
+                    done(err, out );
+                }
             }
-            return out;
         });
     }catch(e){
         debud.error(e);
@@ -76,7 +78,9 @@ var pageEvents = {
         });
     },
     insertLink:function(event, data, Context, routeIO){
-        myRender( Context.page.tempateID, data, $("#token_" + data.param.token  ) , 'replace-slide'); // Context.page.contentAction
+        myRender( Context.page.tempateID, data, $("#token_" + data.param.token  ) , 'replace-slide', function(err, out){
+            var dummy = 1;
+        }); // Context.page.contentAction
     },
     linkUpdated:function(event, data, Context, routeIO){
         myRender( Context.page.tempateID, data.link, $("#link_" + data.link._id  ) , Context.page.contentAction); // Context.page.contentAction
@@ -208,8 +212,9 @@ function page_init() {
     socket.on('link.saved',         socketEvent_common);
     socket.on('link.updated',       socketEvent_common);
 
-    window.onerror = function(error, url, line, stack) {
-        debug.error(error, url, line, stack);
+    window.onerror = function(error, url, line, stack, extra) {
+        debug.error(error, url, line, stack, extra);
+        return true;
     };
 
 }

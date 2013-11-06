@@ -1,5 +1,4 @@
 {#user Collection="{collection}"}
-  {@eq value="{user._id}" key="{owner}"}
      <div class="row">
         <div class="span8 vTop">
             {@select key="{pageParam.route}"}
@@ -18,6 +17,5 @@
             {+extraButtons/}
         </div>
      </div>
- {/eq}
 {/user}
 

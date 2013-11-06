@@ -1,7 +1,6 @@
 /**
  * 25/10/2013
 
- todo: fix delete link
  todo: Delete missing 404
  todo: collections - next page
  todo: collections - prev/next collection buttons/panel on the right
