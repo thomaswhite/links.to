@@ -1,18 +1,13 @@
-{#display.notFound}
-  {#user}
-    {@eq value="{user._id}" key="{owner}"}
-      <div class="blocked-link" id="link_{_id}">
-          {>"links/link_content" link_id="{_id}"/}
-      </div>
-    {/eq}
-  {/user}
-{:else}
-  <div class="blocked-link" id="link_{_id}">
-      {?display}
-          {>"links/link_content" link_id="{_id}"/}
-      {/display}
-      {^display}
-         <div>No link data.</div>
-      {/display}
-  </div>
-{/display.notFound}
+<div class="blocked-link" id="link_{_id}">
+    {^display}
+        <div>No link data.</div>
+    {:else}
+        {?display.notFound}
+            {@eq value="{user._id}" key="{owner}"}
+               {>"links/link_content" link_id="{_id}"/}
+            {/eq}
+        {:else}
+            {>"links/link_content" link_id="{_id}"/}
+        {/display.notFound}
+    {/display}
+</div>

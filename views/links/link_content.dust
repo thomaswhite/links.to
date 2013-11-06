@@ -1,28 +1,26 @@
 <div class="row link-title {^images.length}noImg{/images.length} {@ne key="{state}" value="ready"}notReady{/ne}" data-id="{_id}">
-    {#display}
-        <div class="span8 link-content">
-            {?thumbnail}
-                <ul class="iddCont imgDropdown eipURL" data-url="/link/{_id}/eip" >
-                    <li>
-                        <a href="#" class="thumbnail" data-imagePos="{imagePos}">
-                            <img src="{thumbnail}">
-                        </a>
-                    </li>
-                    {#images}
-                    <li>
-                        <a href="#" class="thumbnail inactive" data-imagePos="{$idx}"><img src="{src}"></a>
-                    </li>
-                    {/images}
-                </ul>
-            {/thumbnail}
-            <a class="link-title wrap {?canEdit}eip ta{/canEdit} {?notFound}notFound{/notFound}" href="{url}?linked-from=www.links.to/w/c/{collection_id}" target="_blank">{title|s}</a>
-            {?notFound}<br/>{/notFound}
-            {?autor}<span class="author">Author:<span class="author_name">{author}</span></span>{/autor}
-            {?description}<span title="description" class="description wrap {?canEdit}eip ta{/canEdit}">{description}</span>{/description}
-            {^description}<span title="Summary" class="description wrap ta summary">summary:{summary}</span>{/description}
-            {link_id}
-            {>"links/link_tag_row" /}
-        </div>
-    {/display}
-     {link_id}
+    <div class="span8 link-content">
+      {#display}
+        {?thumbnail}
+            <ul class="iddCont imgDropdown eipURL" data-url="/link/{_id}/eip" >
+                <li>
+                    <a href="#" class="thumbnail" data-imagePos="{imagePos}">
+                        <img src="{thumbnail}">
+                    </a>
+                </li>
+                {#images}
+                <li>
+                    <a href="#" class="thumbnail inactive" data-imagePos="{$idx}"><img src="{src}"></a>
+                </li>
+                {/images}
+            </ul>
+        {/thumbnail}
+        <a class="link-title wrap {?canEdit}eip ta{/canEdit} {?notFound}notFound{/notFound}" href="{url}?linked-from=www.links.to/w/c/{collection_id}" target="_blank">{title|s}</a>
+        {?notFound}<br/>{/notFound}
+        {?autor}<span class="author">Author:<span class="author_name">{author}</span></span>{/autor}
+        {?description}<span title="description" class="description wrap {?canEdit}eip ta{/canEdit}">{description}</span>{/description}
+        {^description}<span title="Summary" class="description wrap ta summary">summary:{summary}</span>{/description}
+      {/display}
+      {>"links/link_tag_row" /}
+    </div>
 </div>

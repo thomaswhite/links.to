@@ -19,44 +19,48 @@ function myRender(tempateID, data, $target, contentAction) {
         user:socketContext.user,
         pageParam:pageParam
     });
-
+    if( !$target ){
+        throw  'myRender: missing target';
+    }
     data.user =   socketContext.user;
-    dust.render(tempateID,  base.push(data), function(err, out) {
-        if (err) {
-            debug.error(err.message);
-        }else if( !$target ){
-            debug.log( out );
-        } else {
-            var $out = $(out);
-            switch( contentAction ){
-                case 'append' :
-                case 1 :
-                    $out.appendTo($target).hide().slideDown(400);
-                    break;
+    try{
+        dust.render(tempateID,  base.push(data), function(err, out) {
+            out = $.trim(out) || '--empty--';
+            if (err) {
+                debug.error( 'myRender: ' + err.message);
+            } else {
+                var $out = $(out);
+                switch( contentAction ){
+                    case 'append' :
+                    case 1 :
+                        $out.appendTo($target).hide().slideDown(400);
+                        break;
 
-                case 'prepend' :
-                case -1:
-                    $out.prependTo($target).hide().slideDown(400);
-                    break;
+                    case 'prepend' :
+                    case -1:
+                        $out.prependTo($target).hide().slideDown(400);
+                        break;
 
-                case 'replace-slide':
-                    $target.html(out).hide().slideDown(250);
-                    break;
+                    case 'replace-slide':
+                        $target.html(out).hide().slideDown(250);
+                        break;
 
-                case '$replace':
-                    $target.replaceWith( $out );
+                    case '$replace':
+                        $target.replaceWith( $out );
+                        break;
 
-                    break;
-
-                case 'replace':
-                case 'replace-content':
-                default:
-                    $target.html(out);
-                    break;
+                    case 'replace':
+                    case 'replace-content':
+                    default:
+                        $target.html(out);
+                        break;
+                }
             }
-        }
-        return out;
-    });
+            return out;
+        });
+    }catch(e){
+        debud.error(e);
+    }
 }
 
 
@@ -141,13 +145,24 @@ function addDustHelpers(){
  * @param data
  */
 function socketEvent_common(data){
-    var Context = page_context( null,null, null, data.param.route );
-    debug.log ( 'socketEvent_common, data:', data, ' context:', Context );
-    $('body').trigger(Context.page.eventDone, [ data, Context, data.param.route ] );
+    try{
+        var Context = page_context( null,null, null, data.param.route );
+        $('body').trigger(Context.page.eventDone, [ data, Context, data.param.route ] );
+        debug.log ( 'socketEvent_common, data:', data, ' context:', Context );
+    }catch(e){
+        debud.error(e);
+    }
 }
 
 function socketResponseCommon( response, on, noLog, done ){
-    on = on || (response.param && response.param.emitted ? response.param.emitted :'') || '?socketResponseCommon?';
+    if( !on && response.param && response.param.emitted ){
+        on =  response.param.emitted;
+    }
+    if( !on && response.request && response.request.emitted ){
+        on =  response.request.emitted;
+    }
+    on = on || '?socketResponseCommon?';
+
     if( !noLog ){
         debug.log ( on, response );
     }
@@ -172,28 +187,29 @@ function page_bottom_detected(event, nowTS, window_height){
 function page_init() {
     addDustHelpers();
 
-    $('body').on('click', 'button.btnAdd',     fnBtnAdd);
-    $('body').on('click', 'a.deleteIcon.coll', fnBtnDelete);
-    $('body').on('click', 'a.linkDelete',      fnBtnDelete);
-    $('body').on('keydown', 'input.addInput',  inputCR);
-    $('body').on('page_bottom_detected',       page_bottom_detected);
-
-    $('body').trigger('page_bottom_detection');
-
+    $('body')
+        .on('click', 'button.btnAdd',     fnBtnAdd)
+        .on('click', 'a.deleteIcon.coll', fnBtnDelete)
+        .on('click', 'a.linkDelete',      fnBtnDelete)
+        .on('keydown', 'input.addInput',  inputCR)
+        .on('page_bottom_detected',       page_bottom_detected)
+        .trigger('page_bottom_detection')
+    ;
 
     $.each(pageEvents, function(id, fn ){
         $('body').on(id, fn);
     });
 
 
-//    detect_bottom();
-
-        // TODO if the current page is /collections/mine, just replace the waiting sign with the new collection name
-// else go to /collections/mine
+// TODO if the current page is /collections/mine, just replace the waiting sign with the new collection name else go to /collections/mine
     socket.on('collection.added',   socketEvent_common);
     socket.on('collection.deleted', socketEvent_common);
     socket.on('link.deleted',       socketEvent_common);
     socket.on('link.saved',         socketEvent_common);
     socket.on('link.updated',       socketEvent_common);
+
+    window.onerror = function(error, url, line, stack) {
+        debug.error(error, url, line, stack);
+    };
 
 }

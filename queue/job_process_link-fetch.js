@@ -66,12 +66,20 @@ function update_link_display( oLink, oURL, done ){
      * @param job: link_id, url_id, url
      * @param Done
      *
+     *  Asses the situation first and then choose the action
+     *   action could be:
+     *      error
+     *      link-ready
+     *      url-ready
+     *      html-ready
+     *
      */
 
     processor : function (job, Done){
         var sURL = job.data.url
             , request_options = _.merge( {}, box.config.request.default_request_settings, {uri:sURL, jar:request.jar()  })
             , hard_refresh
+            , action = 'none'
         ;
         if( !sURL ){
             dummy = 1;
