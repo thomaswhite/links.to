@@ -67,22 +67,22 @@ function myRender(tempateID, data, $target, contentAction, done ) {
 
 
 var pageEvents = {
-    renderContent:function(event, data, Context, routeIO){
+    "renderContent":function(event, data, Context, routeIO){
         //Context = Context || page_context(null,null, routeIO);
         myRender( Context.page.tempateID, data, Context.$container, Context.page.contentAction);
     },
 
-    slideUpDeleted:function(event, data, Context, routeIO){
+    "slideUpDeleted":function(event, data, Context, routeIO){
         $('#' + Context.page.id_prefix + data.param.id ).slideUp(500, function(){
             $(this).remove();
         });
     },
-    insertLink:function(event, data, Context, routeIO){
+    "insertLink":function(event, data, Context, routeIO){
         myRender( Context.page.tempateID, data, $("#token_" + data.param.token  ) , 'replace-slide', function(err, out){
             var dummy = 1;
         }); // Context.page.contentAction
     },
-    linkUpdated:function(event, data, Context, routeIO){
+    "linkUpdated":function(event, data, Context, routeIO){
         myRender( Context.page.tempateID, data.link, $("#link_" + data.link._id  ) , Context.page.contentAction); // Context.page.contentAction
     }
 };
@@ -153,7 +153,7 @@ function addDustHelpers(){
 function socketEvent_common(data){
     try{
         var Context = page_context( null,null, null, data.param.route );
-        $('body').trigger(Context.page.eventDone, [ data, Context, data.param.route ] );
+        $.publish(Context.page.eventDone, [ data, Context, data.param.route ] );
         debug.log ( 'socketEvent_common, data:', data, ' context:', Context );
     }catch(e){
         debud.error(e);
@@ -221,7 +221,7 @@ function page_init() {
     ;
 
     $.each(pageEvents, function(id, fn ){
-        $('body').on(id, fn);
+        $.subscribe(id, fn);
     });
 
 
