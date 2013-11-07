@@ -101,7 +101,9 @@ function fnBtnAdd(event){
             var param = Context.page.adding;
             myRender( param.tempateID, dataDone, $(param.containerID), param.contentAction  );
             //if( dataDone.state != 'found'){
-                setTimeout('$("#token_"' + dataDone.token + '" ).slideUp(400)', 1000);
+                setTimeout(function(){
+                    $("#token_" + dataDone.token ).slideUp(400)
+                }, 1000);
             //}
         }
         return;
@@ -188,7 +190,25 @@ function page_bottom_detected(event, nowTS, window_height){
     debug.info('page_bottom_detected, received. ts:' + nowTS + ', window_height:' + window_height );
 }
 
+
 function page_init() {
+
+    /*! Tiny Pub/Sub - v0.7.0 - 2013-01-29
+     * https://github.com/cowboy/jquery-tiny-pubsub
+     * Copyright (c) 2013 "Cowboy" Ben Alman; Licensed MIT */
+    (function($) {
+        var o = $({});
+        $.subscribe = function() {
+            o.on.apply(o, arguments);
+        };
+        $.unsubscribe = function() {
+            o.off.apply(o, arguments);
+        };
+        $.publish = function() {
+            o.trigger.apply(o, arguments);
+        };
+    }(jQuery));
+
     addDustHelpers();
 
     $('body')
@@ -205,7 +225,7 @@ function page_init() {
     });
 
 
-// TODO if the current page is /collections/mine, just replace the waiting sign with the new collection name else go to /collections/mine
+// TODO when adding a collection if the current page is /collections/mine, just replace the waiting sign with the new collection name else go to /collections/mine
     socket.on('collection.added',   socketEvent_common);
     socket.on('collection.deleted', socketEvent_common);
     socket.on('link.deleted',       socketEvent_common);
@@ -216,5 +236,7 @@ function page_init() {
         debug.error(error, url, line, stack, extra);
         return true;
     };
+
+
 
 }

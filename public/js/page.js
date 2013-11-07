@@ -92,8 +92,8 @@
     if (running) return;
     running = true;
     if (false === options.dispatch) dispatch = false;
-    if (false !== options.popstate) bindEvent( window, 'popstate', onpopstate  ); // window.addEventListener('popstate', onpopstate, false);
-    if (false !== options.click)    bindEvent( window, 'click', onclick, true );     // window.addEventListener('click', onclick, true
+    if (false !== options.popstate) addEvent( window, 'popstate', onpopstate  ); // window.addEventListener('popstate', onpopstate, false);
+    if (false !== options.click)    addEvent( window, 'click', onclick, true );     // window.addEventListener('click', onclick, true
 
     if (!dispatch) return;
     page.replace(location.pathname + location.search, null, true, dispatch);
@@ -120,7 +120,7 @@
   }
 
 
-    function bindEvent(el, eventName, eventHandler, firstThis ) {
+    function addEvent(el, eventName, eventHandler, firstThis ) {
         if (el.addEventListener){
             el.addEventListener(eventName, eventHandler, firstThis);
         } else if (el.attachEvent){
