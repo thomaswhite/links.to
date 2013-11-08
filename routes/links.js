@@ -227,6 +227,8 @@ box.on('init.attach', function (app, config,  done) {
                             explain:'Error saving link'
                         });
                     }else{
+                        param.emitted = 'link.saved';
+                        return;
                         req.io.emit( 'link.saved', {
                             result:'ok',
                             param: req.data,

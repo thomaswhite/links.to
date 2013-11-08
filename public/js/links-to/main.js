@@ -65,7 +65,7 @@ function myRender(tempateID, data, $target, contentAction, done ) {
     }
 }
 
-
+// $.subscribe(id
 var pageEvents = {
     "renderContent":function(event, data, Context, routeIO){
         //Context = Context || page_context(null,null, routeIO);
@@ -100,11 +100,11 @@ function fnBtnAdd(event){
         if( Context.page.routeIO == "link:add" ){
             var param = Context.page.adding;
             myRender( param.tempateID, dataDone, $(param.containerID), param.contentAction  );
-            //if( dataDone.state != 'found'){
+            if( 0 && dataDone.state != 'found'){
                 setTimeout(function(){
-                    $("#token_" + dataDone.token ).slideUp(400)
+                    $("#token_" + dataDone.token ).slideUp(400);
                 }, 1000);
-            //}
+            }
         }
         return;
     });
@@ -151,13 +151,9 @@ function addDustHelpers(){
  * @param data
  */
 function socketEvent_common(data){
-    try{
-        var Context = page_context( null,null, null, data.param.route );
-        $.publish(Context.page.eventDone, [ data, Context, data.param.route ] );
-        debug.log ( 'socketEvent_common, data:', data, ' context:', Context );
-    }catch(e){
-        debud.error(e);
-    }
+    var Context = page_context( null,null, null, data.param.route );
+    $.publish(Context.page.eventDone, [ data, Context, data.param.route ] );
+    debug.log ( 'socketEvent_common, data:', data, ' context:', Context );
 }
 
 function socketResponseCommon( response, on, noLog, done ){
@@ -190,27 +186,27 @@ function page_bottom_detected(event, nowTS, window_height){
     debug.info('page_bottom_detected, received. ts:' + nowTS + ', window_height:' + window_height );
 }
 
+/*! Tiny Pub/Sub - v0.7.0 - 2013-01-29
+ * https://github.com/cowboy/jquery-tiny-pubsub
+ * Copyright (c) 2013 "Cowboy" Ben Alman; Licensed MIT */
+function installPubSub($) {
+    var o = $({});
+    $.subscribe = function() {
+        o.on.apply(o, arguments);
+    };
+    $.unsubscribe = function() {
+        o.off.apply(o, arguments);
+    };
+    $.publish = function() {
+        o.trigger.apply(o, arguments);
+    };
+}
 
 function page_init() {
-
-    /*! Tiny Pub/Sub - v0.7.0 - 2013-01-29
-     * https://github.com/cowboy/jquery-tiny-pubsub
-     * Copyright (c) 2013 "Cowboy" Ben Alman; Licensed MIT */
-    (function($) {
-        var o = $({});
-        $.subscribe = function() {
-            o.on.apply(o, arguments);
-        };
-        $.unsubscribe = function() {
-            o.off.apply(o, arguments);
-        };
-        $.publish = function() {
-            o.trigger.apply(o, arguments);
-        };
-    }(jQuery));
+    installPubSub(jQuery);
+    $.each(pageEvents, function(id, fn ){  $.subscribe(id, fn); });
 
     addDustHelpers();
-
     $('body')
         .on('click', 'button.btnAdd',     fnBtnAdd)
         .on('click', 'a.deleteIcon.coll', fnBtnDelete)
@@ -219,11 +215,6 @@ function page_init() {
         .on('page_bottom_detected',       page_bottom_detected)
         .trigger('page_bottom_detection')
     ;
-
-    $.each(pageEvents, function(id, fn ){
-        $.subscribe(id, fn);
-    });
-
 
 // TODO when adding a collection if the current page is /collections/mine, just replace the waiting sign with the new collection name else go to /collections/mine
     socket.on('collection.added',   socketEvent_common);
@@ -236,7 +227,4 @@ function page_init() {
         debug.error(error, url, line, stack, extra);
         return true;
     };
-
-
-
 }
