@@ -48,19 +48,22 @@ function newCollection  (user, name, description){
 }
 
 function collectionList_defaultParam(filter, param){
-    return {
+    var p = {
         filter : _.merge( {}, filter),
         param  :  _.merge(  {page:1, limit:40, sort:{updated:-1, created:-1} }, param)
     };
+    p.param.skip = p.param.limit * (p.param.page - 1);
+    return p;
+
 }
 
 function collectionList_data( filter, param, user, callBack ){
     var Parameters =  collectionList_defaultParam(filter, param);
-    box.parallel('collections.list', Parameters.filter, Parameters.param.limit, Parameters.param.sort, function( err, result ){
+    box.invoke('collections.list', Parameters.filter, Parameters.param, function( err, result ){
         callBack( err, {
-            button_action:{route:'/coll/new'},
+            button_action:{route:'/colls/new'},
             title: 'All collection',
-            grid: box.utils.pickUpFromAsyncResult( result, 'collections-list' ),
+            grid:  result,
             user: user,
             canEdit:true,
             crumbs : breadcrumbs.make({ }),
@@ -75,8 +78,7 @@ function collectionList_data( filter, param, user, callBack ){
 
 function collectionList( req, res, next, filter, param ){
     var helpers = box.kleiDust.getDust().helpers
-
-        , Parameters =  collectionList_defaultParam(filter, param)
+        var Parameters =  collectionList_defaultParam(filter, param)
         , user  =  req.session && req.session.passport && req.session.passport.user ? JSON.parse(req.session.passport.user):''
         , base = box.dust.makeBase({
                 user:user,
@@ -85,17 +87,6 @@ function collectionList( req, res, next, filter, param ){
                     param: Parameters.param,
                     route:'collection:list'
                 }
-/*                , timeFromNow: function(chunk, ctx, bodies, params) {
-                    var value = helpers.tap(params.time, chunk, ctx);
-                    if( value ){
-                        return chunk.write( moment(value).fromNow() );
-                    }else{
-                        return chunk;
-                    }
-                    //chunk.write( value );
-                    //chunk.write(':' + ctx.current().value );
-                }
-*/
           })
         ;
 
@@ -120,39 +111,15 @@ function Mine (req, res, next ){
         user  = session && session.passport && session.passport.user ? JSON.parse(session.passport.user):null;
     //            , isOwner =  user._id ==  collection.owner ? true : ''
     if( user && user._id ){
-        collectionList(  req, res, next, {owner:  user._id });
+        collectionList(  req, res, next, {owner:  user._id}, {page:req.params.page });
     }else{
         next();
     }
 }
 
 function All ( req, res, next  ){
-    collectionList(  req, res, next );
+    collectionList(  req, res, next, {}, {page:req.params.page } );
 }
-
-/*
-function Add(req, res) {
-    var referer = req.headers.referer
-        , coll_name = req.body.collectionName || 'New collection'
-        , coll;
-    if( !req.user ){
-        context.Page2(req, res, 'add-button', {
-            add_link: '/coll/new'
-        });
-    }else{
-        coll = newCollection(req.user, coll_name.trim());
-        box.emit('collection.add', coll, function(err, collection ) {
-            if (err) {
-                context.notFound(res, 'db error while creating new collection.');
-            }else {
-                box.parallel('collection.added',  collection, function(err, result){
-                    res.redirect( referer  );
-                });
-            }
-        });
-    }
-}
-*/
 
 function Delete (req, res) {
     var referer = req.headers.referer
@@ -160,10 +127,10 @@ function Delete (req, res) {
         , User = req.session.User
         ;
     if( !User ){
-        res.redirect( '/coll');
+        res.redirect( '/colls');
     }else{
         box.emit('collection.delete', coll_id, function(err, aResult){
-            res.redirect( req.query.back || '/coll/mine');
+            res.redirect( req.query.back || '/colls/mine');
         });
     }
 
@@ -206,7 +173,7 @@ function Get_One (req, res) {
             console.error(  'collection.get.one', err);
         }
         if( err || !collection ){
-            res.redirect( '/coll' );
+            res.redirect( '/colls' );
         }else{
             var user  =  req.session && req.session.passport && req.session.passport.user ? JSON.parse(req.session.passport.user):''
     //            , isOwner =  user._id ==  collection.owner ? true : ''
@@ -240,17 +207,28 @@ box.on('init', function (App, Config, done) {
     app = App;
     config = Config;
     box.utils.later( done, null, '+' + ( new Date().getTime() - ts) + 'ms route "collections.js" initialised.');
+
+// https://github.com/visionmedia/express/blob/master/examples/params/app.js
+    App.param('page', function(req, res, next, page){
+        var num = parseInt(page, 10);
+        if( isNaN(num) ){
+            page = 1;
+        }
+        req.params.page = page;
+        next();
+    });
+
 });
 
 box.on('init.attach', function (app, config,  done) {
     var ts = new Date().getTime();
     app.use(
         box.middler()
-            .get('/coll/mine',       Mine)
-            .get('/coll',            All)
+            .get('/colls/mine/:page?', Mine)
+            .get('/colls/:page?',      All)
 //            .post('/coll/new',       Add)
-            .get(['/coll/:id', '/w/c/:id'], Get_One)
-            .get('/coll/:id/delete', Delete)
+            .get(['/colls/:id', '/w/c/:id'], Get_One)
+            .get('/colls/:id/delete', Delete)
             .handler
     );
 
@@ -268,6 +246,7 @@ box.on('init.attach', function (app, config,  done) {
            var User = req.session && req.session.passport && req.session.passport.user ?  JSON.parse( req.session.passport.user ):null
                , Parameters =  collectionList_defaultParam(req.data.filter, req.data.param)
                ;
+           // TODO: add page parameter
            collectionList_data( Parameters.filter, Parameters.param, User, function(err, displayBlock){
                req.io.respond({
                    req:req.data,

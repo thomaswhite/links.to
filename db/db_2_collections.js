@@ -55,15 +55,6 @@ box.on('db.init', function(  Config, done ){
         Collections.updateById( coll_id, {$set: o }, callback );
     });
 
-    box.on('collections.list', function( filter, limit, sort, callback){
-        Collections.find( filter , {limit:limit || 64, sort:sort || {updated:-1, created:-1}}, function(err, result){
-            if( result ){
-                result.type = 'collections-list';
-            }
-            callback(err, result);
-        });
-    });
-
     box.on('link.added', function( newLink, callback){
         var link_id =  newLink._id;
         Collections.update(
@@ -111,6 +102,23 @@ box.on('db.init', function(  Config, done ){
  */
 
 // =============================  updated =================================================
+
+
+
+    /**
+     *    {
+     *     filter : {
+     *     },
+           param  : {
+                page:1,
+                page_size:40,
+                limit:40,
+                sort:{updated:-1, created:-1}
+            }
+     */
+    box.on('collections.list', function( filter, param, callback){
+        Collections.find( filter, param, callback );
+    });
 
 
     box.on('collection.get.one', function( coll_id, callback){

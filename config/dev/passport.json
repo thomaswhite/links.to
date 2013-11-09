@@ -4,9 +4,9 @@
       "successRedirect":"/auth-after-success",
       "failureRedirect":"/auth-failed",
       "logoutRedirect":null,
-      "userHasEmail":"/coll/mine",
-      "afterEmailPing":"/coll/mine?emailPinged",
-      "afterEmailVerified":"/coll/mine"
+      "userHasEmail":"/colls/mine",
+      "afterEmailPing":"/colls/mine?emailPinged",
+      "afterEmailVerified":"/colls/mine"
     },
     "passports":[
       {

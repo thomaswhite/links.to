@@ -9,7 +9,7 @@
             <a class="brand" href="/">Links.To</a>
             <div class="nav-collapse">
               <ul class="nav">
-                    <li><a href="/coll">Collections</a></li>
+                    <li><a href="/colls">Collections</a></li>
                     <li><a href="/authors">Authors</a></li>
                     <li><a href="/tags">Tags</a></li>
                     <li><a href="/favorites">Favorites</a></li>
@@ -23,7 +23,7 @@
                      <li class="dropdown">
                         <a class="dropdown-toggle" data-toggle="dropdown" href="#">My Links <b class="caret"></b></a>
                         <ul class="dropdown-menu">
-                            <li><a href="/coll/mine">My collections</a></li>
+                            <li><a href="/colls/mine">My collections</a></li>
                             <li><a href="/tags/mine">My Tags</a></li>
                             <li><a href="/favorites/mine">My Favorites</a></li>
                             <li class="divider"></li>

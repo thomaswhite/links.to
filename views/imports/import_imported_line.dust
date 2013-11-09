@@ -1,7 +1,7 @@
 <div class="row" id="folder_{_id}">
       <div class="span2 coll-title">
        {#imported}
-          <a href="/coll/{_id}">{title}</a>
+          <a href="/colls/{_id}">{title}</a>
        {:else}
           <span>{title}</span>
        {/imported}

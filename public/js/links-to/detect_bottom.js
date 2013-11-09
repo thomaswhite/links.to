@@ -41,6 +41,7 @@ function detect_bottom( event, options ){
 
     ;
 
+
     interval = Math.max(50, interval);
 
     /**
@@ -88,7 +89,7 @@ function detect_bottom( event, options ){
                 myDebug("Canceled. Wait for 'page_updated' event");
             }else if( (thisScrollTop + window_height + distance) >= window_height - footerHeight) {
                 myDebug( 'page_bottom_detected triggered, window_height:' + window_height );
-                $body.trigger( eventName, [nowTS, window_height]);
+                $.publish( eventName, [nowTS, window_height]);
                 triggeredTS = nowTS;
                 triggeredWindowHeight = window_height;
             }
@@ -105,10 +106,10 @@ function detect_bottom( event, options ){
    check();
 
     /** this allow the 'page_bottom_detected' to be triggered again */
-    $body.on('page_updated', function(event){
+    $.subscribe('page_updated', function(event){
         lastWindowHeight = lastScrollTS = triggeredTS = triggeredWindowHeight = 0;
         check();
     });
-
 }
-$('body').on('page_bottom_detection', detect_bottom);
+$.subscribe('page_bottom_detection', { catchUp:true }, detect_bottom);
+//$('body').on('page_bottom_detection', detect_bottom);

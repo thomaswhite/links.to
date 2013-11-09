@@ -13,12 +13,12 @@
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/headjs/0.99/head.min.js"></script>
     <script>
       head.js(
-          {debug:"/js/ba-debug.js"},
+          {debug:"/js/ba-debug.min.js"},
+//        {log:"/js/consolelog.min.js"},
           {socket_io_core:"/socket.io/socket.io.js"},
           {socket_main:"/js/links-to/socket-io.js"},
-//         {log:"/js/consolelog.min.js"},
           function(){
-             debug.log( 'linksTo socket-io has loaded');
+             debug.log( 'linksTo socket-io loaded.');
           }
       );
       head.load(
@@ -38,7 +38,6 @@
     {+headContent/}
   </head>
   <body class="{+bodyClass/}">
-
     <div id="navbar">{>"navigation/navbar"/}</div>
     <div class="container" id="container">
         {+container}
@@ -55,8 +54,6 @@
         if( pageScripts.length) { head.js.applay(undefined,   pageScripts ); }
         if( pageCSS.length)     { head.load.applay(undefined, pageCSS ); }
     </script>
-
     {+pageBottom /}
-
   </body>
 </html>

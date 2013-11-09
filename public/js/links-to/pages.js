@@ -11,32 +11,32 @@ var pages = {
         containerID:'#container',
         contentID:'#coll-list-rows'
     },
-    '/coll':{
+    '/colls':{
         routeIO: 'collection:list',
         tempateID:'collections/collection_list_container',
         containerID:'#container',
         contentID:'#coll-list-rows'
     },
-    '/coll/mine': {
+    '/colls/mine': {
         routeIO:'collection:mine',
         tempateID:'collections/collection_list_container',
         containerID:'#container',
         contentID:''
     },
-    '/coll/:id':{
+    '/colls/:id':{
         routeIO:'collection:get',
         tempateID:'collections/collection_container',
         containerID:'#container',
         contentID:''
     },
-    '/coll/:id/delete': {
+    '/colls/:id/delete': {
         routeIO:'collection:delete',
         tempateID:'collections/collections-list',
         containerID:'#container',
         contentID:''
     },
 
-    '/coll/new':{
+    '/colls/new':{
         routeIO:'collection:add',
         tempateID:'collections/collection_list_add_line',
         containerID:'#coll-list-rows',
@@ -44,7 +44,7 @@ var pages = {
         value: '.addInput',
         eventDone:'renderContent'
     },
-    '/coll/delete':{
+    '/colls/delete':{
         routeIO:'collection:remove',
         closest:'.row',
         id_prefix:'coll_',
@@ -150,13 +150,14 @@ function page_not_found(context){
     // $('#content').html( context.pathname + ' not found');
 }
 
+
 function pageAddRoutes(){
     return;
 
     //page.base('/');
-    page('/coll',
+    page('/colls',
         function(context, next){
-            context.state.pageDef = context.pageDef || pages['/coll'];
+            context.state.pageDef = context.pageDef || pages['/colls'];
             context.state.pageParam = {
                 filter:{},
                 param:{ page:1 }
@@ -167,9 +168,9 @@ function pageAddRoutes(){
         getData,
         processRoute
     );
-    page('/coll/:id',
+    page('/colls/:id',
         function(context, next){
-            context.state.pageDef = context.pageDef || pages['/coll/:id'];
+            context.state.pageDef = context.pageDef || pages['/colls/:id'];
             context.state.pageParam = {
                 coll_id: context.params.id
             };
@@ -183,4 +184,5 @@ function pageAddRoutes(){
     page('*', page_not_found);
     page.start({dispatch:false});
 }
+$.subscribe('page-init', { catchUp:true }, pageAddRoutes);
 

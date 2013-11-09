@@ -99,7 +99,7 @@ function All (req, res, next ){
     if( user && user._id ){
         importLists(  req, res, next, {owner:  user._id });
     }else{
-        res.redirect( '/coll'  );  // not logged in
+        res.redirect( '/colls'  );  // not logged in
     }
 }
 
@@ -113,7 +113,7 @@ function responseJSON(res, obj){
 function Add(req, res) {
     var user = req.user;
     if( !user ){
-        res.redirect( '/coll' );
+        res.redirect( '/colls' );
     }
     //req.io.route('imports:add');
 
@@ -208,7 +208,7 @@ function Get_One (req, res) {
         User = req.session && req.session.passport && req.session.passport.user ?  JSON.parse( req.session.passport.user ):null;
 
     if( !User ){
-        res.redirect( '/coll' );
+        res.redirect( '/colls' );
     }else{
         Get_One_data( id, function(err, displayBlock ){
             if ( err ){
@@ -378,7 +378,7 @@ box.on('init.attach', function (app, config,  done) {
            if( !User || !User._id ){
                req.io.respond({
                    error:'session-timeout',
-                   go_to:'/coll'
+                   go_to:'/colls'
                });
            }else{
                perform_import( req.data.id, !!req.data.fetch_links, User, req );

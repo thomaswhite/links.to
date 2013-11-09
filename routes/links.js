@@ -41,7 +41,7 @@ function Delete (req, res) {
         if( err ){
             throw err;
         }else{
-            res.redirect( req.query.back || ('/coll/' + coll_id ) );
+            res.redirect( req.query.back || ('/colls/' + coll_id ) );
         }
     });
     // todo: get the id of current collection to return back after deletion
