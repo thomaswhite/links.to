@@ -39,7 +39,7 @@ function deleteNoFoundLinks(event ){
                 emitted:'collection:deleteMissingLinks',
                 coll_id    : pageParam.coll_id,
                 missingID : IDs,
-                route:'/coll/remove404'
+                route:'/link/delete' // to be used when individual delete events come back
             },
             function( response ){
                  socketResponseCommon(response);
@@ -50,16 +50,18 @@ function deleteNoFoundLinks(event ){
     return false;
 }
 
-var notFound;
+function display_deleteNoFoundLinks(){
+    var notFound = $('#grid div.link-content a.notFound');
+    if( notFound.length ){
+        $('#delete404').css('display', 'inline-block');
+    }
+}
 
 head.ready(function() {
     fetchNorReadyLinks(null, '.row.notReady');
     $('.refresh-coll').click({selector:'.row', refresh:true}, fetchNorReadyLinks );
+    $('body').on('click', '#delete404',     deleteNoFoundLinks);
 
-    notFound = $('#grid div.link-content a.notFound');
-    if( notFound.length ){
-        $('#delete404').css('display', 'inline-block');
-        $('body').on('click', '#delete404',     deleteNoFoundLinks);
-    }
-
+    $.subscribe('insertLink', display_deleteNoFoundLinks);
+    display_deleteNoFoundLinks();
 });

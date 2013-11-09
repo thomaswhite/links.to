@@ -163,10 +163,14 @@ box.on('init', function (App, Config, done) {
     box.utils.later( done, null, '+' + ( new Date().getTime() - ts) + 'ms route "links.js" initialised.');
 });
 
-function link_delete( req, id ){
+function link_delete( req, id, done ){
     id = id || req.data.id;
     box.invoke('link.delete2',id, function(err, found ){
+        param:req.data.id = id;
         req.io.emit('link.deleted', { param:req.data, error:err, found:found } );
+        if( done && typeof done == 'function'){
+            done();
+        }
     });
 }
 
@@ -227,8 +231,7 @@ box.on('init.attach', function (app, config,  done) {
                             explain:'Error saving link'
                         });
                     }else{
-                        param.emitted = 'link.saved';
-                        return;
+                        req.data.emitted = 'link.saved';
                         req.io.emit( 'link.saved', {
                             result:'ok',
                             param: req.data,

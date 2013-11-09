@@ -316,17 +316,19 @@ box.on('init.attach', function (app, config,  done) {
        },
 
        deleteMissingLinks:function(req){
-           var User = req.session.User, param;
+           var User = req.session.User, param, missingID;
            if( !User ){
                req.io.respond({ result:'timeout' });
            }else{
                param = _.merge({}, req.data);
+               missingID = param.missingID;
+               delete req.data.missingID;
                box.emit( 'collection.get.one', param.coll_id, function( err, collection ){
                    if( collection.owner != User._id ){
                        req.io.respond({ result:'timeout' });
                    }else{
                        async.map(
-                           param.missingID,
+                           missingID,
                            function(id, done){
                                box.emit('Link__Delete', req, id, done);
                            },

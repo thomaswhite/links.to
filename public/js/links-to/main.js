@@ -204,6 +204,7 @@ function installPubSub($) {
 
 function page_init() {
     installPubSub(jQuery);
+
     $.each(pageEvents, function(id, fn ){  $.subscribe(id, fn); });
 
     addDustHelpers();

@@ -1,5 +1,5 @@
 {#link}
-{>"links/link" user_id="{user._id}"/}
-{:else}
-<div class="row"><div class="span6">No link data.</div></div>
+    <div class="blocked-link" id="link_{_id}">
+       {>"links/link_content" link_id="{_id}"/}
+    </div>
 {/link}
