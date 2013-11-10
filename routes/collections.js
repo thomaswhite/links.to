@@ -227,8 +227,8 @@ box.on('init.attach', function (app, config,  done) {
             .get('/colls/mine/:page?', Mine)
             .get('/colls/:page?',      All)
 //            .post('/coll/new',       Add)
-            .get(['/colls/:id', '/w/c/:id'], Get_One)
-            .get('/colls/:id/delete', Delete)
+            .get(['/coll/:id', '/w/c/:id'], Get_One)
+            .get('/coll/:id/delete', Delete)
             .handler
     );
 

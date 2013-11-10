@@ -23,13 +23,13 @@ var pages = {
         containerID:'#container',
         contentID:''
     },
-    '/colls/:id':{
+    '/coll/:id':{
         routeIO:'collection:get',
         tempateID:'collections/collection_container',
         containerID:'#container',
         contentID:''
     },
-    '/colls/:id/delete': {
+    '/coll/:id/delete': {
         routeIO:'collection:delete',
         tempateID:'collections/collections-list',
         containerID:'#container',
@@ -168,7 +168,7 @@ function pageAddRoutes(){
         getData,
         processRoute
     );
-    page('/colls/:id',
+    page('/coll/:id',
         function(context, next){
             context.state.pageDef = context.pageDef || pages['/colls/:id'];
             context.state.pageParam = {
