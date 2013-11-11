@@ -73,10 +73,12 @@ box.on('init', function (App, Config, done) {
 
     box.on('init.listen', function (done) {
         var ts   = new Date().getTime();
-          app.listen( config.port );
+          app.listen( config.port, function(){
+              done( null, '+' + ( new Date().getTime() - ts) + 'ms express.io listens on port #' + config.port );
+          });
           // box.server.listen(config.port);
           // box.emit('init.server', box.server);
-        box.utils.later( done, null, '+' + ( new Date().getTime() - ts) + 'ms express.io listens on port #' + config.port);
+        // box.utils.later( done, null, '+' + ( new Date().getTime() - ts) + 'ms express.io listens on port #' + config.port);
     });
 
     box.utils.later( done, null, '+' + ( new Date().getTime() - ts) + 'ms plugin "express.io" initialised.');

@@ -14,6 +14,8 @@
 
  todo: When delete a link make sure if there is a pending job it is canceled properly.
 
+ todo: replace Passport authentication with Autom
+
  todo: Import/export a collection in JSON
  todo: Import/Export multiple collection
  todo: Import/Export as HTML
