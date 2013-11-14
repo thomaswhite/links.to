@@ -2,6 +2,7 @@ var box = require('../lib/box')
     , express    = box.express =  require('express.io')
     , app        = box.app = express()
     , mongoStore = require('connect-mongo')(express)
+    , staticCache = require('express-static-cache')
     , path       = require('path')
 
 //    , http = require('http')
@@ -27,6 +28,9 @@ box.on('init', function (App, Config, done) {
     app.configure(function () {
             app.use(express.logger('dev'));
             app.use(express.favicon());
+
+// TODO: replace with https://github.com/mscdex/dicer
+// reason: https://github.com/senchalabs/connect/wiki/Connect-3.0
             app.use(
                 express.bodyParser({
                     keepExtensions: true,
@@ -34,6 +38,7 @@ box.on('init', function (App, Config, done) {
                     limit: '10mb'
                 })
             );
+
             app.use(express.json());
             app.use(express.urlencoded());
             app.use(express.methodOverride());
@@ -50,7 +55,7 @@ box.on('init', function (App, Config, done) {
             );
 
             app.set('views',  config.views );
-            app.engine('dust', box.kleiDust.dust);
+            app.engine('dust', box.kleiDust.dust);+
             app.set('view engine', 'dust');
             app.set('view options', {layout: false});
     });
@@ -67,7 +72,13 @@ box.on('init', function (App, Config, done) {
     box.on('init.attach', function (app, config, done) {
         var ts   = new Date().getTime();
         app.use(require('less-middleware')( config.less ));
-        app.use(express.static(path.join(config.__dirname, 'public')));
+        // app.use(express.static(path.join(config.__dirname, 'public')));
+
+// TODO add expiere period in config
+        app.use(staticCache(path.join(config.__dirname, 'public')), {
+            maxAge: 2, //365 * 24 * 60 * 60,
+            buffer:false
+        })
         box.utils.later( done, null, '+' + ( new Date().getTime() - ts) + 'ms route "public directory" attached.');
     });
 

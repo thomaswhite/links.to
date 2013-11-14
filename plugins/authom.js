@@ -11,6 +11,7 @@ var box = require('../lib/box')
     , config
     , app
     ;
+
 /*
 passport.serializeUser(function(user, done) {
     done(null, JSON.stringify(user));

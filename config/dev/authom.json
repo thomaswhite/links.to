@@ -1,4 +1,5 @@
 {
+
     "passport_after":{
       "successRedirect":"/auth-after-success",
       "failureRedirect":"/auth-failed",
@@ -7,7 +8,6 @@
       "afterEmailPing":"/colls/mine?emailPinged",
       "afterEmailVerified":"/colls/mine"
     },
-
     "services":{
         "dropbox":{
             "id": "ehmp71ikn0jb48b",
@@ -93,5 +93,6 @@
         }
     }
 
+ 
 
 }
