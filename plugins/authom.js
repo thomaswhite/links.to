@@ -12,6 +12,7 @@ var box = require('../lib/box')
     , app
     ;
 
+/*
 passport.serializeUser(function(user, done) {
     done(null, JSON.stringify(user));
 });
@@ -33,3 +34,4 @@ box.on('init', function (App, Config, done) {
     app.use(app.router);
     box.utils.later( done, null, '+' + ( new Date().getTime() - ts) + 'ms plugin "Passport" initialised.');
 });
+*/

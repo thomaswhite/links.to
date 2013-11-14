@@ -72,7 +72,8 @@
     "bson": "~0.2.x",
     "graceful-fs": "~2.0.x",
     "when": "~2.6.x",
-    "authom": "~0.4.x"
+    "authom": "~0.4.x",
+    "express-static-cache": "0.0.6"
   },
   "devDependencies": {
     "nodelint": "~0.6.x",

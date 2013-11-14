@@ -10,7 +10,7 @@
     },
     "services":{
         "dropbox":{
-            "id: "ehmp71ikn0jb48b",
+            "id": "ehmp71ikn0jb48b",
             "secret" : "98s4wr8m37krjyn",
             "info"   : true
         },
@@ -37,9 +37,9 @@
             ]
         },
         "linkedin":{
-            id: "mqn35l8n2clj",
-            secret: "GbPa2iIcKeRbFXVG",
-            scopes:["r_fullprofile"],
+            "id": "mqn35l8n2clj",
+            "secret": "GbPa2iIcKeRbFXVG",
+            "scopes":["r_fullprofile"],
             "pick":[
                 "identity:id",
                 "id",
@@ -50,9 +50,9 @@
         },
 
         "windowslive":{
-            id: "000000004C0C3804",
-            secret: "7KTDwioZ4OsNAb8plABbe6x19a0ioM",
-            scope: "wl.basic"
+            "id": "000000004C0C3804",
+            "secret": "7KTDwioZ4OsNAb8plABbe6x19a0ioM",
+            "scope": "wl.basic",
             "pick":[
                 "identity:id",
                 "id",
@@ -79,7 +79,7 @@
                 "_id":1
             }
         },
-        "google"{
+        "google":{
             "id": "515913292583.apps.googleusercontent.com",
             "secret": "UAjUGd_MD9Bkho-kazmJ5Icm",
             "pick":[
@@ -91,50 +91,8 @@
               "last_name:name.familyName"
             ]
         }
-    },
+    }
 
-    "passports":[
-
-      {
-        "name": "yahoo",
-        "arity":3,
-        "icon":"yahoo",
-        "require":"passport-yahoo",
-        "returnURL":"http://127.0.0.1:3000/auth/yahoo/callback",
-        "realm":"http://127.0.0.1:3000/",
-        "pick":[
-          "identity:emails.0.value",
-          "id:emails.0.value",
-          "user_name:emails.0.value",
-          "email:emails.0.value",
-          "first_name:name.givenName",
-          "last_name:name.familyName",
-          "screen_name:displayName"
-        ]
-      },
-
-      {
-        "name":"meetup",
-        "arity":4,
-        "icon":"meetup",
-        "require":"passport-meetup",
-        "consumerKey":"7u9meedhtkeknea43eru6ncta3",
-        "consumerSecret":"7mee5ubjj19d90shirqfughohd",
-        "callbackURL":"http://127.0.0.1:3000/auth/meetup/callback",
-        "pick":[
-          "identity:id",
-          "id",
-          "screen_name:displayName",
-          "gravatarURL:_json.results.0.photo.thumb_link",
-          "country:_json.results.0.country",
-          "other_services:_json.results.0.other_services",
-          "lon:_json.results.lon",
-          "lat:_json.results.lat",
-          "city:_json.results.city",
-          "city:_json.results.city"]
-      },
-
-
-    ]
+ 
 
 }
