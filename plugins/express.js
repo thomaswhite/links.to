@@ -5,7 +5,6 @@ var box = require('../lib/box')
     , staticCache = require('express-static-cache')
     , path       = require('path')
 
-//    , http = require('http')
     , config;
 
 app.http().io();
@@ -19,9 +18,9 @@ box.on('init', function (App, Config, done) {
     var ts   = new Date().getTime();
     config = Config;
 
-    app.set('port', config.port );
+    app.set('port', config.express.port );
 
-    box.cookieParser = express.cookieParser(config.common.session.secret);
+    box.cookieParser = express.cookieParser(config.express.session.secret);
     box.sessionStore = new mongoStore(config.db);
 
 
@@ -39,7 +38,8 @@ box.on('init', function (App, Config, done) {
                 })
             );
 
-            app.use(express.json());
+           app.enable('trust proxy')
+           app.use(express.json());
             app.use(express.urlencoded());
             app.use(express.methodOverride());
             app.use(express.compress());
@@ -48,8 +48,8 @@ box.on('init', function (App, Config, done) {
 
             app.use(
                 express.session({
-                    secret: config.common.session.secret
-                    , cookie: { maxAge: 1000 * config.common.session.maxAgeSeconds}
+                    secret: config.express.session.secret
+                    , cookie: { maxAge: 1000 * config.express.session.maxAgeSeconds}
                     , store: box.sessionStore
                 })
             );
@@ -72,20 +72,17 @@ box.on('init', function (App, Config, done) {
     box.on('init.attach', function (app, config, done) {
         var ts   = new Date().getTime();
         app.use(require('less-middleware')( config.less ));
-        // app.use(express.static(path.join(config.__dirname, 'public')));
-
-// TODO add expiere period in config
         app.use(staticCache(path.join(config.__dirname, 'public')), {
-            maxAge: 2, //365 * 24 * 60 * 60,
-            buffer:false
-        })
+            maxAge: config.express.static.maxAge, //365 * 24 * 60 * 60,
+            buffer:config.express.static.buffer
+        });
         box.utils.later( done, null, '+' + ( new Date().getTime() - ts) + 'ms route "public directory" attached.');
     });
 
     box.on('init.listen', function (done) {
         var ts   = new Date().getTime();
           app.listen( config.port, function(){
-              done( null, '+' + ( new Date().getTime() - ts) + 'ms express.io listens on port #' + config.port );
+              done( null, '+' + ( new Date().getTime() - ts) + 'ms express.io listens on ' + config.express.host + ':' + config.port );
           });
           // box.server.listen(config.port);
           // box.emit('init.server', box.server);

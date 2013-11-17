@@ -36,7 +36,7 @@ box.on('init', function (App, Config, initDone) {
     AuthTemp.options.safe = false;
 
     var session = monk.get(settings.collection);
-    session.index({expires: 1}, { expireAfterSeconds: common_config.session.maxAgeSeconds });
+    session.index({expires: 1}, { expireAfterSeconds: Config.express.session.maxAgeSeconds });
     session.options.safe = false;
 
     box.on('db.init', function( Config, done ){

@@ -1,0 +1,12 @@
+{
+    "host":"http://beta.links-to.com",
+    "port":3000,
+    "session":{
+        "secret":"AlaBalaNica",
+        "maxAgeSeconds":900
+    },
+    "static":{
+        "maxAge":360,
+        "buffer":false
+    }
+}

@@ -25,9 +25,6 @@ exports.init = function(  env, mainDir ){
             views: path.join(mainDir, 'views'),
             host:'127.0.0.1',
             port:3000,
-            swig:{
-                root: path.join(mainDir, 'views')
-            },
             less:{
                 paths:[
                     '.'

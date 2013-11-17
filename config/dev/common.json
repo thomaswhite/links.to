@@ -1,8 +1,4 @@
 {
-    "session":{
-        "secret":"AlaBalaNica",
-        "maxAgeSeconds":900
-    },
     "gravatar":{
       "d":"mm",
       "r":"g",

@@ -9,6 +9,11 @@
       "afterEmailVerified":"/colls/mine"
     },
     "services":{
+        "37signals":{
+            "id": "8915250d79514e0f45d382ee18142005f5e0eef6",
+            "secret": "10951c6200e2f674fcee309477b47242a4118958"
+        },
+
         "dropbox":{
             "id": "ehmp71ikn0jb48b",
             "secret" : "98s4wr8m37krjyn",
