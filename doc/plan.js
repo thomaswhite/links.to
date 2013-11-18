@@ -35,6 +35,12 @@
  todo: Search
 
 
+ Pickup from where I left off
+ 1. Stop in the middle
+ 2. Leave a trial: explain what I was doing
+ 3. Small steps: list of small tasks that require short period of time to be completed.
+
+
  DEBUG = monk:-*,  jobs:*, plugin:*, linksTo:*, linksTo:app, linskTo:db, linksTo:view.collections
  DEBUG_COLORS = 1
  */
