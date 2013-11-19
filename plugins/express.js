@@ -2,10 +2,48 @@ var box = require('../lib/box')
     , express    = box.express =  require('express.io')
     , app        = box.app = express()
     , mongoStore = require('connect-mongo')(express)
-    , staticCache = require('express-static-cache')
+    , st = require('st')
     , path       = require('path')
 
-    , config;
+// to replace express cookies
+    , cookies = require('cookies')
+    , keygrip = require('keygrip')
+
+    , config
+    ;
+
+
+var mount_param = {
+    path: 'resources/static/', // resolved against the process cwd
+    url: 'static/', // defaults to '/'
+
+    cache: { // specify cache:false to turn off caching entirely
+        fd: {
+            max: 1000, // number of fd's to hang on to
+            maxAge: 1000*60*60 // amount of ms before fd's expire
+        },
+
+        stat: {
+            max: 5000, // number of stat objects to hang on to
+            maxAge: 1000 * 60 // number of ms that stats are good for
+        },
+
+        content: {
+            max: 1024*1024*64, // how much memory to use on caching contents
+            maxAge: 1000 * 60 * 10 // how long to cache contents for
+        },
+
+        readdir: { // irrelevant if not using index:true
+            max: 1000, // how many dir entries to cache
+            maxAge: 1000 * 60 * 10 // how long to cache them for
+        }
+    },
+
+    index: false, // return 404's for directories
+    dot: false, // default: return 403 for any url with a dot-file part
+    passthrough: true // calls next/returns instead of returning a 404 error
+};
+
 
 app.http().io();
 //box.server = require('http').Server(app);
@@ -23,7 +61,6 @@ box.on('init', function (App, Config, done) {
     box.cookieParser = express.cookieParser(config.express.session.secret);
     box.sessionStore = new mongoStore(config.db);
 
-
     app.configure(function () {
             app.use(express.logger('dev'));
             app.use(express.favicon());
@@ -38,8 +75,8 @@ box.on('init', function (App, Config, done) {
                 })
             );
 
-           app.enable('trust proxy')
-           app.use(express.json());
+            app.enable('trust proxy')
+            app.use(express.json());
             app.use(express.urlencoded());
             app.use(express.methodOverride());
             app.use(express.compress());
@@ -55,7 +92,7 @@ box.on('init', function (App, Config, done) {
             );
 
             app.set('views',  config.views );
-            app.engine('dust', box.kleiDust.dust);+
+            app.engine('dust', box.kleiDust.dust);
             app.set('view engine', 'dust');
             app.set('view options', {layout: false});
     });
@@ -70,12 +107,19 @@ box.on('init', function (App, Config, done) {
     box.app.on('error', box.emit.bind(box, 'error'));
 
     box.on('init.attach', function (app, config, done) {
-        var ts   = new Date().getTime();
+        var ts   = new Date().getTime()
+            , mount = st({ path: config.__dirname + '/public', url: '/', passthrough: true })
+            ;
         app.use(require('less-middleware')( config.less ));
+        app.use(mount);
+
+//        app.use(express.static(path.join(config.__dirname, 'public')));
+/*
         app.use(staticCache(path.join(config.__dirname, 'public')), {
             maxAge: config.express.static.maxAge, //365 * 24 * 60 * 60,
             buffer:config.express.static.buffer
         });
+*/
         box.utils.later( done, null, '+' + ( new Date().getTime() - ts) + 'ms route "public directory" attached.');
     });
 
