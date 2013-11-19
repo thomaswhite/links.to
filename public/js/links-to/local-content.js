@@ -74,7 +74,7 @@ function myRender(tempateID, data, $target, contentAction, done ) {
             }
         });
     }catch(e){
-        debud.error(e);
+        debug.error(e);
     }
 }
 
