@@ -37,10 +37,8 @@ function myRender(tempateID, data, $target, contentAction, done ) {
         dust.render(tempateID,  base.push(data), function(err, out) {
             out = $.trim(out) || '--empty--';
             if (err) {
-                debug.error( 'myRender: ' + err.message);
-                if($.isFunction(done)){
-                    done(err, out );
-                }
+                err.where = 'myRender';
+                throw err;
             } else {
                 var $out = $(out);
                 switch( contentAction ){
@@ -74,7 +72,7 @@ function myRender(tempateID, data, $target, contentAction, done ) {
             }
         });
     }catch(e){
-        debug.error(e);
+        throw e;
     }
 }
 
@@ -96,7 +94,7 @@ $.subscribe("insertLink", function(event, data, Context, routeIO){
 });
 
 $.subscribe("linkUpdated", function(event, data, Context, routeIO){
-    myRender( Context.page.tempateID, data, $("#link_" + data.link._id  ) , Context.page.contentAction); // Context.page.contentAction
+    myRender( Context.page.tempateID, data.link, $("#link_" + data.link._id  ) , Context.page.contentAction); // Context.page.contentAction
 });
 
 
@@ -135,7 +133,6 @@ function socketEvent_common(data){
     data = socketResponseCommon(data);
     var Context = page_context( null,null, null, data.param.route );
     $.publish(Context.page.eventDone, [ data, Context, data.param.route ] );
-    //debug.log ( 'socketEvent_common, data:', data, ' context:', Context );
 }
 
 // TODO when adding a collection if the current page is /collections/mine, just replace the waiting sign with the new collection name else go to /collections/mine
@@ -143,5 +140,3 @@ socket.on('collection.added',   socketEvent_common);
 socket.on('collection.deleted', socketEvent_common);
 socket.on('link.deleted',       socketEvent_common);
 socket.on('link.saved',         socketEvent_common);
-socket.on('link.updated',       socketEvent_common);
-
