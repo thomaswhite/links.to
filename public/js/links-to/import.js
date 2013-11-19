@@ -14,7 +14,7 @@ function disableSelection( $o ){
             '-webkit-user-select':'none',/* and add the CSS class here instead */
             '-ms-user-select':'none',
             'user-select':'none'
-        }).bind('selectstart', function(){ return false; });
+        }).bind('selectstart', function(evenr ){ event.preventDefault(); });
 }
 
 function import_folder_progress_3( data ){
@@ -78,7 +78,7 @@ head.ready(function() {
             }
         })
         .on('select', '.coll-title', function(event){
-            return false;
+            event.preventDefault();
         })
         .on('change', 'input.excluded', function(event){
             var o = get_import_parts(this);
@@ -125,7 +125,7 @@ head.ready(function() {
                     }
                 }
             });
-            return false;
+            event.preventDefault();
         });
 /*
         .on('click', '.nav .nav-tabs a#tab-imported', function(event){

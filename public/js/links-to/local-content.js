@@ -96,7 +96,7 @@ $.subscribe("insertLink", function(event, data, Context, routeIO){
 });
 
 $.subscribe("linkUpdated", function(event, data, Context, routeIO){
-    myRender( Context.page.tempateID, data.link, $("#link_" + data.link._id  ) , Context.page.contentAction); // Context.page.contentAction
+    myRender( Context.page.tempateID, data, $("#link_" + data.link._id  ) , Context.page.contentAction); // Context.page.contentAction
 });
 
 

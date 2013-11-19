@@ -23,7 +23,8 @@ function fnBtnAdd(event){
             myRender( param.tempateID, dataDone, $(param.containerID), param.contentAction  );
         }
     });
-    return false;
+    event.preventDefault();
+    //return false;
 }
 
 function fnBtnDelete(event){
@@ -41,7 +42,8 @@ function fnBtnDelete(event){
 function inputCR(event){
     if( 13 == (event.which || event.keyCode) ){
         $(this).next().trigger('click');
-        return false;
+        event.preventDefault();
+        //return false;
     }
     return true;
 }
