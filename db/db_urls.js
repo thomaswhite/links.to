@@ -123,6 +123,7 @@ box.on('db.init', function( Config, done ){
             if( err ){
                 callback(err);
             }else if( link_id ){
+                // add .Display if exists
                 box.db.coll.links.updateById( link_id, { $set: { url_id:insertedURL._id }}, function( err, result ){
                     callback( err, insertedURL );
                 });

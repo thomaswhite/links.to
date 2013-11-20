@@ -44,9 +44,9 @@ function update_link_display( oLink, oURL, done ){
 function saveError(err, oLink, oURL, done ){
     if( err ){
         if(oLink){
-
+            box.invoke('link.update', oLink._id, {error:err}, false, done);
         }else if( oURL ){
-
+            box.invoke('url.update', oURL._id, {error:err}, done );
         }else{
             err.where = 'saveError';
             err.reason = 'db error with now link or url to save to'
@@ -174,70 +174,70 @@ module.exports = {
                         });
                     })
                 }else{
-                    box.on('url.add', sURL, o.Link._id, {state:'fetching' }, function(err, oAddedURL){
-                        request(request_options, function (err, response, page_HTML) {
-                            if( err ){
-                                // TODO: recognise bad URL
-                                job.log( err.message);
-                                debug(o.URL, err);
-                                Done(err);
-                            }else if( !err && response && response.statusCode != 200 ){
-                                var notFound = {
-                                    statusCode: response ? response.statusCode : -1 ,
-                                    url: o.URL.url
-                                };
-                                box.invoke('url.update-display-queued_and_new-links', o.URL._id, {display:make_link_display( null, notFound  ),err:err,  notFound : true}, function(err2, oUpdated_URL, number_of_updated_links){
-                                    Done( err2 );
-                                });
-                            }else{
-                                var canonicalURL = linkDisplay.find_canonical_url('' + page_HTML);
-                                box.emit('url.check-url', canonicalURL, o.URL._id, function(err, found_same_url_oURL ){
-                                    // TODO clear the case when found_same_url_oURL is not ready
-                                    if( found_same_url_oURL && !hard_refresh && found_same_url_oURL.state == 'ready'){
-                                        box.invoke('url.add-link-ids', found_same_url_oURL._id, [o.Link._id].concat(o.URL.links ), false, function(err, how_many_were_updated ){
-                                            box.emit('url.delete', o.URL._id );
-                                            box.invoke('url.update-display-queued_and_new-links', found_same_url_oURL._id, null, function( err, oURL_updated, updated_links_number){
-                                                Done(err );
-                                            });
-                                        });
-                                    }else{
-                                        box.invoke('page.find', null, canonicalURL, function(err, Page ){
-                                            if( err ){
-                                                Done(err, 'page.find');
-                                            }else if( Page && !hard_refresh ){
-                                                    box.invoke('url.set-page-id', o.URL._id, Page._id);
-                                                    // TODO: use body and head from the page
-                                                    box.invoke( 'pageScrape', Page.url, page_HTML /*Page.html*/, function(err, page_Parts ){
-                                                        var page2update = page_Parts.xhtml;
-                                                        page2update.html = page_HTML;
-                                                        delete page_Parts.xhtml;
-                                                        page_Parts.display = linkDisplay.update( page_Parts );
-                                                        box.invoke( 'page.update', Page._id, page2update, canonicalURL, canonicalURL, function(err){
-                                                            if( err ){ Done(err )}else{
-                                                                box.invoke('url.update-display-queued_and_new-links', o.URL._id, page_Parts, Done );
-                                                            }
-                                                        });
-                                                    });
-                                            }else{
-                                                box.invoke( 'pageScrape', sURL, page_HTML, function(err, page_Parts ){
-                                                    var page2save = page_Parts.xhtml;
-                                                    page2save.html = page_HTML;
+                    request(request_options, function (err, response, page_HTML) {
+                        if( err ){
+                            // TODO: recognise bad URL
+                            job.log( err.message);
+                            debug(o.URL, err);
+                            Done(err);
+                        }else if( !err && response && response.statusCode != 200 ){
+                            var notFound = {
+                                statusCode: response ? response.statusCode : -1 ,
+                                url: o.URL.url
+                            };
+                            // combine wit display update
+                            box.invoke('url.add', sURL, o.Link._id, {state:'ready', error:err, notFound:true, display:make_link_display( null, notFound ) }, function(err, oAddedURL){
+                                box.invoke('url.update-display-queued_and_new-links', o.URL._id, null, Done );
+                            });
+                        }else{
+                            var canonicalURL = linkDisplay.find_canonical_url('' + page_HTML);
+                            box.emit('url.check-url', canonicalURL, o.URL._id, function(err, found_same_url_oURL ){
+                                // TODO clear the case when found_same_url_oURL is not ready
+                                if( found_same_url_oURL && !hard_refresh && found_same_url_oURL.state == 'ready'){
+                                    // combine wit display update
+                                    box.invoke('url.add-link-id', found_same_url_oURL._id, o.Link._id, function(err, how_many_were_updated ){
+                                        // err ?
+                                        box.invoke('url.update-display-queued_and_new-links', found_same_url_oURL._id, null, Done);
+                                    });
+                                }else{
+                                    box.invoke('page.find', null, canonicalURL, function(err, Page ){
+                                        if( err ){
+                                            Done(err, 'page.find');
+                                        }else if( Page && !hard_refresh ){
+                                                // add oURL
+                                                box.invoke('url.set-page-id', o.URL._id, Page._id);
+                                                // TODO: use body and head from the page
+                                                box.invoke( 'pageScrape', Page.url, page_HTML /*Page.html*/, function(err, page_Parts ){
+                                                    var page2update = page_Parts.xhtml;
+                                                    page2update.html = page_HTML;
                                                     delete page_Parts.xhtml;
                                                     page_Parts.display = linkDisplay.update( page_Parts );
-                                                    box.invoke('url.update-display-queued_and_new-links', o.URL._id, page_Parts, function(err, oUpdated_URL, number_of_updated_links){
-                                                        if( hard_refresh && o.URL && o.URL.page_id){
-                                                            box.invoke( 'page.update', o.URL.page_id, page2save, sURL, canonicalURL, Done);
-                                                        }else{
-                                                            box.invoke( 'page.save', page2save, sURL, canonicalURL, o.URL._id, Done);
+                                                    box.invoke( 'page.update', Page._id, page2update, canonicalURL, canonicalURL, function(err){
+                                                        if( err ){ Done(err )}else{
+                                                            box.invoke('url.update-display-queued_and_new-links', o.URL._id, page_Parts, Done );
                                                         }
                                                     });
                                                 });
-                                            }
-                                        });
-                                    }
-                                });
-                            }
-                        });
+                                        }else{
+                                            //add oURL
+                                            box.invoke( 'pageScrape', sURL, page_HTML, function(err, page_Parts ){
+                                                var page2save = page_Parts.xhtml;
+                                                page2save.html = page_HTML;
+                                                delete page_Parts.xhtml;
+                                                page_Parts.display = linkDisplay.update( page_Parts );
+                                                box.invoke('url.update-display-queued_and_new-links', o.URL._id, page_Parts, function(err, oUpdated_URL, number_of_updated_links){
+                                                    if( hard_refresh && o.URL && o.URL.page_id){
+                                                        box.invoke( 'page.update', o.URL.page_id, page2save, sURL, canonicalURL, Done);
+                                                    }else{
+                                                        box.invoke( 'page.save', page2save, sURL, canonicalURL, o.URL._id, Done);
+                                                    }
+                                                });
+                                            });
+                                        }
+                                    });
+                                }
+                            });
+                        }
                     });
                 }
             }
