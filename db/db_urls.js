@@ -83,6 +83,20 @@ function add_link_ids( id, aLinks, returnUpdated, callback){
     );
 }
 
+function add_link_id( id, link_id, callback){
+    URLs.updateById(
+        id,
+        {   $addToSet: {  "links" : { $each: [link_id] } } },
+        function(err, u){
+            if(err){
+                callback(err);
+            }else{
+                box.db.coll.links.updateById( link_id, { $set: { url_id:id }}, callback);
+            }
+        }
+    );
+}
+
 
 
 box.on('db.init', function( Config, done ){
@@ -123,7 +137,11 @@ box.on('db.init', function( Config, done ){
     });
 
     box.on('url.get', function( id,  callback){
-        URLs.findById(id, callback);
+        if( id ){
+            URLs.findById(id, callback);
+        }else{
+            box.utils.later( callback );
+        }
     });
 
 
@@ -162,18 +180,27 @@ box.on('db.init', function( Config, done ){
         URLs.updateById( id, { $set:oURL }, { safe: false } );
     });
 
-    box.on('url.set-state', function( id, state, callback ){
+    box.on('url.set-state', function( id, state, job_id, callback ){
         var u = {
-            state:state,
-            updated: new Date()
+            $set:{
+              state:state,
+              updated: new Date()
+            }
         };
+        if( job_id ){
+           if(  job_id > 0 ){
+               u.$set.job_id = job_id;
+           }else{
+               u.$unset = { job_id: ''}
+           }
+        }
         if(  state === 'fetching' ){
-            u.start_fetching = new Date();
+            u.$set.start_fetching = new Date();
         }
         if( callback ){
-            URLs.updateById( id, { $set:u }, callback);
+            URLs.updateById( id, u, callback);
         }else{
-            URLs.updateById( id, { $set:u}, { safe: false });
+            URLs.updateById( id, u, { safe: false });
         }
     });
 
@@ -201,6 +228,7 @@ box.on('db.init', function( Config, done ){
 
     box.on('url.update-links', update_links_display );
     box.on('url.add-link-ids', add_link_ids );
+    box.on('url.add-link-id',  add_link_id );
 
     // invoked
     box.on('url.add-link', function( url, newLink, callback){

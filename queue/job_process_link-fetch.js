@@ -89,39 +89,91 @@ function update_link_display( oLink, oURL, done ){
                         box.invoke('link.get', job.data.link_id, cb );
                       },
                 URL : function(cb){
-                       box.invoke('url.get', job.data.url_id, cb );
+                        if( job.data.url_id ){
+                            box.invoke('url.get', job.data.url_id, cb );
+                        }else{
+                            process.nextTick(cb);
+                        }
+                      },
+                URL2 : function(cb){
+                    if( job.data.url_id ){
+                        process.nextTick(cb);
+                    }else{
+                        box.invoke('url.check-url-and-original_url', sURL, cb );
+                    }
                 },
                 Page: function(cb){
-                    box.invoke('page.find', sURL, null, cb );
+                    if( job.data.url_id ){
+                        box.invoke('page.find', sURL, null, cb );
+                    }else{
+                        process.nextTick(cb);
+                    }
                 }
             },
             function(err, o){
                 hard_refresh = o.Link.state == 'hard-refresh';
+
+                var state = '', prepare = '', URL = o.URL || o.URL2;
+
+                if( o.Link.state == 'ready' ){
+                    state = 'ready';
+                }else if(o.URL && o.URL.state != 'timeout'){
+                    if( o.URL.state == 'ready' && (o.Link.state == 'queued' || o.Link.state == 'fetching' ) ){
+                      state = 'url.update-links';
+                    }else if( !o.URL.start_fetching || !(o.URL.start_fetching instanceof Date) || (new Date - o.URL.start_fetching > 15000) ){
+                        state = 'timeout';
+                    }else{
+                        state =  'still-not-ready';
+                    }
+                }else if( o.URL2 ){
+                    prepare = 'url.add-link-id';
+                    if( o.URL2.state == 'ready' && (o.Link.state == 'queued' || o.Link.state == 'fetching' ) ){
+                        state = 'url.update-links';
+                    }else if( !o.URL2.start_fetching || !(o.URL2.start_fetching instanceof Date) || (new Date - o.URL2.start_fetching > 15000) ){
+                        state = 'timeout';
+                    }else{
+                        state =  'still-not-ready';
+                    }
+                }else if(o.Page){
+                    prepare = "url.set-page-id";
+                    state =  'pageScrape';
+                }else if( job.data.do_not_fetch ){
+                    state = "done";
+                }else{
+                    prepare = 'url.set-state:fetching';
+                    state = "fetching";
+                }
+
+
+                // TODO: deal with the error
                 if( err || o.Link.state == 'ready' ){ // queued and the URL become ready before this job was called
                     Done( err );
                     return;
                 }
-                if(o.Link.state == 'queued' && o.URL.state != 'timeout' ){
+
+
+                if( o.URL && o.URL.state != 'timeout' && (o.Link.state == 'queued' || o.Link.state == 'fetching' ) ){
                     if(o.URL.state == 'ready' ){ // 1.1
                         box.invoke('url.update-links', o.URL._id, false, Done);
                     }else {
-                        // 1.2 this event will be fired when the URL is ready. It will update the .display section of all links that are in state "queued"
-                        //box.once( '' + o.URL._id, Done );
-                        if(!o.URL.start_fetching || !(o.URL.start_fetching instanceof Date) || (new Date - o.URL.start_fetching > 180000) ){
-                            box.invoke('url.set-state',  o.URL._id, 'timeout', function(err, u){
+                        if(!o.URL.start_fetching || !(o.URL.start_fetching instanceof Date) || (new Date - o.URL.start_fetching > 15000) ){
+                            box.invoke('url.set-state',  o.URL._id, 'timeout', 0, function(err, u){
                                  Done( err || 'timeout' );
                             });
                         }else{
                             Done( 'still not ready' ); // fail the job so it will check later if the oURL is ready
                         }
                     }
-                }else{ // 2 o.Link.state == 'new'
+                }else if(o.URL2 ){
+
+                }else{
                     if(!o.URL ){
                         throw 'oURL is missing!';
                     }
-                    if(o.URL.state == 'ready' && o.Link.state != 'refresh' && !hard_refresh && !o.Link.notFound ){
-                        box.invoke('url.update-links', o.URL._id, false, Done);
-                    }else if( o.Page && !hard_refresh ){ //&& !o.Link.notFound
+//                    if(o.URL.state == 'ready' && o.Link.state != 'refresh' && !hard_refresh && !o.Link.notFound ){
+//                        box.invoke('url.update-links', o.URL._id, false, Done);
+//                    }else
+                    if( o.Page && !hard_refresh ){ //&& !o.Link.notFound
                             box.invoke('url.set-page-id', o.URL._id, o.Page._id, function(err, updated ){
                                if( err ){ Done(err); }else{
                                    box.invoke( 'pageScrape', sURL, o.Page.html, function(err, page_Parts ){
@@ -139,13 +191,14 @@ function update_link_display( oLink, oURL, done ){
                         if( job.data.do_not_fetch ){
                             Done();
                         }
-                        box.invoke('url.set-state', o.URL._id, 'fetching');
+                        box.invoke('url.set-state', o.URL._id, 'fetching', job.id);
                         request(request_options, function (err, response, page_HTML) {
-                            if( err || response.statusCode != 200 ){
-                                if( err ){
-                                   job.log( err.message);
-                                   debug(err.message);
-                                }
+                            if( err ){
+                                // todo: recognise bad URL
+                                job.log( err.message);
+                                debug(o.URL, err);
+                                Done(err);
+                            }else if( !err && response && response.statusCode != 200 ){
                                 var notFound = {
                                     statusCode: response ? response.statusCode : -1 ,
                                     url: o.URL.url

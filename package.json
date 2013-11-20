@@ -2,7 +2,7 @@
   "author": "Thomas White",
   "name": "Links.to",
   "description": "Share your link collections",
-  "version": "0.2.5",
+  "version": "0.4.1",
   "homepage": "http://links.to/",
   "private": true,
   "scripts": {
@@ -31,6 +31,7 @@
     "underscore": "~1.4.x",
     "lodash": "~1.0.x",
     "gravatar": "~1.0.x",
+
     "passport": "~0.1.x",
     "passport-yahoo": "~0.3.x",
     "passport-google": "~0.3.x",
@@ -42,6 +43,7 @@
     "passport-twitter": "~0.1.x",
     "passport-dummy": ">=0.0.x",
     "passport-http": ">=0.2.x",
+
     "caterpillar": "~1.1.x",
     "shortid": "~2.0.x",
     "idgen": "*",

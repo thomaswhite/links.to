@@ -82,34 +82,27 @@ function link_add( url, collectionID, param, oLink, extra, Done ){
                 if( err ){
                     Done(err, 'url.find-url');
                 }else if( oExisting_URL ){
-                    box.invoke('url.add-link-ids', oExisting_URL._id, [oAdded_Link._id], true, function( err, oUpdated_URL ){
+                    // todo: change the state to queued
+                    box.invoke('url.add-link-id', oExisting_URL._id, oAdded_Link._id, function( err ){
                         if( err ){
                             Done( err );
                         }else{
-                            var oUpdate = {
-                                url_id  : oExisting_URL._id,
-                                state   : 'queued'
-                            };
-                            if(  oExisting_URL.state == 'ready' ){
-                                oUpdate.state   = 'ready';
-                                oUpdate.display = oExisting_URL.display;
+                            if( oExisting_URL.state == 'ready' ){
+                                box.invoke('url.update-display-queued_and_new-links', oExisting_URL._id, null, function(err){
+                                    box.on('link.get',  oAdded_Link._id, Done );
+                                });
+                            }else{
+                                Done(err, oAdded_Link );
                             }
-                            box.invoke('link.update', oAdded_Link._id, oUpdate, true, function( err, updated_Link ){
-                                    Done(err, updated_Link, oExisting_URL );
-                                }
-                            );
                         }
                     });
                 }else{
-                    box.invoke('url.add', url, oAdded_Link, {}, function(err, oURL ){
-                        Done(err, oAdded_Link, oURL );
-                    });
+                    Done(err, oAdded_Link );
                 }
             });
         }
     });
 }
-
 
 function job_fetch_link( param, Done ){
 //    param.default_request_settings = config.request;
@@ -136,13 +129,13 @@ function job_fetch_link( param, Done ){
  */
 function link_process( url, collectionID, param, oLink, extra, Done ){
     param = param || {};
-    link_add( url, collectionID, param, oLink, extra, function(err, oLink, oURL){
+    link_add( url, collectionID, param, oLink, extra, function(err, oLink ){
         if( err ){
             Done(err);
         }else if( oLink.state == 'ready' || param.do_not_fetch ){
-            Done( null, oLink, oURL );
+            Done( null, oLink );
         }else{
-            job_fetch_link(_.merge(param, { url:url, link_id : oLink._id, url_id: oURL._id } ), function(err){
+            job_fetch_link(_.merge(param, { url:url, link_id : oLink._id, url_id: oLink.url_id || 0 } ), function(err){
                 if( err ){
                     Done(err);
                 }else{

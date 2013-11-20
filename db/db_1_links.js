@@ -76,7 +76,7 @@ box.on('db.init', function(  Config, done ){
             callback( null, waterfall );
         }
     });
-
+/*
     box.on('link.add', function( oLink, callback){
         var cb = callback;
         Links.insert( oLink,  { safe: true }, function( err, addedLink){
@@ -89,7 +89,7 @@ box.on('db.init', function(  Config, done ){
             }
         });
     });
-
+*/
     box.on('link.delete', function(link_id, url_id, coll_id, callback){
         if( !link_id ){
             throw "Link ID expected!";

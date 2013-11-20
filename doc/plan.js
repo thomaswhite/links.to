@@ -4,6 +4,9 @@
  todo: collections - next page
  todo: collections - bottomless scroll
  todo: collections - prev/next collection buttons/panel on the right
+ todo: collections - if there are not fetched links in a collection display it in italic.
+
+ fixme:
 
  todo: Import cancel
  todo: parse the Head only when fetch the page. body parse and  content tags as jobs or when the folder is opened.
