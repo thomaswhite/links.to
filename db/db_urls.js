@@ -16,13 +16,21 @@ var   box = require('../lib/box')
 function new_url( url, link_id, extra ){
     var url2save = {
         state: 'fetching',
-        url:  url
+        url:  url,
+        links:[]
     };
     if( link_id ){
-        url2save.links = [ link_id ];
+        url2save.links.push( link_id );
     }
     return _.merge( url2save, extra );
 }
+
+function update_related_links(aLinks, oUpdate, condition, callback ){
+    condition = oUpdate || {};
+    condition._id = { $in: aLinks};
+    box.db.coll.links.update( condition, oUpdate, { multi : true },  callback  );
+}
+
 
 function update_links_display( id, all, callback ){
     if( !id ){
@@ -110,30 +118,42 @@ box.on('db.init', function( Config, done ){
 
 // ================== updated =================
 
-    box.on('url.add', function( url, newLink, extra, callback){
-        URLs.insert( new_url(url, newLink._id, extra), function(err, insertedURL){
+    box.on('url.add', function( url, link_id, extra, callback){
+        URLs.insert( new_url(url, link_id, extra), function(err, insertedURL){
             if( err ){
                 callback(err);
-            }else if( newLink ){
-                box.db.coll.links.updateById(
-                    newLink._id,
-                    { $set: { url_id:insertedURL._id }},
-                    function( err, result ){
-                        callback( err, insertedURL );
-                    }
-                );
+            }else if( link_id ){
+                box.db.coll.links.updateById( link_id, { $set: { url_id:insertedURL._id }}, function( err, result ){
+                    callback( err, insertedURL );
+                });
             }else{
                 callback(err, insertedURL);
             }
         });
     });
 
-    // TODO: DO not delete URL thst is used in any active link
-    box.on('url.delete', function( url_id, callback){
-        URLs.remove( {_id: url_id || -1 }, { safe: false } );
-        if( typeof callback == 'function'){
-            callback();
+    // TODO: DO not delete URL that is used in any active link
+    box.on('url.delete', function( id, callback){
+        if( !id ){
+            throw "'url.delete': missing ID";
         }
+        callback = callback || function(){};
+        URLs.findById(id, function(err, oURL){
+            if( !oURL || err ){
+                if( typeof callback == 'function'){
+                    callback();
+                }
+            }else{
+                update_related_links(oURL.links, {$set:{url_id:0}}, {}, function(err, updated){
+                    URLs.remove( {_id: id }, callback );
+                });
+            }
+        });
+
+
+
+
+
     });
 
     box.on('url.get', function( id,  callback){
@@ -230,55 +250,58 @@ box.on('db.init', function( Config, done ){
     box.on('url.add-link-ids', add_link_ids );
     box.on('url.add-link-id',  add_link_id );
 
-    // invoked
-    box.on('url.add-link', function( url, newLink, callback){
-        var link_id =  newLink._id;
-
-        // fields:{ links:false }
-        URLs.findOne(
-            {$or : [
-                {url: url },
-                {original_url:url}
-            ]},
-            { fields:{links:false, page_id:false} },
-            function(err, exisitng_URL ){
-                if( exisitng_URL ){
-                    add_link_ids( exisitng_URL._id, [link_id], false, function(err){
-                        if( err ){
-                            callback( err );
-                        }else{
-                            var oUpdate = {
-                                url_id  : exisitng_URL._id,
-                                state   : 'queued'
-                            };
-                            if(  exisitng_URL.state == 'ready' ){
-                                oUpdate.state   = 'ready';
-                                oUpdate.display = exisitng_URL.display;
-                            }
-                            box.db.coll.links.updateById(  link_id, { $set:oUpdate}, function( err, result ){
-                                 callback(err, exisitng_URL, true ); // true indicates it is an existing URL
-                            });
-                        }
-                    });
-                }else{
-                    URLs.insert( new_url(url, link_id), function(err, insertedURL){
-                        if( err ){
-                            callback( err );
-                        }else{
-                            box.db.coll.links.updateById( link_id, { $set: { url_id:insertedURL._id }}, function( err, result ){
-                                    callback(err, insertedURL, false );
-                            });
-                        }
-                    });
-                }
-            }
-        );
-    });
-
     box.utils.later( done, null, 'db:URLs');
 });
 
 /*
+box.on('url.add-link', function( url, newLink, callback){
+    var link_id =  newLink._id;
+
+    // fields:{ links:false }
+    URLs.findOne(
+        {$or : [
+            {url: url },
+            {original_url:url}
+        ]},
+        { fields:{links:false, page_id:false} },
+        function(err, exisitng_URL ){
+            if( exisitng_URL ){
+                add_link_ids( exisitng_URL._id, [link_id], false, function(err){
+                    if( err ){
+                        callback( err );
+                    }else{
+                        var oUpdate = {
+                            url_id  : exisitng_URL._id,
+                            state   : 'queued'
+                        };
+                        if(  exisitng_URL.state == 'ready' ){
+                            oUpdate.state   = 'ready';
+                            oUpdate.display = exisitng_URL.display;
+                        }
+                        box.db.coll.links.updateById(  link_id, { $set:oUpdate}, function( err, result ){
+                            callback(err, exisitng_URL, true ); // true indicates it is an existing URL
+                        });
+                    }
+                });
+            }else{
+                URLs.insert( new_url(url, link_id), function(err, insertedURL){
+                    if( err ){
+                        callback( err );
+                    }else{
+                        box.db.coll.links.updateById( link_id, { $set: { url_id:insertedURL._id }}, function( err, result ){
+                            callback(err, insertedURL, false );
+                        });
+                    }
+                });
+            }
+        }
+    );
+});
+
+
+
+
+
 
 {
   ready: true,
