@@ -15,7 +15,7 @@ var   box = require('../lib/box')
 
 function new_url( url, link_id, extra ){
     var url2save = {
-        state: 'new',
+        state: 'fetching',
         url:  url,
         links:[]
     };
@@ -51,8 +51,9 @@ function update_links_display( id, all, callback ){
                 , condition = {
                     _id : { $in: oURL.links},
                     $or : [
-                        {state: 'queued'  },
+                        {state: 'queued' },
                         {state: 'new' },
+                        {state: 'fetching' },
                         {state: 'refresh' },
                         {state: 'hard-refresh' }
                     ]
@@ -91,7 +92,7 @@ function add_link_ids( id, aLinks, returnUpdated, callback){
     );
 }
 
-function add_link_id( id, link_id, callback){
+function add_link_id( id, link_id, update, callback){
     URLs.updateById(
         id,
         {   $addToSet: {  "links" : { $each: [link_id] } } },
@@ -99,7 +100,12 @@ function add_link_id( id, link_id, callback){
             if(err){
                 callback(err);
             }else{
-                box.db.coll.links.updateById( link_id, { $set: { url_id:id }}, callback);
+                box.db.coll.links.updateById( link_id, { $set: { url_id:id }}, function(err, number_of_updated ){
+                    if( update ){
+                        update_links_display( id, false, callback);
+                    }
+                });
+
             }
         }
     );
@@ -128,11 +134,17 @@ box.on('db.init', function( Config, done ){
                     update.display = insertedURL.display;
                     update.state = insertedURL.state;
                 }
-                if( insertedURL.error ){
-                    update.error = insertedURL.error;
-                }
                 box.db.coll.links.updateById( link_id, { $set: update}, function( err, result ){
-                    callback( err, insertedURL );
+                    if( insertedURL.page_id ){
+                        box.db.coll.pages.updateById(  insertedURL.page_id, { $set:{url_id: insertedURL._id}},{ safe: false });
+                    }
+                    if( insertedURL.state == 'ready'){
+                        update_links_display( insertedURL._id, true, function(err){
+                            callback( err, insertedURL );
+                        });
+                    }else{
+                        callback( err, insertedURL );
+                    }
                 });
             }else{
                 callback(err, insertedURL);
@@ -233,9 +245,9 @@ box.on('db.init', function( Config, done ){
     });
 
 
-    box.on('url.set-page-id', function( id, page_id, callback  ){
+    box.on('url.set-page-id', function( id, page_id  ){
         box.db.coll.pages.updateById(  page_id, { $set:{url_id: id}},{ safe: false }); // URLs.col.ObjectID()
-        URLs.updateById( id, { $set: {page_id:page_id }}, callback );
+        URLs.updateById( id, { $set: {page_id:page_id }}, { safe: false } );
     });
 
     box.on('url.update-display-queued_and_new-links', function( id, toUpdate, callback ){

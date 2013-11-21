@@ -19,7 +19,7 @@ box.on('db.init', function(  Config, done ){
 
     Pages.index('url'); // ,  { unique: true }
 
-    box.on('page.save', function( o, URL, canonicalURL, url_id,  callback){
+    box.on('page.save', function( o, URL, canonicalURL, url_id ){
         var page = _.merge( {
                 url_id: url_id,
                 updated : new Date(),
@@ -38,13 +38,12 @@ box.on('db.init', function(  Config, done ){
 
         Pages.insert( page,  function( err, added_page){
                 if( err ){
-                    callback(err);
+                    debug( 'page:save', err );
                 }else{
                     box.db.coll.urls.updateById(
                         url_id,
                         { $set:{ page_id: added_page._id }},
-                        { safe: true },
-                        callback
+                        { safe: true }
                     );
                 }
             }

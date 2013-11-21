@@ -41,17 +41,25 @@ function update_link_display( oLink, oURL, done ){
     box.invoke( 'link.update',  oLink._id, oUpdate, false, done);
 }
 
-function saveError(err, oLink, oURL, done ){
+function saveError(err, oLink, oURL, extra ){
+    var upadate =  _.merge( {error:err}, extra );
     if( err ){
         if(oLink){
-            box.invoke('link.update', oLink._id, {error:err}, false, done);
-        }else if( oURL ){
-            box.invoke('url.update', oURL._id, {error:err}, done );
-        }else{
-            err.where = 'saveError';
-            err.reason = 'db error with now link or url to save to'
-            throw err;
+            box.invoke('link.update-fast', oLink._id, upadate);
         }
+        if( oURL ){
+            box.invoke('url.update-fast', oURL._id, upadate );
+        }
+    }
+}
+
+function check_if_url_has_timedout_and_fail_the_job( oURL, Done){
+    if( !oURL.start_fetching || !(oURL.start_fetching instanceof Date) || (new Date - oURL.start_fetching > 15000) ){
+        box.invoke('url.set-state',  oURL._id, 'timeout', 0, function(err, u){
+            Done( 'timeout' );
+        });
+    }else{
+        Done( 'still-not-ready' );
     }
 }
 
@@ -130,118 +138,90 @@ module.exports = {
                 hard_refresh = o.Link.state == 'hard-refresh';
                 var state = '', prepare = '', URL = o.URL || o.URL2, ready = false;
 
-                if( o.Link.state == 'ready' || job.data.do_not_fetch  ){
+                if( o.Link.state == 'ready' ){  // multiple links waiting for the same URL. The URL has been updated by other job
                     Done();
                 }else if(o.URL && o.URL.state != 'timeout'){
-                    if( o.URL.state == 'ready' && (o.Link.state == 'queued' || o.Link.state == 'fetching' ) ){
+                    if( o.URL.state == 'ready' ){ //  && (o.Link.state == 'queued' || o.Link.state == 'fetching' )
                         box.invoke('url.update-links', o.URL._id, false, Done);
-                    }else if( !o.URL.start_fetching || !(o.URL.start_fetching instanceof Date) || (new Date - o.URL.start_fetching > 15000) ){
-                        box.invoke('url.set-state',  o.URL._id, 'timeout', 0, function(err, u){
-                            Done( 'timeout' );
-                        });
                     }else{
-                        Done( 'still-not-ready' );
-                    }
+                        check_if_url_has_timedout_and_fail_the_job( o.URL, Done);
+                    }    
                 }else if( o.URL2 ){
-                    box.invoke('url.add-link-id', o.URL2._id,  o.Link._id, function(err, ok){
-                        if( o.URL2.state == 'ready' && (o.Link.state == 'queued' || o.Link.state == 'fetching' ) ){
-                            box.invoke('url.update-links', o.URL._id, false, Done);
-                        }else if( !o.URL2.start_fetching || !(o.URL2.start_fetching instanceof Date) || (new Date - o.URL2.start_fetching > 15000) ){
-                            box.invoke('url.set-state',  o.URL._id, 'timeout', 0, function(err, u){
-                                Done( 'timeout' );
+                        if( o.URL2.state == 'ready'  ){ // && (o.Link.state == 'queued' || o.Link.state == 'fetching' )
+                            box.invoke('url.add-link-id', o.URL2._id,  o.Link._id, true, Done );
+                        }else {
+                            box.invoke('url.add-link-id', o.URL2._id,  o.Link._id, false, function(err, ok){                            
+                                check_if_url_has_timedout_and_fail_the_job( o.URL2, Done);
                             });
-                        }else{
-                            Done( 'still-not-ready' );
                         }
-                    });
                 }else if(o.Page){
                     sURL = o.Page.url;
-                    box.on('url.add', sURL, o.Link._id, {state:'pageScrape', page_id:o.Page._id }, function(err, oAddedURL){
-                        box.invoke('url.set-page-id', oAddedURL._id, o.Page._id, function(err, updated ){
-                            if( err ){
-                                Done(err);
-                            }else{
-                                box.invoke( 'pageScrape', sURL, o.Page.html, function(err, page_Parts ){
-                                    if( err ){
-                                        Done(err);
-                                    }else{
-                                        box.invoke('url.update-display-queued_and_new-links', o.URL._id, {display:linkDisplay.update( page_Parts )}, function(err, oUpdated_URL, number_of_updated_links){
-                                            Done(err);
-                                        })
-                                    }
-                                })
-                            }
+                    box.invoke('url.add', sURL, o.Link._id, {state:'pageScrape', page_id:o.Page._id }, function(err, oAddedURL){
+                        box.invoke( 'pageScrape', sURL, o.Page.html, function(err, page_Parts ){
+                            saveError(err, null, oAddedURL );
+                            delete page_Parts.xhtml;
+                            page_Parts.display = linkDisplay.update( page_Parts );
+                            box.invoke('url.update-display-queued_and_new-links', o.URL._id, page_Parts, Done);
                         });
-                    })
+                    });
                 }else{
-                    request(request_options, function (err, response, page_HTML) {
-                        if( err ){
-                            // TODO: recognise bad URL
-                            job.log( err.message);
-                            debug(o.URL, err);
-                            Done(err);
-                        }else if( !err && response && response.statusCode != 200 ){
-                            var notFound = {
-                                statusCode: response ? response.statusCode : -1 ,
-                                url: o.URL.url
-                            };
-                            box.invoke('url.add', sURL, o.Link._id, {state:'ready', error:err, notFound:true, display:make_link_display( null, notFound ) }, function(err, oAddedURL){
-                                if( err ){
-                                    throw err; // this should never happen
+                    if( job.data.do_not_fetch ){
+                        box.invoke('link.set-state', job.data.link_id, 'postponed', Done);
+                    }else{
+                        request(request_options, function (err, response, page_HTML) {
+                            var update = {state:'ready'};
+                            if( err && err.code === 'ENOTFOUND' || response && response.statusCode != 200 ){
+                                update.notFound = true;
+                                update.err = {statusCode:404};
+                            }
+                            if( update.notFound ){
+                                update.display = make_link_display( null, {url:sURL } );
+                                if(o.URL ){
+                                    box.invoke('url.update-display-queued_and_new-links', o.URL._id, update, Done );
                                 }else{
-                                    Done();
-                                }
-                            });
-                        }else{
-                            var canonicalURL = linkDisplay.find_canonical_url('' + page_HTML);
-                            box.emit('url.check-url', canonicalURL, o.URL._id, function(err, found_same_url_oURL ){
-                                // TODO clear the case when found_same_url_oURL is not ready
-                                if( found_same_url_oURL && !hard_refresh && found_same_url_oURL.state == 'ready'){
-                                    // combine wit display update
-                                    box.invoke('url.add-link-id', found_same_url_oURL._id, o.Link._id, function(err, how_many_were_updated ){
-                                        // err ?
-                                        box.invoke('url.update-display-queued_and_new-links', found_same_url_oURL._id, null, Done);
-                                    });
-                                }else{
-                                    box.invoke('page.find', null, canonicalURL, function(err, Page ){
-                                        if( err ){
-                                            Done(err, 'page.find');
-                                        }else if( Page && !hard_refresh ){
-                                                // add oURL
-                                                box.invoke('url.set-page-id', o.URL._id, Page._id);
-                                                // TODO: use body and head from the page
-                                                box.invoke( 'pageScrape', Page.url, page_HTML /*Page.html*/, function(err, page_Parts ){
-                                                    var page2update = page_Parts.xhtml;
-                                                    page2update.html = page_HTML;
-                                                    delete page_Parts.xhtml;
-                                                    page_Parts.display = linkDisplay.update( page_Parts );
-                                                    box.invoke( 'page.update', Page._id, page2update, canonicalURL, canonicalURL, function(err){
-                                                        if( err ){ Done(err )}else{
-                                                            box.invoke('url.update-display-queued_and_new-links', o.URL._id, page_Parts, Done );
-                                                        }
-                                                    });
+                                    box.invoke('url.add', sURL, o.Link._id, update, function(err2, oAddedURL){
+                                        if( err2 ){
+                                            // E11000 duplicate key error index: LinksTo.urls.$url_1  dup key
+                                            if( err2.code === 11000){
+                                                box.invoke('url.check-url', sURL, 0, function(err, foundURL ){
+                                                    box.invoke('url.add-link-id', foundURL._id,  o.Link._id, true, Done );
                                                 });
+                                            }else{
+                                                throw err2;  // TODO: if this is a duplicate URL then use the existing URL
+                                            }
                                         }else{
-                                            //add oURL
-                                            box.invoke( 'pageScrape', sURL, page_HTML, function(err, page_Parts ){
-                                                var page2save = page_Parts.xhtml;
-                                                page2save.html = page_HTML;
-                                                delete page_Parts.xhtml;
-                                                page_Parts.display = linkDisplay.update( page_Parts );
-                                                box.invoke('url.update-display-queued_and_new-links', o.URL._id, page_Parts, function(err, oUpdated_URL, number_of_updated_links){
-                                                    if( hard_refresh && o.URL && o.URL.page_id){
-                                                        box.invoke( 'page.update', o.URL.page_id, page2save, sURL, canonicalURL, Done);
-                                                    }else{
-                                                        box.invoke( 'page.save', page2save, sURL, canonicalURL, o.URL._id, Done);
-                                                    }
-                                                });
-                                            });
+                                            Done();
                                         }
                                     });
                                 }
-                            });
-                        }
-                    });
+                            }else{
+                                var canonicalURL = linkDisplay.find_canonical_url('' + page_HTML);
+                                box.emit('url.check-url', canonicalURL, o.URL._id, function(err, found_same_url_oURL ){
+                                    // TODO clear the case when found_same_url_oURL is not ready
+                                    if( found_same_url_oURL ){
+                                        box.invoke('url.add-link-id', found_same_url_oURL._id, o.Link._id, found_same_url_oURL.state == 'ready', Done);
+                                    }else{
+                                        box.invoke('url.add', sURL, o.Link._id, { state:'pageScrape' }, function(err, oAddedURL){
+                                            box.invoke( 'pageScrape', sURL, page_HTML, function(err, page_Parts ){
+                                                saveError(err, null, oAddedURL );
+
+                                                var page2save = page_Parts.xhtml;
+                                                page2save.html = page_HTML;
+                                                delete page_Parts.xhtml;
+
+                                                page_Parts.display = linkDisplay.update( page_Parts );
+
+                                                box.invoke('url.update-display-queued_and_new-links', o.URL._id, page_Parts, function(err, oUpdated_URL, number_of_updated_links){
+                                                    box.invoke( 'page.save', page2save, sURL, canonicalURL, o.URL._id );
+                                                    Done();
+                                                });
+                                            });
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    }
                 }
             }
         );

@@ -82,15 +82,12 @@ function link_add( url, collectionID, param, oLink, extra, Done ){
                 if( err ){
                     Done(err, 'url.find-url');
                 }else if( oExisting_URL ){
-                    // todo: change the state to queued
-                    box.invoke('url.add-link-id', oExisting_URL._id, oAdded_Link._id, function( err ){
+                    box.invoke('url.add-link-id', oExisting_URL._id, oAdded_Link._id, oExisting_URL.state == 'ready', function( err ){
                         if( err ){
                             Done( err );
                         }else{
                             if( oExisting_URL.state == 'ready' ){
-                                box.invoke('url.update-display-queued_and_new-links', oExisting_URL._id, null, function(err){
-                                    box.on('link.get',  oAdded_Link._id, Done );
-                                });
+                                 box.on('link.get',  oAdded_Link._id, Done );
                             }else{
                                 Done(err, oAdded_Link );
                             }
@@ -106,6 +103,7 @@ function link_add( url, collectionID, param, oLink, extra, Done ){
 
 function job_fetch_link( param, Done ){
 //    param.default_request_settings = config.request;
+    box.invoke('link.set-state', param.link_id, 'queued');
     jobs.create('link-fetch', param )
         .on('complete', Done )
         .on('failed',   function(err) {
