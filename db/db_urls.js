@@ -15,7 +15,7 @@ var   box = require('../lib/box')
 
 function new_url( url, link_id, extra ){
     var url2save = {
-        state: 'fetching',
+        state: 'new',
         url:  url,
         links:[]
     };
@@ -127,6 +127,9 @@ box.on('db.init', function( Config, done ){
                 if( insertedURL.display ){
                     update.display = insertedURL.display;
                     update.state = insertedURL.state;
+                }
+                if( insertedURL.error ){
+                    update.error = insertedURL.error;
                 }
                 box.db.coll.links.updateById( link_id, { $set: update}, function( err, result ){
                     callback( err, insertedURL );
