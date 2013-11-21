@@ -185,9 +185,12 @@ module.exports = {
                                 statusCode: response ? response.statusCode : -1 ,
                                 url: o.URL.url
                             };
-                            // combine wit display update
                             box.invoke('url.add', sURL, o.Link._id, {state:'ready', error:err, notFound:true, display:make_link_display( null, notFound ) }, function(err, oAddedURL){
-                                box.invoke('url.update-display-queued_and_new-links', o.URL._id, null, Done );
+                                if( err ){
+                                    throw err; // this should never happen
+                                }else{
+                                    Done();
+                                }
                             });
                         }else{
                             var canonicalURL = linkDisplay.find_canonical_url('' + page_HTML);
