@@ -189,10 +189,13 @@ box.on('db.init', function( Config, done ){
         if( !url ){
             box.utils.later( callback );
         }else{
-            URLs.findOne(
-                {url: url, _id:{ $not: exclude_id } },
+            var param = {url: url };
+            if( exclude_id ){
+                param._id = { $not: exclude_id };
+            }
+            URLs.findOne(param,  { fields:{links:false }}, callback  );
            //  { fields:{links:false, page_id:false} },
-                callback  );
+
         }
     });
 
