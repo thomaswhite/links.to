@@ -13,7 +13,7 @@
            }
         );
         head.js(
-            {dust:"/js/dust-core-2.0.3.js"},
+            {dust:"/js/dust-core-2.2.0.js"},
             {dust_helpers:"/js/dust-helpers-1.1.1.js"},
             {moment:"/js/moment.js"},
             {dust_templates: "/templates/all.js"},

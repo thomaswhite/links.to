@@ -207,6 +207,8 @@ module.exports = {
                                         box.invoke('url.add-link-id', found_same_url_oURL._id, o.Link._id, found_same_url_oURL.state == 'ready', Done);
                                     }else{
                                         box.invoke('url.add', sURL, o.Link._id, { state:'pageScrape' }, function(err, oAddedURL){
+                                            // deal with duplicate keys
+                                            // E11000 duplicate key error index: LinksTo.urls.$url_1  dup key
                                             box.invoke( 'pageScrape', sURL, page_HTML, function(err, page_Parts ){
                                                 saveError(err, null, oAddedURL );
 
