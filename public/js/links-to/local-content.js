@@ -140,3 +140,4 @@ socket.on('collection.added',   socketEvent_common);
 socket.on('collection.deleted', socketEvent_common);
 socket.on('link.deleted',       socketEvent_common);
 socket.on('link.saved',         socketEvent_common);
+socket.on('link.updated',         socketEvent_common);

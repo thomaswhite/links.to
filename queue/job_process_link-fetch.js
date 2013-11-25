@@ -170,9 +170,14 @@ module.exports = {
                     }else{
                         request(request_options, function (err, response, page_HTML) {
                             var update = {state:'ready'};
-                            if( err && err.code === 'ENOTFOUND' || response && response.statusCode != 200 ){
+                            if( err && err.code === 'ENOTFOUND' ||
+                                err && err.message.match(/invalid/i) ||
+                                response && response.statusCode != 200 ){
                                 update.notFound = true;
                                 update.err = {statusCode:404};
+                                if( err && err.message ){
+                                    update.error = error;
+                                }
                             }
                             if( update.notFound ){
                                 update.display = make_link_display( null, {url:sURL } );
@@ -196,7 +201,7 @@ module.exports = {
                                 }
                             }else{
                                 var canonicalURL = linkDisplay.find_canonical_url('' + page_HTML);
-                                box.emit('url.check-url', canonicalURL, o.URL._id, function(err, found_same_url_oURL ){
+                                box.emit('url.check-url', canonicalURL, o.URL ? o.URL._id:0, function(err, found_same_url_oURL ){
                                     // TODO clear the case when found_same_url_oURL is not ready
                                     if( found_same_url_oURL ){
                                         box.invoke('url.add-link-id', found_same_url_oURL._id, o.Link._id, found_same_url_oURL.state == 'ready', Done);
@@ -211,8 +216,8 @@ module.exports = {
 
                                                 page_Parts.display = linkDisplay.update( page_Parts );
 
-                                                box.invoke('url.update-display-queued_and_new-links', o.URL._id, page_Parts, function(err, oUpdated_URL, number_of_updated_links){
-                                                    box.invoke( 'page.save', page2save, sURL, canonicalURL, o.URL._id );
+                                                box.invoke('url.update-display-queued_and_new-links', oAddedURL._id, page_Parts, function(err, oUpdated_URL, number_of_updated_links){
+                                                    box.invoke( 'page.save', page2save, sURL, canonicalURL, oAddedURL._id );
                                                     Done();
                                                 });
                                             });

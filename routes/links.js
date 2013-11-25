@@ -87,7 +87,7 @@ function link_add( url, collectionID, param, oLink, extra, Done ){
                             Done( err );
                         }else{
                             if( oExisting_URL.state == 'ready' ){
-                                 box.on('link.get',  oAdded_Link._id, Done );
+                                 box.invoke('link.get',  oAdded_Link._id, Done );
                             }else{
                                 Done(err, oAdded_Link );
                             }
@@ -104,15 +104,17 @@ function link_add( url, collectionID, param, oLink, extra, Done ){
 function job_fetch_link( param, Done ){
 //    param.default_request_settings = config.request;
     box.invoke('link.set-state', param.link_id, 'queued');
-    jobs.create('link-fetch', param )
+    var job = jobs.create('link-fetch', param )
         .on('complete', Done )
         .on('failed',   function(err) {
-            Done('job-error', err );
+            // Done('job-error', err );
         })
         .priority('normal')
         .attempts(100)
         .save( function( err, result ){
-            box.utils.later( Done, err);
+              if( err){
+                  Done(err, null, 'during job save')
+              };
         });
 }
 
@@ -130,9 +132,10 @@ function link_process( url, collectionID, param, oLink, extra, Done ){
     link_add( url, collectionID, param, oLink, extra, function(err, oLink ){
         if( err ){
             Done(err);
-        }else if( oLink.state == 'ready' || param.do_not_fetch ){
+        }else if( oLink.state == 'ready' || param.do_not_fetch || oLink.job_id){
             Done( null, oLink );
         }else{
+            //box.invoke('link.update-fast', oLink._id, {job_id } );
             job_fetch_link(_.merge(param, { url:url, link_id : oLink._id, url_id: oLink.url_id || 0 } ), function(err){
                 if( err ){
                     Done(err);
