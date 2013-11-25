@@ -214,7 +214,7 @@ box.on('db.init', function( Config, done ){
     });
 
     box.on('url.update', function( id, oURL, callback ){
-        URLs.updateById( id, { $set:oURL }, { safe: true }, callback );
+        URLs.updateById( id, { $set:oURL },callback );
     });
     box.on('url.update-fast', function( id, oURL ){
         URLs.updateById( id, { $set:oURL }, { safe: false } );

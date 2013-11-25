@@ -63,6 +63,21 @@ function check_if_url_has_timedout_and_fail_the_job( oURL, Done){
     }
 }
 
+function page_scrape( sURL, canonicalURL, HTML, oURL,  Done){
+    box.invoke( 'pageScrape', sURL, HTML, function(err, page_Parts ){
+        saveError(err, null, oURL );
+        var page2save = page_Parts.xhtml;
+        page2save.html = HTML;
+        delete page_Parts.xhtml;
+
+        page_Parts.display = linkDisplay.update( page_Parts );
+
+        box.invoke('url.update-display-queued_and_new-links', oURL._id, page_Parts, function(err, oUpdated_URL, number_of_updated_links){
+            box.invoke( 'page.save', page2save, sURL, canonicalURL, oURL._id );
+            Done();
+        });
+    });
+}
 
 module.exports = {
     id : job_id,
@@ -176,7 +191,7 @@ module.exports = {
                                 update.notFound = true;
                                 update.err = {statusCode:404};
                                 if( err && err.message ){
-                                    update.error = error;
+                                    update.error = err;
                                 }
                             }
                             if( update.notFound ){
@@ -205,25 +220,16 @@ module.exports = {
                                     // TODO clear the case when found_same_url_oURL is not ready
                                     if( found_same_url_oURL ){
                                         box.invoke('url.add-link-id', found_same_url_oURL._id, o.Link._id, found_same_url_oURL.state == 'ready', Done);
+                                    }else if(o.URL ){
+                                        box.invoke('url.update-fast', o.URL._id, {state:'pageScrape'} );
+                                        page_scrape( sURL, canonicalURL, page_HTML, o.URL,  Done);
                                     }else{
                                         box.invoke('url.add', sURL, o.Link._id, { state:'pageScrape' }, function(err, oAddedURL){
                                             // deal with duplicate keys
                                             // E11000 duplicate key error index: LinksTo.urls.$url_1  dup key
-                                            box.invoke( 'pageScrape', sURL, page_HTML, function(err, page_Parts ){
-                                                saveError(err, null, oAddedURL );
-
-                                                var page2save = page_Parts.xhtml;
-                                                page2save.html = page_HTML;
-                                                delete page_Parts.xhtml;
-
-                                                page_Parts.display = linkDisplay.update( page_Parts );
-
-                                                box.invoke('url.update-display-queued_and_new-links', oAddedURL._id, page_Parts, function(err, oUpdated_URL, number_of_updated_links){
-                                                    box.invoke( 'page.save', page2save, sURL, canonicalURL, oAddedURL._id );
-                                                    Done();
-                                                });
-                                            });
+                                            page_scrape( sURL, canonicalURL, page_HTML, oAddedURL,  Done);
                                         });
+
                                     }
                                 });
                             }
