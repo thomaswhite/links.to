@@ -178,6 +178,10 @@ box.on('db.init', function( Config, done ){
 
     box.on('url.get', function( id,  callback){
         if( id ){
+            if( typeof id == 'string'){
+                id = URLs.col.ObjectID(id);
+            }
+
             URLs.findById(id, callback);
         }else{
             box.utils.later( callback );

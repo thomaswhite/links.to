@@ -152,18 +152,10 @@ module.exports = {
                         }
                       },
                 URL2 : function(cb){
-                    if( job.data.url_id ){
-                        process.nextTick(cb);
-                    }else{
-                        box.invoke('url.check-url-and-original_url', sURL, cb );
-                    }
+                   box.invoke('url.check-url-and-original_url', sURL, cb );
                 },
                 Page: function(cb){
-                    if( job.data.url_id ){
-                        box.invoke('page.find', sURL, null, cb );
-                    }else{
-                        process.nextTick(cb);
-                    }
+                    box.invoke('page.find', sURL, null, cb );
                 }
             },
             function(err, o){
