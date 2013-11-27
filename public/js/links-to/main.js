@@ -16,7 +16,7 @@ function fnBtnAdd(event){
     socket.emit(Context.page.routeIO, Context.data, function(dataDone){
         Context.$this.removeAttr('disabled');
         Context.$input.removeAttr('disabled').val('');
-        debug.log ('btn_Add', dataDone);
+        log ('btn_Add', dataDone);
 
         if( Context.page.routeIO == "link:add" ){
             var param = Context.page.adding;
@@ -32,9 +32,9 @@ function fnBtnDelete(event){
     Context.$closest.addClass('deleting');
     socket.emit(Context.page.routeIO, Context.data, function(dataDone){
         if( dataDone.result == 'ok' ){
-            debug.log ('btn_Delete: OK, ', Context.data, dataDone);
+            log ('btn_Delete: OK, ', Context.data, dataDone);
         }else{
-            debug.log ('btn_Delete: ERROR, ', Context.data, dataDone);
+            log ('btn_Delete: ERROR, ', Context.data, dataDone);
         }
     });
 }
@@ -49,7 +49,7 @@ function inputCR(event){
 }
 
 function page_bottom_detected(event, nowTS, window_height){
-    debug.info('page_bottom_detected, received. ts:' + nowTS + ', window_height:' + window_height );
+    log('page_bottom_detected, received. ts:' + nowTS + ', window_height:' + window_height );
 }
 
 $.subscribe('page-init', { catchUp:true }, function() {

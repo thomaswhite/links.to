@@ -1,3 +1,9 @@
 {
-    "jobs_dir" : "queue"
+    "jobs_dir" : "queue-jobs",
+    "on_start":{
+        "inactive":"delete",
+        "complete":"delete",
+        "failed":"delete",
+        "active":"delete"
+    }
 }

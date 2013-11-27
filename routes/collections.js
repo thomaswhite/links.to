@@ -343,6 +343,7 @@ box.on('init.attach', function (app, config,  done) {
                        link.link_id = link._id;
                        delete link._id;
                        link.refresh = resp_param.refresh;
+                       resp_param.emitted = "link.updated";
                        box.invoke('Link__Fetch',  link, function(err, o){
                            if(err){
                                done(err);
