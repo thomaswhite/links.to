@@ -13,7 +13,7 @@
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/headjs/0.99/head.min.js"></script>
     <script>
       head.js(
-          {debug:"/js/ba-debug.min.js"},
+          {debug:"/js/ba-debug.js"},
 //        {log:"/js/consolelog.min.js"},
           {socket_io_core:"/socket.io/socket.io.js"},
           {socket_main:"/js/links-to/socket-io.js"},

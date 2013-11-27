@@ -65,9 +65,9 @@ head.ready(function() {
                         id   : o.id,
                         rowID : o.$row.attr('id')
                     }, function(data){
-                        console.debug ('import.folder_content:',  data);
+                        debug.info ('import.folder_content:',  data);
                         o.$linkCont.stop(true,true).slideDown(300);
-                        console.info( 'rendered HTML',
+                        debug.info( 'rendered HTML',
                             myRender('imports/import_folder_content', data.result, o.$linkCont, '$replace')
                         );
                     });
@@ -93,7 +93,7 @@ head.ready(function() {
                 id   : o.id,
                 excluded : o.excluded
             }, function(data){
-                debug ('import.folder_excluded:',  data);
+                debug.log ('import.folder_excluded:',  data);
                 o.$this.removeAttr('disabled');
                 if(o.excluded ){
                     o.$row.addClass('excluded');
@@ -117,9 +117,9 @@ head.ready(function() {
                 fetch_links: $('#fetch_links').is(':checked')
             }, function( response ){
                 if (!response.success){
-                    debug('Bad import', response);
+                    debug.log('Bad import', response);
                 }else{
-                    debug('Import started', response);
+                    debug.log('Import started', response);
                     if( response.go_to ){
                         page(  response.go_to  );
                     }
@@ -144,60 +144,60 @@ head.ready(function() {
     disableSelection( $('.coll-title'));
 
     socket.on('import.process-start', function(data){
-        debug ( 'import.process-start:', data );
+        debug.log ( 'import.process-start:', data );
         $('#tab-imported').trigger('click');
     });
     socket.on('import.process-progress', function(data){
-        debug ( 'import.process-progress:', data );
+        debug.log ( 'import.process-progress:', data );
     });
     socket.on('import.process-end', function(data){
-        debug ( 'import.process-end:', data );
+        debug.log ( 'import.process-end:', data );
         myRender('imports/import_summary', {import:data}, $('#beforeContent'), 'replace-content');
     });
     socket.on('import.process-error', function(data){
-        debug ( 'import.process-end:', data );
+        debug.log ( 'import.process-end:', data );
     });
     socket.on('import.process-queued', function(data){
-        debug ( 'import.process-queued:', data );
+        debug.log ( 'import.process-queued:', data );
     });
 
 
     socket.on('import.collection-start', function(data){
-        debug ( 'import.collection-start:', data );
+        debug.log ( 'import.collection-start:', data );
         $('#tab-imported').trigger('click');
         myRender('imports/import_imported_line', data, $('#imported'), 'append');
     });
 
     socket.on('import.collection-progress', function(data){
-        debug ( 'import.collection-progress:', data );
+        debug.log ( 'import.collection-progress:', data );
         import_folder_progress( data );
     });
 
     socket.on('import.collection-end', function(data){
-        debug ( 'import.collection-end:', data );
+        debug.log ( 'import.collection-end:', data );
         myRender('imports/import_imported_line', data, $('#folder_' + data._id ), '$replace');
     });
     socket.on('import.collection-error', function(data){
-        debug ( 'import.collection-error:', data );
+        debug.log ( 'import.collection-error:', data );
     });
 
 
     socket.on('import.link-start', function(data){
-        debug ( 'import.link-start:', data );
+        debug.log ( 'import.link-start:', data );
     });
     socket.on('import.link-end', function(data){
-        debug ( 'import.link-end:', data );
+        debug.log ( 'import.link-end:', data );
     });
     socket.on('import.link-error', function(data){
-        debug ( 'import.link-error:', data );
+        debug.log ( 'import.link-error:', data );
     });
 
 
     socket.on('import.processing', function(data){
-        debug ( 'import.processing:', data );
+        debug.log ( 'import.processing:', data );
     });
     socket.on('import.root', function(data){
-        debug ( 'import.root:', data );
+        debug.log ( 'import.root:', data );
     });
 
 

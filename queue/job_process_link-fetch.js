@@ -71,7 +71,7 @@ function page_scrape( sURL, canonicalURL, HTML, oLink, oURL,  Done){
         delete page_Parts.xhtml;
 
         page_Parts.display = linkDisplay.update( page_Parts );
-        page_Parts.status = "ready";
+        page_Parts.state = "ready";
 
         if(  oURL ){
             box.invoke('url.update-display-queued_and_new-links', oURL._id, page_Parts, function(err, oUpdated_URL, number_of_updated_links){
@@ -90,6 +90,7 @@ function page_scrape( sURL, canonicalURL, HTML, oLink, oURL,  Done){
                     });
                 }else{
                     box.invoke( 'page.save', page2save, sURL, canonicalURL, oAddedURL._id );
+                    Done();
                 }
             });
         }
@@ -145,17 +146,13 @@ module.exports = {
                         box.invoke('link.get', job.data.link_id, cb );
                       },
                 URL : function(cb){
-                        if( job.data.url_id ){
-                            box.invoke('url.get', job.data.url_id, cb );
-                        }else{
-                            process.nextTick(cb);
-                        }
+                        box.invoke('url.get', job.data.url_id, cb );
                       },
                 URL2 : function(cb){
-                   box.invoke('url.check-url-and-original_url', sURL, cb );
+                        box.invoke('url.check-url', sURL, job.data.url_id,  cb );
                 },
                 Page: function(cb){
-                    box.invoke('page.find', sURL, null, cb );
+                        box.invoke('page.find', sURL, null, cb );
                 }
             },
             function(err, o){
@@ -168,11 +165,15 @@ module.exports = {
                     Done();
                 }else if(o.URL && o.URL.state != 'timeout'){
                     if( o.URL.state == 'ready' ){ //  && (o.Link.state == 'queued' || o.Link.state == 'fetching' )
+                        box.invoke('link.set-state', job.data.link_id, 'queued');
                         box.invoke('url.update-links', o.URL._id, false, Done);
                     }else{
                         check_if_url_has_timedout_and_fail_the_job( o.URL, Done);
                     }    
                 }else if( o.URL2 ){
+                        if(o.URL2.length ){
+                            throw {msg:'Only one URL2 expected', oURL: o.URL2};
+                        }
                         if( o.URL2.state == 'ready'  ){ // && (o.Link.state == 'queued' || o.Link.state == 'fetching' )
                             box.invoke('url.add-link-id', o.URL2._id,  o.Link._id, true, Done );
                         }else {
@@ -182,6 +183,7 @@ module.exports = {
                         }
                 }else if(o.Page){
                     sURL = o.Page.url;
+                    box.invoke('link.set-state', job.data.link_id, 'queued');
                     box.invoke('url.add', sURL, o.Link._id, {state:'pageScrape', page_id:o.Page._id }, function(err, oAddedURL){
                         box.invoke( 'pageScrape', sURL, o.Page.html, function(err, page_Parts ){
                             saveError(err, null, oAddedURL );
@@ -194,6 +196,7 @@ module.exports = {
                     if( job.data.do_not_fetch ){
                         box.invoke('link.set-state', job.data.link_id, 'postponed', Done);
                     }else{
+                        box.invoke('link.set-state', job.data.link_id, 'fetching');
                         request(request_options, function (err, response, page_HTML) {
                             var update = {state:'ready'};
                             if( err && err.code === 'ENOTFOUND' ||

@@ -44,6 +44,7 @@ var mount_param = {
     passthrough: true // calls next/returns instead of returning a 404 error
 };
 
+mount_param.cache = false;
 
 app.http().io();
 //box.server = require('http').Server(app);

@@ -155,7 +155,7 @@ box.on('db.init', function( Config, done ){
     // TODO: DO not delete URL that is used in any active link
     box.on('url.delete', function( id, callback){
         if( !id ){
-            throw "'url.delete': missing ID";
+            throw "url.delete': missing ID";
         }
         callback = callback || function(){};
         URLs.findById(id, function(err, oURL){
@@ -193,9 +193,15 @@ box.on('db.init', function( Config, done ){
         if( !url ){
             box.utils.later( callback );
         }else{
-            var param = {url: url };
+            var param =  {
+                $or : [
+                    {url: url },
+                    {original_url:url}
+                ]
+            };
+
             if( exclude_id ){
-                param._id = { $not: exclude_id };
+                param._id = { $ne: exclude_id };
             }
             URLs.findOne(param,  { fields:{links:false }}, callback  );
            //  { fields:{links:false, page_id:false} },
@@ -207,14 +213,14 @@ box.on('db.init', function( Config, done ){
         if( !url ){
             box.utils.later(callback );
         }else{
-            URLs.findOne(
+            URLs.find(
                 {$or : [
                     {url: url },
                     {original_url:url}
                 ]},
                 // { fields:{links:false, page_id:false} },
                 function(err, oFound){
-                    callback(err, oFound, oFound && url == oFound.url );
+                    callback(err, !oFound.length ? null: oFound.length == 1 ? oFound[0]:oFound );
                 }
             );
         }
