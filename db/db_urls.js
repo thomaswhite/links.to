@@ -201,7 +201,7 @@ box.on('db.init', function( Config, done ){
             };
 
             if( exclude_id ){
-                param._id = { $ne: exclude_id };
+                param._id = { $nin: [exclude_id] };
             }
             URLs.findOne(param,  { fields:{links:false }}, callback  );
            //  { fields:{links:false, page_id:false} },
@@ -220,7 +220,10 @@ box.on('db.init', function( Config, done ){
                 ]},
                 // { fields:{links:false, page_id:false} },
                 function(err, oFound){
-                    callback(err, !oFound.length ? null: oFound.length == 1 ? oFound[0]:oFound );
+                    if( oFound && oFound.length && oFound.length > 1){
+                        throw {msg:"Duplicate oURLs", URL: oFound };
+                    }
+                    callback(err, !oFound.length ? null: oFound[0]);
                 }
             );
         }

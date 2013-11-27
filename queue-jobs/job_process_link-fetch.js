@@ -183,7 +183,7 @@ module.exports = {
                         }
                 }else if(o.Page){
                     sURL = o.Page.url;
-                    box.invoke('link.set-state', job.data.link_id, 'queued');
+
                     box.invoke('url.add', sURL, o.Link._id, {state:'pageScrape', page_id:o.Page._id }, function(err, oAddedURL){
                         box.invoke( 'pageScrape', sURL, o.Page.html, function(err, page_Parts ){
                             saveError(err, null, oAddedURL );
