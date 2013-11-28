@@ -103,7 +103,7 @@ function link_add( url, collectionID, param, oLink, extra, Done ){
 
 function job_fetch_link( param, Done ){
 //    param.default_request_settings = config.request;
-    box.invoke('link.set-state', job.data.link_id, 'queued');
+    box.invoke('link.set-state', param.link_id, 'queued');
     var job = jobs.create('link-fetch', param )
         .on('complete', Done )
         .on('failed',   function(err) {

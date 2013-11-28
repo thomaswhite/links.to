@@ -55,10 +55,14 @@ function saveError(err, oLink, oURL, extra ){
 
 function check_if_url_has_timedout_and_fail_the_job( oURL, Done){
     if( !oURL.start_fetching || !(oURL.start_fetching instanceof Date) || (new Date - oURL.start_fetching > 15000) ){
-        box.invoke('url.set-state',  oURL._id, 'timeout', 0, function(err, u){
-            Done( 'timeout' );
-        });
-    }else{
+        if( Done ){
+            box.invoke('url.set-state',  oURL._id, 'timeout', 0, function(err, u){
+                    Done( 'timeout' );
+            });
+        }else{
+            oURL.state = 'timeout';
+        }
+    }else if( Done ){
         Done( 'still-not-ready' );
     }
 }
@@ -149,7 +153,9 @@ module.exports = {
                         box.invoke('url.get', job.data.url_id, cb );
                       },
                 URL2 : function(cb){
-                        box.invoke('url.check-url', sURL, job.data.url_id,  cb );
+                        if( !job.data.url_id ){
+                            box.invoke('url.check-url', sURL, job.data.url_id,  cb );
+                        }
                 },
                 Page: function(cb){
                         box.invoke('page.find', sURL, null, cb );
@@ -167,10 +173,12 @@ module.exports = {
                     if( o.URL.state == 'ready' ){ //  && (o.Link.state == 'queued' || o.Link.state == 'fetching' )
                         box.invoke('link.set-state', job.data.link_id, 'queued');
                         box.invoke('url.update-links', o.URL._id, false, Done);
+                        return;
                     }else{
-                        check_if_url_has_timedout_and_fail_the_job( o.URL, Done);
+                        check_if_url_has_timedout_and_fail_the_job( o.URL );
                     }    
-                }else if( o.URL2 ){
+                }
+                if( !o.URL && o.URL2 ){
                         if(o.URL2.length ){
                             throw {msg:'Only one URL2 expected', oURL: o.URL2};
                         }
@@ -181,7 +189,7 @@ module.exports = {
                                 check_if_url_has_timedout_and_fail_the_job( o.URL2, Done);
                             });
                         }
-                }else if(o.Page){
+                }else if(!o.URL && !o.URL2 && o.Page){
                     sURL = o.Page.url;
 
                     box.invoke('url.add', sURL, o.Link._id, {state:'pageScrape', page_id:o.Page._id }, function(err, oAddedURL){
