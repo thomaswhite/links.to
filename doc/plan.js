@@ -46,4 +46,8 @@
 
  DEBUG = monk:-*,  jobs:*, plugin:*, linksTo:*, linksTo:app, linskTo:db, linksTo:view.collections
  DEBUG_COLORS = 1
+
+
+ rdesktop -d websense.com -u twhite -p Transform20 -g 1800x1100 -P -z  10.5.21.62
+
  */

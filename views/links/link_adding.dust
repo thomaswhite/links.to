@@ -1,7 +1,7 @@
 <div class="blocked-link token_{token}" id="token_{token}">
   <div class="row link-title">
      <div class="span8 link-content">
-           <i class="icon-refresh icon-spin "></i>
+           <i class="fa fa-refresh fa-spin "></i>
            <span class="link-fetching">{url}</span>
       </div>
   </div>

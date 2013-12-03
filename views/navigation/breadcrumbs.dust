@@ -13,6 +13,10 @@
       {:else}
          <li>no breadcrumbs yet</li>
       {/crumbs}
+      <li class="btn-group" style="float:right">
+           <button id="prev-in-list" class="btn btn-mini"><i class="fa fa-angle-double-left"></i></button>
+           <button id="next-in-list" class="btn btn-mini"><i class="fa fa-angle-double-right"></i></button>
+      </li>
     </ul>
   </div>
 </div>

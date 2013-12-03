@@ -5,7 +5,7 @@
       <div class="span2 coll-e">
         {#created}
           <span class="updated"  title='{@timeStamp time="{.}" format="YYYY-MM-DD HH:mm" /}' >
-              <i class="icon-calendar"></i>
+              <i class="fa fa-calendar"></i>
               <span>{@timeFromNow time="{.}"/}</span>
           </span>
         {/created}

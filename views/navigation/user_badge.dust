@@ -31,7 +31,7 @@
     <td align="right">
       <a class="btn logout " href="/logout" title="{title}">
         <span>Log Out</span>
-        <i class="icon-play"></i>
+        <i class="fa fa-play"></i>
       </a>
     </td>
   </tr>

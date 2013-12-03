@@ -3,7 +3,7 @@
           <span>
               {#folder}
                 {#excluded}
-                  <i class="import-folder icon-ban-circle text-error"></i>
+                  <i class="import-folder fa fa-ban text-error"></i>
                 {:else}
                   <i class="import-folder icon-expand-alt"></i>
                 {/excluded}
@@ -18,14 +18,14 @@
               <span class="updated"  title='{@timeStamp time="{.}" format="YYYY-MM-DD HH:mm" /}' >, {@timeFromNow time="{.}"/}</span>
             {/add_date}
             {#imported}
-                <i class="icon-ok"></i>
+                <i class="fa fa-check"></i>
             {:else}
                 <input type="checkbox" class="excluded" {#excluded}{:else}checked="checked"{/excluded} >
             {/imported}
 
           {:else}
               {#imported}
-                 <i class="icon-ok"></i>
+                 <i class="fa fa-tick"></i>
               {/imported}
           {/folder}
       </div>

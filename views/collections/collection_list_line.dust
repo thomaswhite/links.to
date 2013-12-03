@@ -2,10 +2,10 @@
       <div class="span5 coll-title">
         <a href="/coll/{_id}" title="{description}" >{title}</a>
             {@eq key="{owner}" value="{user._id}" }
-                    <span class="icon-user my-collection" title="This collection is mine"></span>
+                    <span class="fa fa-user my-collection" title="This collection is mine"></span>
                     {@lt key="{links.length}" value="1"}
                       <a href="#" data-context='{~lb}"route":"/coll/delete", "id":"{_id}"{~rb}' title="Delete" class="deleteIcon coll">
-                        <i class="icon-trash"></i>
+                        <i class="fa fa-trash-o"></i>
                       </a>
                     {/lt}
             {/eq}
@@ -15,7 +15,7 @@
       <div class="span2 coll-e">
         {#updated}
           <span class="updated"  title='{@timeStamp time="{updated}" format="YYYY-MM-DD HH:mm" /}' >
-              <i class="icon-calendar"></i>
+              <i class="fa fa-calendar"></i>
               <span>{@timeFromNow time="{updated}"/}</span>
           </span>
         {/updated}

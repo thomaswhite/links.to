@@ -1,7 +1,7 @@
 {! <div class="row"> !}
     <div class="tag-row">
         {@ne key="{state}" value="ready"}
-            <i class="icon-refresh icon-spin "></i>
+            <i class="fa fa-refresh fa-spin"></i>
         {/ne}
         <span class="link-tools-block">
             <span>{@timeFromNow time="{updated}"/}</span>
@@ -18,6 +18,6 @@
             {#tags}<a href="#" title="Found {count} times">{word}</a>{/tags}
             </span>
         {/display}
-        {!  ?canEdit} <button class="btn btn-mini"><i class="icon-plus"></i></button>{/canEdit !}
+        {!  ?canEdit} <button class="btn btn-mini"><i class="fa fa-plus"></i></button>{/canEdit !}
     </div>
 {!  </div> !}

@@ -3,8 +3,8 @@
               <span class="btn-toolbar">
                 {!
                 <span class="btn-group">
-                  <a href="#" class="btn btn-primary" title="Like"><i class="icon-white  icon-thumbs-up"></i></a>
-                  <a href="#" class="btn btn-primary" title="Add to favorites"><i class="icon-white icon-heart"></i></a>
+                  <a href="#" class="btn btn-primary" title="Like"><i class="icon-white  fa fa-thumbs-up"></i></a>
+                  <a href="#" class="btn btn-primary" title="Add to favorites"><i class="icon-white fa fa-heart"></i></a>
                   <a href="#" class="btn btn-primary" title="Share"><i class="icon-white icon-share-alt"></i></a>
                  </span>
                 !}

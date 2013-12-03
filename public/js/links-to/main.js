@@ -49,7 +49,7 @@ function inputCR(event){
 }
 
 function page_bottom_detected(event, nowTS, window_height){
-    log('page_bottom_detected, received. ts:' + nowTS + ', window_height:' + window_height );
+    debug.log('page_bottom_detected, received. ts:' + nowTS + ', window_height:' + window_height );
 }
 
 $.subscribe('page-init', { catchUp:true }, function() {

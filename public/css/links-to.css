@@ -70,28 +70,20 @@ body {
 .wrap2 {
   white-space: pre;
   /* CSS 2.0 */
-
   white-space: pre-wrap;
   /* CSS 2.1 */
-
   white-space: pre-line;
   /* CSS 3.0 */
-
   white-space: -pre-wrap;
   /* Opera 4-6 */
-
   white-space: -o-pre-wrap;
   /* Opera 7 */
-
   white-space: -moz-pre-wrap;
   /* Mozilla */
-
   white-space: -hp-pre-wrap;
   /* HP Printers */
-
   word-wrap: break-word;
   /* IE 5+ */
-
 }
 /*
 http://css-tricks.com/snippets/css/useful-css3-less-mixins/
@@ -206,7 +198,6 @@ http://css-tricks.com/snippets/css/useful-css3-less-mixins/
   width: 27px;
   height: 27px;
   /*	border: 1px gray solid; */
-
   background-color: silver;
 }
 .user-name {
@@ -248,14 +239,12 @@ span.updated i {
   float: left;
   background: #ccc;
   /*#c5c5c5; */
-
   color: black;
   text-decoration: none;
   margin: 0 5px 0px 0;
   padding: 0px 4px;
   position: relative;
   /*  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4); */
-
   white-space: nowrap;
   -webkit-border-radius: 3px;
   -moz-border-radius: 3px;
@@ -265,7 +254,6 @@ span.updated i {
   -webkit-box-shadow: 5px 3px 10px rgba(50, 50, 50, 0.45);
   -moz-box-shadow: 5px 3px 10px rgba(50, 50, 50, 0.45);
 */
-
   transition: all .25s linear;
 }
 .tags a:hover {
@@ -325,7 +313,8 @@ span.updated i {
   width: 5px;
 }
 
-*/.dropdown-menu li * {
+*/
+.dropdown-menu li * {
   vertical-align: middle;
 }
 .navbar-inner {
@@ -391,8 +380,7 @@ li.dropdown.open>.dropdown-toggle .caret, .navbar .nav li.dropdown.active>.dropd
   color: white;
   text-decoration: none;
   font-weight: bold;
-  text-shadow: none /* 0px 0px 15px #ddd; */
-;
+  text-shadow: none /* 0px 0px 15px #ddd; */;
 }
 .navbar .nav > li > a:hover {
   color: yellow;
@@ -445,7 +433,6 @@ a.iddDrop:hover {
 }
 ul.opened {
   /* width:50%; */
-
 }
 ul.opened a.thumbnail {
   background-color: #0088cc;
@@ -471,7 +458,6 @@ body.collection h1 {
   -khtml-border-radius: 5px;
   border-radius: 5px;
   /* for multi values */
-
   -webkit-box-shadow: 4px 4px 19px rgba(50, 50, 50, 0.75);
   box-shadow: 4px 4px 19px rgba(50, 50, 50, 0.75);
 }
@@ -689,7 +675,6 @@ div.tab-content {
 .row.table-header > div {
   border-bottom: 1px solid gray;
   /*  background-color: #ffffff; */
-
 }
 .w100 {
   width: 100% !important;
