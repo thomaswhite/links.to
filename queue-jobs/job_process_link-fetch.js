@@ -11,6 +11,7 @@ var job_id = 'link-fetch'
     , debug = require('debug')('jobs:' + job_id )
     , async = require('async')
     , request = require('request')
+    , when = require('when')
     , _ = require('lodash')
     , linkDisplay = require('../lib/link-make-display')
     , config
@@ -155,6 +156,8 @@ module.exports = {
                 URL2 : function(cb){
                         if( !job.data.url_id ){
                             box.invoke('url.check-url', sURL, job.data.url_id,  cb );
+                        }else{
+                            box.utils.later(cb );
                         }
                 },
                 Page: function(cb){
