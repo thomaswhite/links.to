@@ -141,7 +141,8 @@ function getData( context, next){
 
 function processRoute(context){
     var p = context.state.pageDef;
-    myRender(p.tempateID, context.state.pageData , p.containerID, 0);
+    $.publish('renderContent', p.tempateID, context.state.pageData , p.containerID, 0);
+//        myRender(p.tempateID, context.state.pageData , p.containerID, 0);
 }
 
 function page_not_found(context){

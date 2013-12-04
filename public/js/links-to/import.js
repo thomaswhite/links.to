@@ -3,6 +3,8 @@
  * User: twhite
  * Date: 20/08/13
  * To change this template use File | Settings | File Templates.
+ *
+ * Depends on $, socket
  */
 
 function disableSelection( $o ){
@@ -48,85 +50,91 @@ function get_import_parts(dom){
     return o;
 }
 
+function import_btn(event){
+    $(this).attr('disabled', true );
+
+    $('#importBtn').hide();
+    $('#processBtn').show();
+    $('#content').empty();
+
+    socket.emit('imports:process', {
+        id   : pageParam.id,
+        fetch_links: $('#fetch_links').is(':checked')
+    }, function( response ){
+        if (!response.success){
+            debug.log('Bad import', response);
+        }else{
+            debug.log('Import started', response);
+            if( response.go_to ){
+                page(  response.go_to  );
+            }
+        }
+    });
+    event.preventDefault();
+}
+
+
+function coll_title (event){
+    var o = get_import_parts(this);
+    if(event.target.tagName == 'INPUT' || o.excluded ){
+        return;
+    }
+    if(o.state == 'closed'){
+        o.$i.removeClass( 'icon-expand-alt').addClass('icon-collapse-alt');
+        if( o.$linkCont.find('div').length ){
+            o.$linkCont.stop(true,true).slideDown(300);
+        }else{
+            socket.emit('imports:folder_content', {
+                id   : o.id,
+                rowID : o.$row.attr('id')
+            }, function(data){
+                debug.info ('import.folder_content:',  data);
+                o.$linkCont.stop(true,true).slideDown(300);
+                debug.info( 'rendered HTML',
+                    myRender('imports/import_folder_content', data.result, o.$linkCont, '$replace')
+                );
+            });
+        }
+    }else{
+        o.$i.removeClass( 'icon-collapse-alt').addClass('icon-expand-alt');
+        o.$linkCont.stop(true,true).slideUp(300);
+    }
+}
+
+function input_excluded(event){
+    var o = get_import_parts(this);
+
+    o.$this.attr('disabled', true );
+    o.$linkCont.stop(true,true).hide();
+    o.$i.removeClass( 'icon-collapse-alt').addClass('icon-expand-alt');
+    if(o.excluded ){
+        o.$row.addClass('excluded');
+    }
+    socket.emit('imports:folder_exclude', {
+        id   : o.id,
+        excluded : o.excluded
+    }, function(data){
+        debug.log ('import.folder_excluded:',  data);
+        o.$this.removeAttr('disabled');
+        if(o.excluded ){
+            o.$row.addClass('excluded');
+            o.$i.removeClass( 'icon-collapse-alt icon-expand-alt').addClass('icon-ban-circle text-error');
+        }else{
+            o.$row.removeClass('excluded');
+            o.$i.removeClass( 'icon-ban-circle text-error').addClass('icon-expand-alt');
+        }
+        myRender('imports/import_summary', data.result, $('#beforeContent'), 'replace-content');
+    });
+}
 
 head.ready(function() {
     $('body')
-        .on('click', '.coll-title', function(event){
-            var o = get_import_parts(this);
-            if(event.target.tagName == 'INPUT' || o.excluded ){
-                return;
-            }
-            if(o.state == 'closed'){
-                o.$i.removeClass( 'icon-expand-alt').addClass('icon-collapse-alt');
-                if( o.$linkCont.find('div').length ){
-                    o.$linkCont.stop(true,true).slideDown(300);
-                }else{
-                    socket.emit('imports:folder_content', {
-                        id   : o.id,
-                        rowID : o.$row.attr('id')
-                    }, function(data){
-                        debug.info ('import.folder_content:',  data);
-                        o.$linkCont.stop(true,true).slideDown(300);
-                        debug.info( 'rendered HTML',
-                            myRender('imports/import_folder_content', data.result, o.$linkCont, '$replace')
-                        );
-                    });
-                }
-            }else{
-                o.$i.removeClass( 'icon-collapse-alt').addClass('icon-expand-alt');
-                o.$linkCont.stop(true,true).slideUp(300);
-            }
-        })
-        .on('select', '.coll-title', function(event){
-            event.preventDefault();
-        })
-        .on('change', 'input.excluded', function(event){
-            var o = get_import_parts(this);
+        .on('click', '.coll-title', coll_title )
+        .on('select', '.coll-title', function(event){  event.preventDefault();   })
+        .on('change', 'input.excluded', input_excluded)
+        .on('click', '.import-btn', import_btn )
 
-            o.$this.attr('disabled', true );
-            o.$linkCont.stop(true,true).hide();
-            o.$i.removeClass( 'icon-collapse-alt').addClass('icon-expand-alt');
-            if(o.excluded ){
-                o.$row.addClass('excluded');
-            }
-            socket.emit('imports:folder_exclude', {
-                id   : o.id,
-                excluded : o.excluded
-            }, function(data){
-                debug.log ('import.folder_excluded:',  data);
-                o.$this.removeAttr('disabled');
-                if(o.excluded ){
-                    o.$row.addClass('excluded');
-                    o.$i.removeClass( 'icon-collapse-alt icon-expand-alt').addClass('icon-ban-circle text-error');
-                }else{
-                    o.$row.removeClass('excluded');
-                    o.$i.removeClass( 'icon-ban-circle text-error').addClass('icon-expand-alt');
-                }
-                myRender('imports/import_summary', data.result, $('#beforeContent'), 'replace-content');
-            });
-        })
-        .on('click', '.import-btn', function(event){
-            $(this).attr('disabled', true );
-
-            $('#importBtn').hide();
-            $('#processBtn').show();
-            $('#content').empty();
-
-            socket.emit('imports:process', {
-                id   : pageParam.id,
-                fetch_links: $('#fetch_links').is(':checked')
-            }, function( response ){
-                if (!response.success){
-                    debug.log('Bad import', response);
-                }else{
-                    debug.log('Import started', response);
-                    if( response.go_to ){
-                        page(  response.go_to  );
-                    }
-                }
-            });
-            event.preventDefault();
-        });
+        ;
 /*
         .on('click', '.nav .nav-tabs a#tab-imported', function(event){
             var $this = $(this)

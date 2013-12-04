@@ -20,7 +20,6 @@ socket.on('connect_failed', function () {       debug || debug.log('socket.io co
 
 socket.on('collection.adding', function( data ){
     debug.log ('collection-adding', data);
-    // display waiting sign
 });
 
 

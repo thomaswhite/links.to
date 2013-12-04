@@ -20,7 +20,8 @@ function fnBtnAdd(event){
 
         if( Context.page.routeIO == "link:add" ){
             var param = Context.page.adding;
-            myRender( param.tempateID, dataDone, $(param.containerID), param.contentAction  );
+            $.publish('renderContent',  param.tempateID, dataDone, $(param.containerID), param.contentAction  );
+            // myRender( param.tempateID, dataDone, $(param.containerID), param.contentAction  );
         }
     });
     event.preventDefault();
