@@ -1,0 +1,32 @@
+{
+    "baseUrl" : "/js",
+    "paths":{
+        "links-to":"links-to_adm",
+        "cdnjs": "//cdnjs.cloudflare.com/ajax/libs",
+        "jquery": "//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.js",
+        "moment": "//cdnjs.cloudflare.com/ajax/libs/moment.js/2.4.0/moment.min.js",
+        "dustjs" : "//cdnjs.cloudflare.com/ajax/libs/dustjs-linkedin/2.0.0/dust-core.min.js",
+        "dustjs-linkedin" : "dist-code-2.2.3.min.js",
+        "dustjs-helpers"  : "dist-helpers-1.1.1.js",
+
+        "bootstarp.css":"link!//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.no-icons.min.css",
+        "font-awesome.min.css": "link!//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css"
+    },
+    "plugins": {
+        "css": {
+            "nowait": true,
+            "baseUrl": "//mycdn.com/base/path/for/all/stylesheets",
+            "paths": {
+                "layout": "containers",
+                "theme": "themes"
+            }
+        },
+        "text": {
+            "baseUrl": "//mycdn.com/base/path/for/all/templates",
+            "paths": {
+                "header": "headers",
+                "footer": "footers"
+            }
+        }
+    }
+}

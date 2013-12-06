@@ -2,6 +2,9 @@
  * User: Thomas
  * Date: 08/05/13
  * Time: 21:01
+
+    externals: $, $.publish, $.subscribe
+
  */
 
 var pages = {
@@ -141,8 +144,11 @@ function getData( context, next){
 
 function processRoute(context){
     var p = context.state.pageDef;
-    $.publish('renderContent', p.tempateID, context.state.pageData , p.containerID, 0);
-//        myRender(p.tempateID, context.state.pageData , p.containerID, 0);
+    $.publish('renderContent', [p.tempateID, context.state.pageData , $(p.containerID), 0, function(err, html){
+        if( err ){
+            throw err;
+        }
+    }]);
 }
 
 function page_not_found(context){
@@ -153,7 +159,7 @@ function page_not_found(context){
 
 
 function pageAddRoutes(){
-    return;
+    //return;
 
     //page.base('/');
     page('/colls',
@@ -171,7 +177,7 @@ function pageAddRoutes(){
     );
     page('/coll/:id',
         function(context, next){
-            context.state.pageDef = context.pageDef || pages['/colls/:id'];
+            context.state.pageDef = context.pageDef || pages['/coll/:id'];
             context.state.pageParam = {
                 coll_id: context.params.id
             };

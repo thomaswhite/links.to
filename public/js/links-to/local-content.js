@@ -1,3 +1,6 @@
+/**
+ *  external: dust, $, $.publish, $.subscribe, socket
+ */
 
 
 function addDustHelpers(){
@@ -76,9 +79,8 @@ function myRender(tempateID, data, $target, contentAction, done ) {
     }
 }
 
-$.subscribe("renderContent", function(event, data, Context, routeIO){
-    //Context = Context || page_context(null,null, routeIO);
-    myRender( Context.page.tempateID, data, Context.$container, Context.page.contentAction);
+$.subscribe("renderContent", function(event, tempateID, data, $container, contentAction, done){
+    myRender( tempateID, data, $container, contentAction, done );
 });
 
 $.subscribe("slideUpDeleted", function(event, data, Context, routeIO){
