@@ -446,10 +446,15 @@
    * Expose `page`.
    */
 
-  if ('undefined' == typeof module) {
-    window.page = page;
-  } else {
-    module.exports = page;
-  }
+    if (typeof define === "function" && define.amd) {
+        define("page", [], function () {
+            return page;
+        });
+    }else if( typeof module !== 'undefined' && module.exports ){
+        module.exports = page;
+    } else {
+        window.page = page;
+    }
 
 })();
+

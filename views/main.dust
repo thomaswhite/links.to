@@ -9,18 +9,91 @@
      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     {+metaTags/}
     <title>{+pageTitle}Links.to: Page{/pageTitle}</title>
-    <script>pageParam={pageParam|js|s};</script>
-    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/headjs/0.99/head.min.js"></script>
+      <link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.no-icons.min.css">
+      <link rel="stylesheet" type="text/css" href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
+      <link rel="stylesheet" type="text/css" href="/css/links-to.css">
+
+    <script>var pageParam={pageParam|js|s}, pageScripts=[], pageCSS=[];</script>
+
+    <script src="/js/curl.js"  type="text/javascript" ></script>
     <script>
-      head.js(
+        console.info('start...');
+        curl.config( {
+              "baseUrl" : "/js",
+              "paths":{
+                      "amd":        "amd",
+                      "links-to":   "amd/links-to",
+                      "cdnjs":      "//cdnjs.cloudflare.com/ajax/libs",
+                      "jquery":     "//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.js",
+                      "moment":     "//cdnjs.cloudflare.com/ajax/libs/moment.js/2.4.0/moment.min.js",
+                      "dustjs200" : "//cdnjs.cloudflare.com/ajax/libs/dustjs-linkedin/2.0.0/dust-core.min.js",
+
+                      "dustjs-linkedin" : "amd/dust-core-2.2.2",
+                      "dustjs-helpers"  : "amd/dust-helpers-1.1.1",
+                      "dust-templates": {
+                              "location": "/templates/all.js",
+                              "config": {
+                                     loader: 'curl/loader/legacy',
+                                     exports : 'dustTemplates=1',
+                                     requires: ['dustjs-helpers', 'dustjs-linkedin']
+                              }
+                       },
+                      "socket.io": {
+                          "location": "/socket.io/socket.io.js",
+                          "config": {
+                              loader: 'curl/loader/legacy',
+                              factory: function (fullId) {
+                                  return io;
+                              }
+                          }
+                      }
+
+                     // "bootstrap" : "link!//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.no-icons.min.css",
+                     // "font-awesome": "link!//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css"
+
+              }
+   //          , packages:{
+   //                "collections":
+   //           }
+          });
+
+          curl( [
+                 'links-to/debug',
+                 'links-to/socket-io',
+                 'links-to/pages',
+                 'links-to/main',
+                 'links-to/local-content'
+
+                ], function(debug){
+                     window.onerror = function(error, url, line, stack, extra) {
+                          debug.error(error, url, line, stack, extra);
+                          return true;
+                      };
+               })
+               .then(
+                      function () {
+                         console.log('Ready.');
+                         // debug.log('Loaded.');
+                          // do something after the dom is ready
+                      },
+                      function (ex) {
+                          throw ex;
+                        }
+                );
+
+    </script>
+
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/headjs/0.99/head.min.js"></script>
+    <script type="text/text">
+   /*   head.js(
           {debug:"/js/ba-debug.js"},
-//        {log:"/js/consolelog.min.js"},
-          {socket_io_core:"/socket.io/socket.io.js"},
-          {socket_main:"/js/links-to/socket-io.js"},
+      //    {socket_io_core:"/socket.io/socket.io.js"},
+      //    {socket_main:"/js/links-to/socket-io.js"},
           function(){
              debug.log( 'linksTo socket-io loaded.');
           }
       );
+*/
       head.load(
       // netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css
       // netdna.bootstrapcdn.com/bootstrap/3.0.2/js/bootstrap.min.js
@@ -35,8 +108,8 @@
           , "/css/stelth.css"
           {/config.stelth.screen}
       );
-      var pageScripts=[], pageCSS=[];
     </script>
+
     {+headLinks/}
     {+headContent/}
   </head>
@@ -53,7 +126,7 @@
     </div>
     {>mainPageScripts/}
     {+pageScripts/}
-    <script>
+    <script  type="text/text">
         if( pageScripts.length) { head.js.applay(undefined,   pageScripts ); }
         if( pageCSS.length)     { head.load.applay(undefined, pageCSS ); }
     </script>

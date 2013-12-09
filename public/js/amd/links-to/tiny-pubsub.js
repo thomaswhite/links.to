@@ -1,11 +1,9 @@
-(function (define) {
     define(['jquery'], function ($) {
         "use strict";
 
         /*! Tiny Pub/Sub - v0.7.0 - 2013-01-29
         * https://github.com/cowboy/jquery-tiny-pubsub
         * Copyright (c) 2013 "Cowboy" Ben Alman; Licensed MIT */
-        function tinyPubSub($) {
           var o = $({}),
               triggered = {};
               // save the first trigger of an event.
@@ -45,12 +43,11 @@
                   triggered[ eventName ] = args;
               }
           };
+
+        return{
+            pub:$.publish,
+            sub:$.subscribe,
+            unsub:$.unsubscribe,
+            one: $.subscribeOne
         }
     });
-}(
-    // http://know.cujojs.com/tutorials/modules/authoring-umd-modules
-    typeof define == 'function' && define.amd  ? define  : function (ids, factory) {
-        var deps = ids.map(function (id) { return require(id); });
-        module.exports = factory.apply(null, deps);
-    }
- ));

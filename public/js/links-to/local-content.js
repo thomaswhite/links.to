@@ -41,7 +41,11 @@ function myRender(tempateID, data, $target, contentAction, done ) {
             out = $.trim(out) || '--empty--';
             if (err) {
                 err.where = 'myRender';
-                throw err;
+                if($.isFunction(done)){
+                    done(err);
+                }else{
+                    throw err;
+                }
             } else {
                 var $out = $(out);
                 switch( contentAction ){

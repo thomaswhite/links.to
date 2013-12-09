@@ -3,7 +3,7 @@
  * Date: 08/05/13
  * Time: 21:01
 
-    externals: $, $.publish, $.subscribe
+    externals: $, $.publish, $.subscribe, page
 
  */
 
@@ -116,6 +116,7 @@ function page_context(that, event, context, route ){
     return o;
 }
 
+/*
 function index(){
     dust.render("main", {}, function(err, out) {
         if( err ) {
@@ -125,6 +126,7 @@ function index(){
         }
     });
 }
+*/
 
 function getData( context, next){
     var p = context.state.pageDef;

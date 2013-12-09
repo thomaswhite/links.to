@@ -5,7 +5,7 @@
 
 {<pageBottom}
     <div class="eipBase" data-url="/coll/{collection._id}/eip"><br/></div>
-    <script>
+    <script type="text/text">
       head.js(
         "/js/jquery.editinplace.js",
         "/js/jquery.autosize.js",

@@ -1,4 +1,4 @@
-<script>
+<script type="text/text">
   head.js(
       {jquery:"//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.js"},
       { pubsub:"/js/ba-tiny-pubsub.js"},
@@ -13,9 +13,9 @@
            }
         );
         head.js(
-            {dust:"/js/dust-core-2.2.0.js"},
+            {dust:"/js/dust-core-2.2.2.js"},
             {dust_helpers:"/js/dust-helpers-1.1.1.js"},
-            {moment:"/js/moment.js"},
+            {moment:      "/js/moment.js"},
             {dust_templates: "/templates/all.js"},
             {"local-content": "/js/links-to/local-content.js"},
             function (){
