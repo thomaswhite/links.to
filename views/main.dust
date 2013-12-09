@@ -35,7 +35,7 @@
                               "config": {
                                      loader: 'curl/loader/legacy',
                                      exports : 'dustTemplates=1',
-                                     requires: ['dustjs-helpers', 'dustjs-linkedin']
+                                     requires: ['dustjs-linkedin']
                               }
                        },
                       "socket.io": {
