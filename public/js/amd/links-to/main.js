@@ -9,8 +9,9 @@
         'links-to/socket-io',
         'links-to/tiny-pubsub',
         'links-to/debug',
+        'links-to/pages',
         'links-to/detect_bottom'
-        ], function ($, socket, tiny, debug ) {
+        ], function ($, socket, tiny, debug, pages ) {
 
         "use strict";
 
@@ -20,7 +21,7 @@
 
         // TODO: make sure adding the collection in coll/mine
         function fnBtnAdd(event){
-            var Context = page_context(this, event);
+            var Context = pages.page_context(this, event);
             Context.$this.attr('disabled', true );
             Context.$input.attr('disabled', true );
             socket.emit(Context.page.routeIO, Context.data, function(dataDone){
@@ -39,7 +40,7 @@
         }
 
         function fnBtnDelete(event){
-            var Context = page_context(this, event);
+            var Context = pages.page_context(this, event);
             Context.$closest.addClass('deleting');
             socket.emit(Context.page.routeIO, Context.data, function(dataDone){
                 if( dataDone.result == 'ok' ){

@@ -2,16 +2,15 @@
  *  external: dust, $, $.publish, $.subscribe, socket
  */
 
-// Fixme: pass page refference
-
 define(['jquery',
         'links-to/socket-io',
         'links-to/debug',
         'links-to/tiny-pubsub',
         'links-to/add-dust-helpers',
         'page',
+        'links-to/pages',
         'dust-templates'
-       ], function ($, socket, debug, tiny, dust, page, templates ) {
+       ], function ($, socket, debug, tiny, dust, page, pages, templates ) {
     "use strict";
 
     var socketContext = {};
@@ -112,7 +111,7 @@ define(['jquery',
      */
     function socketEvent_common(data){
         data = socketResponseCommon(data);
-        var Context = page_context( null,null, null, data.param.route );
+        var Context = pages.page_context( null,null, null, data.param.route );
         tiny.pub(Context.page.eventDone, [ data, Context, data.param.route ] );
     }
 
@@ -148,7 +147,10 @@ define(['jquery',
     });
 
 
-    return myRender;
+    return {
+        socketResponseCommon: socketResponseCommon,
+        socketEvent_common: socketEvent_common
+    };
 });
 
 

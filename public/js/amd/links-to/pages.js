@@ -179,7 +179,8 @@ define(['jquery', 'links-to/socket-io', 'links-to/debug', 'links-to/tiny-pubsub'
     page.start({dispatch:false});
 
     return {
-        pages:pages
+        pages:pages,
+        page_context:page_context
     };
 
 });
