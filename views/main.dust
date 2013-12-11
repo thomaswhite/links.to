@@ -13,9 +13,10 @@
       <link rel="stylesheet" type="text/css" href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
       <link rel="stylesheet" type="text/css" href="/css/links-to.css">
 
+
     <script>var pageParam={pageParam|js|s}, pageScripts=[], pageCSS=[];</script>
 
-    <script src="/js/curl-all.min.js"  type="text/javascript" ></script>
+    <script src="/js/curl-all.js"  type="text/javascript" ></script>
     <script>
         console.info('start...');
         curl.config( {
@@ -30,14 +31,8 @@
 
                       "dustjs-linkedin" : "amd/dust-core-2.2.2",
                       "dustjs-helpers"  : "amd/dust-helpers-1.1.1",
-                      "dust-templates": {
-                              "location": "/templates/all.js",
-                              "config": {
-                                     loader: 'curl/loader/legacy',
-                                     exports : 'dustTemplates=1',
-                                     requires: ['dustjs-linkedin']
-                              }
-                       },
+                      "dust-templates":   "/templates/all-amd.js",
+
                       "socket.io": {
                           "location": "/socket.io/socket.io.js",
                           "config": {
@@ -45,6 +40,16 @@
                               factory: function (fullId) {
                                   return io;
                               }
+                          }
+                      },
+                      "bootstrap-js":{
+                          "location": "//netdna.bootstrapcdn.com/bootstrap/2.3.2/js/bootstrap.min.js",
+                          "config": {
+                              loader: 'curl/loader/legacy',
+                              factory: function (fullId) {
+                                  return "bootstrap_js";
+                              },
+                              requires: ['jquery']
                           }
                       }
 
@@ -59,11 +64,18 @@
 
           curl( [
                  'links-to/debug',
+                 'dustjs-helpers',
+                 'links-to/add-dust-helpers',
+                 'bootstrap-js',
                  'links-to/socket-io',
                  'links-to/pages',
                  'links-to/main',
                  'links-to/local-content',
-                 'links-to/collection'
+
+                 'links-to/collection',
+
+                 'links-to/import',
+                 'links-to/imports'
 
                 ], function(debug){
                      window.onerror = function(error, url, line, stack, extra) {
@@ -85,7 +97,7 @@
 
     </script>
 
-    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/headjs/0.99/head.min.js"></script>
+    <!-- script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/headjs/0.99/head.min.js"></script -->
     <script type="text/text">
    /*   head.js(
           {debug:"/js/ba-debug.js"},

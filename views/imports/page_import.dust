@@ -6,11 +6,3 @@
 {<container}
    {>"imports/import_container"/}
 {/container}
-
-{<pageScripts}
-   <script>
-     head.js(
-         { imports:    "/js/links-to/import.js"}
-     );
-   </script>
- {/pageScripts}
