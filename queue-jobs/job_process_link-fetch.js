@@ -200,7 +200,7 @@ module.exports = {
                             saveError(err, null, oAddedURL );
                             delete page_Parts.xhtml;
                             page_Parts.display = linkDisplay.update( page_Parts );
-                            box.invoke('url.update-display-queued_and_new-links', o.URL._id, page_Parts, Done);
+                            box.invoke('url.update-display-queued_and_new-links', oAddedURL._id, page_Parts, Done);
                         });
                     });
                 }else{
