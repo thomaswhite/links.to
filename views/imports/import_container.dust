@@ -7,7 +7,7 @@
         <span id="importBtn">
             <a class="btn btn-danger btn-small"  href="/imports/{import._id}/delete?back=/imports"><i class="fa fa-trash-o icon-white"></i> Delete</a>
             <a class="btn btn-primary btn-small import-btn"  href="#"><i class="fa fa-play icon-white"></i>&nbsp;Import</a>
-            <br/><input type="checkbox" id="fetch_links"><label for="fetch_links">Fetch all links.</label>
+            <label for="fetch_links"><input type="checkbox" id="fetch_links">Fetch all links.</label>
         </span>
         <span id="processBtn" style="display:none">
         <a class="btn btn-danger btn-small"  href="#" id="cancelImport"><i class="fa fa-stop icon-white"></i> Cancel</a>

@@ -31,10 +31,14 @@ define(['jquery',
         $bar.attr('aria-valuenow',data.progress).width(data.progress + '%');
         $bar.find('.sr-only').text( data.progress + '% Complete');
     }
+
     function import_folder_progress( data ){
         var $bar = $('#folder_' + data._id + ' .bar');
         $bar.width(data.progress + '%');
         $bar.find('span').text( data.progress + '%');
+        if( data.progress > 99 ){
+            $bar.slideUp(500);
+        }
     }
 
 
