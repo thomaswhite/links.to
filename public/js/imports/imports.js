@@ -10,7 +10,7 @@ define([
     'links-to/socket-io',
     'links-to/debug',
     'links-to/tiny-pubsub',
-    'page'
+    '../../.'
     , 'amd/jquery.iframe-post-form'
 ], function ($, socket, debug, tiny, page ) {
     "use strict";

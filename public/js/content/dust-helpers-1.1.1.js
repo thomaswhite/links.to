@@ -5,7 +5,7 @@
 // Released under the MIT License.
 //
 
-define(['dustjs-linkedin'], function ( dust ) {
+define(['../../.'], function ( dust ) {
     "use strict";
 
     // Note: all error conditions are logged to console and failed silently

@@ -6,7 +6,7 @@ define(['jquery',
         'links-to/socket-io',
         'links-to/debug',
         'links-to/tiny-pubsub',
-        'dustjs-linkedin',
+        '../../',
         'page',
         'links-to/pages',
         'dust-templates'

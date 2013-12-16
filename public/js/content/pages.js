@@ -6,7 +6,7 @@
  */
 
 
-define(['jquery', 'links-to/socket-io', 'links-to/debug', 'links-to/tiny-pubsub', 'page' ], function ($, socket, debug, tiny, page ) {
+define(['jquery', 'links-to/socket-io', 'links-to/debug', 'links-to/tiny-pubsub', '../../' ], function ($, socket, debug, tiny, page ) {
     "use strict";
 
     var pages = {
