@@ -71,5 +71,5 @@ define(['jquery'], function ($ ) {
 		post : function () {},               // Form onsubmit.
 		complete : function (response) {}    // After response from the server has been received.
 	};
-
+    return $.fn.iframePostForm;
 });

@@ -5,14 +5,9 @@
  */
 
 
-
-function toType(obj) {
-    return ({}).toString.call(obj).match(/\s([a-z|A-Z]+)/)[1].toLowerCase();
-}
-
 // TODO: make sure adding the collection in coll/mine
 function fnBtnAdd(event){
-    var Context = page_context(this, event);
+    var Context = pageContext(this, event);
     Context.$this.attr('disabled', true );
     Context.$input.attr('disabled', true );
     socket.emit(Context.page.routeIO, Context.data, function(dataDone){
@@ -31,7 +26,7 @@ function fnBtnAdd(event){
 }
 
 function fnBtnDelete(event){
-    var Context = page_context(this, event);
+    var Context = pageContext(this, event);
     Context.$closest.addClass('deleting');
     socket.emit(Context.page.routeIO, Context.data, function(dataDone){
         if( dataDone.result == 'ok' ){

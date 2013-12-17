@@ -8,7 +8,11 @@
  */
 
 
- define(['jquery', 'links-to/tiny-pubsub', 'links-to/debug' ], function ($, tiny, debug) {
+ define([
+     'jquery',
+     'tiny-pubsub',
+     'debug'
+ ], function ($, tiny, debug) {
     "use strict";
 
     function detect_bottom( event, options ){

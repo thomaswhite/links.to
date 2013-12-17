@@ -5,9 +5,11 @@
  */
 
 
-   // define(['socket.io', 'links-to/debug' ], function (io, debug) {
+
+
+// define(['socket.io', 'links-to/debug' ], function (io, debug) {
 //   define(['js!/socket.io/socket.io.js', 'links-to/debug' ], function (io, debug) {
-       define(['links-to/debug', 'js!/socket.io/socket.io.js' ], function ( debug) {
+   define(['../.', 'socket.io' ], function ( debug, io ) {
        "use strict";
 
        var socket = io.connect(''),  //  io.connect(host, options),
@@ -71,16 +73,16 @@
             debug.log ('socketContext', socketContext);
         });
 
-        socket.on('data', function( data ){
+       socket.on('data', function( data ){
             debug.log ('socket-io ON data:', data);
             socketData[data.param.path] = data;
             //TODO: add data under [search].data and append rows when paginate
             //TODO: trigger update event to refresh the target Area.
             //page.show(param.route); // navigate to the route and now there will be data for it.
             debug.err ('FIXME:page.show(param.route); // navigate to the route and now there will be data for it.');
-        });
+       });
 
-        return socket;
+       return socket;
 
    });
 

@@ -86,7 +86,7 @@ var pages = {
 
 // =========================================
 
-function page_context(that, event, context, route ){
+function pageContext(that, event, context, route ){
     var o,
         page,
         $this = that ? $(that) : null;
