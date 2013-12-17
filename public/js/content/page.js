@@ -1,5 +1,5 @@
 
-;(function(){
+define([], function(){
 
   /**
    * Perform initial dispatch.
@@ -445,16 +445,8 @@
   /**
    * Expose `page`.
    */
+ //  window.page = page;
+   return page;
 
-    if (typeof define === "function" && define.amd) {
-        define("page", [], function () {
-            return page;
-        });
-    }else if( typeof module !== 'undefined' && module.exports ){
-        module.exports = page;
-    } else {
-        window.page = page;
-    }
-
-})();
+});
 

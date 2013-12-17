@@ -3,7 +3,7 @@ define([
     'debug',
     'tiny-pubsub',
     'socket-io',
-    '../content/pages'
+    './pages'
 ], function ($, debug, tiny, socket, pages ) {
 
     "use strict";

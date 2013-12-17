@@ -11,8 +11,8 @@ define([
     'debug',
     'tiny-pubsub',
     './page',
-    'page-definitions',
-    "./render-content"
+    './page-definitions',
+    './render-content'
 ], function ($, socket, debug, tiny, page, pages ) {
     "use strict";
 

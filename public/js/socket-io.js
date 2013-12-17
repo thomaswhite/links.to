@@ -9,7 +9,7 @@
 
 // define(['socket.io', 'links-to/debug' ], function (io, debug) {
 //   define(['js!/socket.io/socket.io.js', 'links-to/debug' ], function (io, debug) {
-   define(['../.', 'socket.io' ], function ( debug, io ) {
+   define(["debug", 'socket.io' ], function ( debug, io ) {
        "use strict";
 
        var socket = io.connect(''),  //  io.connect(host, options),

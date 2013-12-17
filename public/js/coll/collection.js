@@ -4,7 +4,7 @@ define([
     'socket-io',
     'tiny-pubsub',
     'debug',
-    '../content/pages'
+    'content/pages'
 ], function ($, socket, tiny, debug, pages ) {
     "use strict";
 
@@ -71,7 +71,7 @@ define([
     //$('.refresh-coll').click({selector:'.row', refresh:true}, fetchNorReadyLinks );
 
     tiny.sub('insertLink', display_deleteNotFoundLinks);
-    tiny.sub('page-ready', function(event){
+    tiny.sub('page-ready', {catchUp:true}, function(event){
         display_deleteNotFoundLinks();
         fetchNorReadyLinks(null, '.row.notReady');
     });

@@ -1,9 +1,10 @@
-requirejs([
+define([
     "tiny-pubsub",
-    "./detect-bottom",
-    "./buttons",
-    './pages',
-    "bootstrap-js"
+    "./detect_bottom",
+    "content/buttons",
+    'content/pages',
+    "bootstrap-js",
+    "./page"
 ], function(tiny ){
 
     // TODO add bottomless scroll.

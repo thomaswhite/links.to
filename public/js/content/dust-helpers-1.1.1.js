@@ -5,7 +5,7 @@
 // Released under the MIT License.
 //
 
-define(['../../.'], function ( dust ) {
+define(['dustjs-linkedin'], function ( dust ) {
     "use strict";
 
     // Note: all error conditions are logged to console and failed silently
@@ -499,6 +499,5 @@ define(['../../.'], function ( dust ) {
      };
 
     return dust.helpers = helpers;
-
 
 }); //(typeof exports !== 'undefined' ? module.exports = require('dustjs-linkedin') : dust);

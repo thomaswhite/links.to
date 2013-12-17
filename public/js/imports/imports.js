@@ -10,8 +10,8 @@ define([
     'socket-io',
     'debug',
     'tiny-pubsub',
-    '../content/pages'
-    , 'amd/jquery.iframe-post-form'
+    'content/pages',
+    './jquery.iframe-post-form'
 ], function ($, socket, debug, tiny, pages ) {
     "use strict";
 
@@ -60,5 +60,5 @@ define([
         });
 
 
-    tiny.sub('page-ready', page_ready );
+    tiny.sub('page-ready', {catchUp:true}, page_ready );
 });

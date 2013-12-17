@@ -6,7 +6,7 @@ define([
     'jquery',
     'debug',
     'tiny-pubsub',
-    '../content/pages'
+    'content/pages'
 ], function ( ) {
     return { colls: true }
 });

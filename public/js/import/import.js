@@ -11,7 +11,7 @@ define([
     'socket-io',
     'debug',
     'tiny-pubsub',
-    '../content/pages'
+    'content/pages'
 ], function ($, socket, debug, tiny, pages ) {
     "use strict";
 
@@ -221,7 +221,7 @@ define([
     });
 
     // TODO refactor this for Single page Application
-    tiny.sub('page-ready', function(event){
+    tiny.sub('page-ready', {catchUp:true}, function(event){
         disableSelection( $('.coll-title'));
     });
 
