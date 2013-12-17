@@ -9,7 +9,8 @@ define(['jquery',
         '../../',
         'page',
         'links-to/pages',
-        'dust-templates'
+        'dust-templates',
+        'links-to/add-dust-helpers'
        ], function ($, socket, debug, tiny, dust, page, pages, templates ) {
     "use strict";
 
