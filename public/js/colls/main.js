@@ -4,11 +4,9 @@
 
 define([
     'jquery',
-    'bootstrap-js',
-    'links-to/debug',
-    'links-to/socket-io',
-    'links-to/main',
-    'links-to/local-content'
-], function ($) {
-    return { common:true}
+    'debug',
+    'tiny-pubsub',
+    '../content/pages'
+], function ( ) {
+    return { colls: true }
 });

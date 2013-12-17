@@ -24,13 +24,13 @@ function fetchNorReadyLinks( event, selector, refresh  ){
                 refresh : !!refresh, //'hard',
                 route:'/link/updated'
             },
-            socketResponseCommon
+            socketResponse
         );
     }
 }
 
 function deleteNoFoundLinks(event ){
-    var IDs = rowIDs($('#grid div.link-content a.notFound').closest('.row')),
+    var IDs = rowIDs($('div.link-content a.notFound', '#grid' ).closest('.row')),
         btn = event.target,
         $btn = $(btn);
 
@@ -42,7 +42,7 @@ function deleteNoFoundLinks(event ){
                 route:'/link/delete' // to be used when individual delete events come back
             },
             function( response ){
-                 socketResponseCommon(response);
+                 socketResponse(response);
                  $btn.hide(400);
             }
         );
@@ -51,7 +51,7 @@ function deleteNoFoundLinks(event ){
 }
 
 function display_deleteNoFoundLinks(){
-    var notFound = $('#grid div.link-content a.notFound');
+    var notFound = $('div.link-content a.notFound', '#grid');
     if( notFound.length ){
         $('#delete404').css('display', 'inline-block');
     }

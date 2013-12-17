@@ -1,4 +1,8 @@
-define(['../../', 'dustjs-linkedin', 'dustjs-helpers'], function (moment, dust, helpers) {
+define([
+    'moment',
+    'dustjs-linkedin',
+    'dustjs-helpers'
+], function (moment, dust, helpers) {
 
     helpers.timeFromNow = function(chunk, ctx, bodies, params) {
         var time = helpers.tap(params.time, chunk, ctx);

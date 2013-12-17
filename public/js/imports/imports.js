@@ -7,59 +7,58 @@
 
 define([
     'jquery',
-    'links-to/socket-io',
-    'links-to/debug',
-    'links-to/tiny-pubsub',
-    '../../.'
+    'socket-io',
+    'debug',
+    'tiny-pubsub',
+    '../content/pages'
     , 'amd/jquery.iframe-post-form'
-], function ($, socket, debug, tiny, page ) {
+], function ($, socket, debug, tiny, pages ) {
     "use strict";
 
 
-    $('body')
-        .on('change', '.fakeFileCont input:file', function(){
-            var $this = $(this);
-            $this.closest('.fakeFileCont').find('input:text').val($this.val());
-        })
-        .on('click', '.fakeFileCont input:button, .fakeFileCont button', function(event){
-          $(this).closest('.fakeFileCont').find('input:file').trigger('click');
-        })
-    ;
-
-    socket.on('import.processing', function(data){
-                debug.log ( 'import.processing, data:', data );
+    function initFileUpload(){
+        $('.fakeFileCont input:file').css({position:'absolute', top:'-10000px'});
+        $('body')
+            .on('change', '.fakeFileCont input:file', function(){
+                var $this = $(this);
+                $this.closest('.fakeFileCont').find('input:text').val($this.val());
             })
-          .on('import.root', function(data){
-                debug.log ( 'import.root, data:', data );
-           });
-
-    tiny.sub('page-ready', function(event){
-        $('.fakeFileCont input:file')
-            .css('position','absolute')
-            .css('top','-10000px')
+            .on('click', '.fakeFileCont input:button, .fakeFileCont button', function(event){
+                $(this).closest('.fakeFileCont').find('input:file').trigger('click');
+            })
         ;
 
-        if($.isFunction( $.fn.iframePostForm) ){
-            $('form#upload').iframePostForm({
-                json : true,
-                post : function ()	{
-                    debug.info('Uploading..');
-                },
-                error:  function (response,desc){
-                   debug.error('Bad upload', response, desc);
-                },
-                complete : function (response){
-                    if (!response.success){
-                        debug.error('Bad upload');
-                        debug.info(response);
-                    }else{
-                        debug.info('Upload OK', response);
-                        if( response.go_to ){
-                            page( response.go_to  );
-                        }
-                    }
+    }
+    function page_ready(event){
+
+        initFileUpload();
+        $('form#upload').iframePostForm({
+            json : true,
+            post : function ()	{
+                debug.info('Uploading..');
+            },
+            error:  function (response,desc){
+                debug.error('Bad upload', response, desc);
+            },
+            complete : function (response){
+                if (!response.success){
+                    debug.error('Bad upload');
+                    debug.info(response);
+                }else{
+                    pages.socketResponse( response, 'Upload OK');
                 }
-            });
-        }
-    });
+            }
+        });
+    }
+
+    socket
+        .on('import.processing', function(data){
+            debug.log ( 'import.processing, data:', data );
+        })
+        .on('import.root', function(data){
+            debug.log ( 'import.root, data:', data );
+        });
+
+
+    tiny.sub('page-ready', page_ready );
 });

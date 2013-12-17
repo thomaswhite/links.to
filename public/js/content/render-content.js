@@ -1,28 +1,20 @@
 /**
- *  external: dust, $, $.publish, $.subscribe, socket
+
  */
 
-define(['jquery',
-        'links-to/socket-io',
-        'links-to/debug',
-        'links-to/tiny-pubsub',
-        '../../',
-        'page',
-        'links-to/pages',
-        'dust-templates',
-        'links-to/add-dust-helpers'
-       ], function ($, socket, debug, tiny, dust, page, pages, templates ) {
+define([
+    'jquery',
+    'debug',
+    'socket-io',
+    'tiny-pubsub',
+    'dustjs-linkedin',
+    'dustjs-templates',
+    './add-dust-helpers'
+], function ($, debug, socket, tiny, dust ) {
     "use strict";
 
     var socketContext = {};
 
-    /**
-     *
-     * @param model
-     * @param data
-     * @param target
-     * @param contentAction: 1 or append, -1 or prepend, 0 or replace
-     */
     function myRender(tempateID, data, $target, contentAction, done ) {
         if (!tempateID) { return; }
         var base = dust.makeBase({
@@ -80,42 +72,6 @@ define(['jquery',
         }
     }
 
-    function socketResponseCommon( response, on, noLog, done ){
-        if( !on && response.param && response.param.emitted ){
-            on =  response.param.emitted;
-        }
-        if( !on && response.request && response.request.emitted ){
-            on =  response.request.emitted;
-        }
-        on = on || '?socketResponseCommon?';
-
-        if( !noLog ){
-            debug.log ( on, response );
-        }
-        if( !response ){
-            debug.warn('Missing response for "' + on + '"!');
-        }else if( response.go_to ){
-            page(  response.go_to  );
-        }else if( response.refresh || response.timeout  ){
-            location.reload(true);
-        }
-        if($.isFunction(done )){
-            done(response);
-        }else{
-            return response;
-        }
-    }
-
-    /**
-     * Prepares the context needed for the event related to this route
-     * @param data
-     */
-    function socketEvent_common(data){
-        data = socketResponseCommon(data);
-        var Context = pages.page_context( null,null, null, data.param.route );
-        tiny.pub(Context.page.eventDone, [ data, Context, data.param.route ] );
-    }
-
     tiny.sub("renderContent", function(event, tempateID, data, $container, contentAction, done){
         myRender( tempateID, data, $container, contentAction, done );
     });
@@ -136,21 +92,12 @@ define(['jquery',
         myRender( Context.page.tempateID, data.link, $("#link_" + data.link._id  ) , Context.page.contentAction); // Context.page.contentAction
     });
 
-    // TODO when adding a collection if the current page is /collections/mine, just replace the waiting sign with the new collection name else go to /collections/mine
-    socket.on('collection.added',   socketEvent_common);
-    socket.on('collection.deleted', socketEvent_common);
-    socket.on('link.deleted',       socketEvent_common);
-    socket.on('link.saved',         socketEvent_common);
-    socket.on('link.updated',       socketEvent_common);
-
     socket.on('user', function( data ){
         socketContext.user = data;
     });
 
-
     return {
-        socketResponseCommon: socketResponseCommon,
-        socketEvent_common: socketEvent_common
+        render: myRender
     };
 });
 

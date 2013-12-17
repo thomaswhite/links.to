@@ -1,10 +1,12 @@
 
-define(['jquery',
-        'links-to/socket-io',
-        'links-to/tiny-pubsub',
-        'links-to/debug',
-        'links-to/local-content'
-       ], function ($, socket, tiny, debug, localContent ) {
+define([
+    'jquery',
+    'socket-io',
+    'tiny-pubsub',
+    'debug',
+    '../content/pages'
+], function ($, socket, tiny, debug, pages ) {
+    "use strict";
 
     function rowIDs($rows){
        var IDs = [], id;
@@ -31,13 +33,13 @@ define(['jquery',
                     refresh : !!refresh, //'hard',
                     route:'/link/updated'
                 },
-                localContent.socketResponseCommon
+                pages.socketResponse
             );
         }
     }
 
     function deleteNoFoundLinks(event ){
-        var IDs = rowIDs($('#grid div.link-content a.notFound').closest('.row')),
+        var IDs = rowIDs($("#grid div.link-content a.notFound").closest('.row')),
             btn = event.target,
             $btn = $(btn);
 
@@ -49,7 +51,7 @@ define(['jquery',
                     route:'/link/delete' // to be used when individual delete events come back
                 },
                 function( response ){
-                    localContent.socketResponseCommon(response);
+                    pages.socketResponse(response);
                      $btn.hide(400);
                 }
             );
@@ -58,7 +60,7 @@ define(['jquery',
     }
 
     function display_deleteNotFoundLinks(){
-        var notFound = $('#grid div.link-content a.notFound');
+        var notFound = $("#grid div.link-content a.notFound");
         if( notFound.length ){
             $('#delete404').css('display', 'inline-block');
         }

@@ -6,12 +6,13 @@
  *
  * Depends on $, socket
  */
-define(['jquery',
-    'links-to/socket-io',
-    'links-to/debug',
-    'links-to/tiny-pubsub',
-    '../../.'
-], function ($, socket, debug, tiny, page ) {
+define([
+    'jquery',
+    'socket-io',
+    'debug',
+    'tiny-pubsub',
+    '../content/pages'
+], function ($, socket, debug, tiny, pages ) {
     "use strict";
 
     function disableSelection( $o ){
@@ -47,7 +48,9 @@ define(['jquery',
             , $row = $this.closest('.folder')
             , $i = $row.find('> div > span > i')
             , $excluded =  $row.find('> div > input:checkbox.excluded')
-            , o = {
+            ;
+
+        return {
                 $this   : $this,
                 $row    : $row,
                 $i      : $i,
@@ -58,7 +61,6 @@ define(['jquery',
                 state   : $i.hasClass( 'icon-expand-alt' ) ? 'closed' : 'expanded'
             }
         ;
-        return o;
     }
 
     function import_btn(event){
@@ -72,12 +74,9 @@ define(['jquery',
             id   : pageParam.id,
             fetch_links: $('#fetch_links').is(':checked')
         }, function( response ){
-            if (!response.success){
-                debug.log('Bad import', response);
-            }else{
-                debug.log('Import started', response);
-                if( response.go_to ){
-                    page(  response.go_to  );
+            if( false !== pages.socketResponse(response, 'imports:process') ){
+                if (!response.success){
+                    debug.log('Bad import', response);
                 }
             }
         });
@@ -159,45 +158,47 @@ define(['jquery',
 */
 
 
-
-
-
     socket.on('import.process-start', function(data){
-        debug.log ( 'import.process-start:', data );
-        $('#tab-imported').trigger('click');
+        pages.socketResponse(data, 'import.process-start', false, function(data){
+            $('#tab-imported').trigger('click');
+        });
     });
     socket.on('import.process-progress', function(data){
-        debug.log ( 'import.process-progress:', data );
+        pages.socketResponse(data, 'import.process-progress');
     });
     socket.on('import.process-end', function(data){
-        debug.log ( 'import.process-end:', data );
-        tiny.pub("renderContent",['imports/import_summary', {import:data}, $('#beforeContent'), 'replace-content']);
+        pages.socketResponse(data, 'import.process-end', false, function(data){
+           tiny.pub("renderContent",['imports/import_summary', {import:data}, $('#beforeContent'), 'replace-content']);
+        });
     });
     socket.on('import.process-error', function(data){
-        debug.log ( 'import.process-end:', data );
+        pages.socketResponse(data, 'import.process-error');
     });
     socket.on('import.process-queued', function(data){
-        debug.log ( 'import.process-queued:', data );
+        pages.socketResponse(data, 'import.process-queued');
     });
 
 
     socket.on('import.collection-start', function(data){
-        debug.log ( 'import.collection-start:', data );
-        $('#tab-imported').trigger('click');
-        tiny.pub("renderContent", ['imports/import_imported_line', data, $('#imported'), 'append']);
+        pages.socketResponse(data, 'import.collection-start', false, function(data){
+            $('#tab-imported').trigger('click');
+            tiny.pub("renderContent", ['imports/import_imported_line', data, $('#imported'), 'append']);
+        });
     });
 
     socket.on('import.collection-progress', function(data){
-        debug.log ( 'import.collection-progress:', data );
-        import_folder_progress( data );
+        pages.socketResponse(data, 'import.collection-progress', false, function(data){
+            import_folder_progress( data );
+        });
     });
 
     socket.on('import.collection-end', function(data){
-        debug.log ( 'import.collection-end:', data );
-        tiny.pub("renderContent", ['imports/import_imported_line', data, $('#folder_' + data._id ), '$replace']);
+        pages.socketResponse(data, 'import.collection-end', false, function(data){
+            tiny.pub("renderContent", ['imports/import_imported_line', data, $('#folder_' + data._id ), '$replace']);
+        });
     });
     socket.on('import.collection-error', function(data){
-        debug.log ( 'import.collection-error:', data );
+        pages.socketResponse(data, 'import.collection-error');
     });
 
 
@@ -219,7 +220,7 @@ define(['jquery',
         debug.log ( 'import.root:', data );
     });
 
-
+    // TODO refactor this for Single page Application
     tiny.sub('page-ready', function(event){
         disableSelection( $('.coll-title'));
     });

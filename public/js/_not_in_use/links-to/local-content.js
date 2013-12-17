@@ -3,22 +3,6 @@
  */
 
 
-function addDustHelpers(){
-    var helpers = dust.helpers;
-    helpers.timeFromNow = function(chunk, ctx, bodies, params) {
-        var time = helpers.tap(params.time, chunk, ctx);
-        return time ? chunk.write( moment(time).fromNow() )
-            : chunk;
-    };
-    helpers.timeStamp = function(chunk, ctx, bodies, params) {
-        var time  = helpers.tap(params.time, chunk, ctx),
-            format = helpers.tap(params.format, chunk, ctx) || 'YYYY-MM-DD HH:mm';
-
-        return time ? chunk.write( moment(time).format(format) )
-            : chunk;
-    };
-}
-
 /**
  *
  * @param model
@@ -137,7 +121,7 @@ function socketResponseCommon( response, on, noLog, done ){
  */
 function socketEvent_common(data){
     data = socketResponseCommon(data);
-    var Context = page_context( null,null, null, data.param.route );
+    var Context = pageContext( null,null, null, data.param.route );
     $.publish(Context.page.eventDone, [ data, Context, data.param.route ] );
 }
 
