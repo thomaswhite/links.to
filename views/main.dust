@@ -9,9 +9,9 @@
      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     {+metaTags/}
     <title>{+pageTitle}Links.to: Page{/pageTitle}</title>
-      <link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.no-icons.min.css">
-      <link rel="stylesheet" type="text/css" href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
-      <link rel="stylesheet" type="text/css" href="/css/links-to.css">
+    <link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.no-icons.min.css">
+    <link rel="stylesheet" type="text/css" href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/links-to.css">
 
 
     <script>
@@ -36,6 +36,7 @@
                    "font-awesome-css": "//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css",
                    "links-to-css"    : "/css/links-to.css"
               },
+              "depts":["socket.io", "socket-io","debug"],
               "packages":["coll","colls","import", "content", "imports"],
               "shim":{
                   "socket.io": { "exports":"io" }
@@ -62,34 +63,6 @@
       </script>
 
     <!-- script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/headjs/0.99/head.min.js"></script -->
-    <script type="text/text">
-
-
-   /*   head.js(
-          {debug:"/js/ba-debug.js"},
-      //    {socket_io_core:"/socket.io/socket.io.js"},
-      //    {socket_main:"/js/links-to/socket-io.js"},
-          function(){
-             debug.log( 'linksTo socket-io loaded.');
-          }
-      );
-*/
-      head.load(
-      // netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css
-      // netdna.bootstrapcdn.com/bootstrap/3.0.2/js/bootstrap.min.js
-
-          "//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.no-icons.min.css"
-
-  /*        , "//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css"  */
-          , "//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css"
-
-          , "/css/links-to.css"
-          {#config.stelth.screen}
-          , "/css/stelth.css"
-          {/config.stelth.screen}
-      );
-    </script>
-
     {+headLinks/}
     {+headContent/}
   </head>
@@ -106,10 +79,6 @@
     </div>
     {>mainPageScripts/}
     {+pageScripts/}
-    <script  type="text/text">
-        if( pageScripts.length) { head.js.applay(undefined,   pageScripts ); }
-        if( pageCSS.length)     { head.load.applay(undefined, pageCSS ); }
-    </script>
     {+pageBottom /}
   </body>
 </html>
