@@ -30,7 +30,6 @@ define([
 
     }
     function page_ready(event){
-
         initFileUpload();
         $('form#upload').iframePostForm({
             json : true,
@@ -60,5 +59,5 @@ define([
         });
 
 
-    tiny.sub('page-ready', {catchUp:true}, page_ready );
+    tiny.sub('page-loaded', {catchUp:true}, page_ready );
 });

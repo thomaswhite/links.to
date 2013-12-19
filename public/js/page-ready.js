@@ -1,4 +1,4 @@
 require(['domReady!', "tiny-pubsub"], function ( doc, tiny ) {
-    tiny.pub('page-ready');
+    tiny.pub('page-loaded');
     return doc;
 });

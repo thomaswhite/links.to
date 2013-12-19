@@ -1,10 +1,12 @@
 define([], {
+/*
     '/imports':{
         routeIO: 'imports',
         tempateID:'collections/collection_list_container',
         containerID:'#container',
         contentID:'#coll-list-rows'
     },
+*/
     '/colls':{
         routeIO: 'collection:list',
         tempateID:'collections/collection_list_container',

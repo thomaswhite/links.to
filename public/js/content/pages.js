@@ -11,7 +11,7 @@ define([
     'debug',
     'tiny-pubsub',
     './page',
-    './page-definitions',
+    './pages-definitions',
     './render-content'
 ], function ($, socket, debug, tiny, page, pages ) {
     "use strict";
@@ -118,6 +118,12 @@ define([
         tiny.pub(Context.page.eventDone, [ data, Context, data.param.route ] );
     }
 
+    function addPageDefintions(page2add){
+        for(var i in page2add  ){
+            pages[i] = page2add[i];
+        }
+    }
+
     page('/colls',
         function(context, next){
             context.state.pageDef = context.pageDef || pages['/colls'];
@@ -158,7 +164,10 @@ define([
         pageContext     : pageContext,
         page            : page,
         socketEvent     : socketEvent,
-        socketResponse  : socketResponse
+        socketResponse  : socketResponse,
+        getData         : getData,
+        processRoute    : processRoute,
+        addPageDefintions: addPageDefintions
     };
 
 });

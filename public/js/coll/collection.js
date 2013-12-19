@@ -70,8 +70,10 @@ define([
     $('body').on('click', '.refresh-coll', {selector:'.row', refresh:true}, fetchNorReadyLinks );
     //$('.refresh-coll').click({selector:'.row', refresh:true}, fetchNorReadyLinks );
 
+
+
     tiny.sub('insertLink', display_deleteNotFoundLinks);
-    tiny.sub('page-ready', {catchUp:true}, function(event){
+    tiny.sub('page-loaded', {catchUp:true}, function(event){
         display_deleteNotFoundLinks();
         fetchNorReadyLinks(null, '.row.notReady');
     });

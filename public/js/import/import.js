@@ -221,7 +221,7 @@ define([
     });
 
     // TODO refactor this for Single page Application
-    tiny.sub('page-ready', {catchUp:true}, function(event){
+    tiny.sub('page-loaded', {catchUp:true}, function(event){
         disableSelection( $('.coll-title'));
     });
 
