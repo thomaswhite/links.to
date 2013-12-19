@@ -4,32 +4,18 @@
  * Time: 21:01
  */
 
+
+
+
 // define(['socket.io', 'links-to/debug' ], function (io, debug) {
 //   define(['js!/socket.io/socket.io.js', 'links-to/debug' ], function (io, debug) {
    define(["debug", 'socket.io' ], function ( debug, io ) {
-        "use strict";
+       "use strict";
 
-        var socket = io.connect(''),  //  io.connect(host, options),
+       var socket = io.connect(''),  //  io.connect(host, options),
             socketContext = {},
             socketData = {} // saved by pager URL
             ;
-
-        function contextGet(){
-           return socketContext;
-        }
-        function contextAdd( part ){
-           part = part || {};
-           for( var i in part ){
-               socketContext[i] = part[i];
-           }
-           return socketContext;
-        }
-        socket.contextGet = contextGet;
-        socket.contextAdd = contextAdd;
-        socket.userGet = function(){ return socketContext.user };
-
-        socket.on('user',     contextAdd);
-        socket.on('who-am-i', contextAdd);
 
         socket.on('connecting',     function() {    debug || debug.log('socket.io connecting...');});
         socket.on('reconnecting',   function() {    debug ||  debug.log('socket.io reconnecting...');});
@@ -43,6 +29,7 @@
         socket.on('collection.adding', function( data ){
             debug.log ('collection-adding', data);
         });
+
 
         socket.on('link.in-progress', function( data ){
             debug.log ('link.in-progress:', data);
@@ -71,26 +58,32 @@
             // replace the waiting sign with the new link content
         });
 
-       socket.on('data', function( data ){
-           debug.log ('socket-io ON data:', data);
-           socketData[data.param.path] = data;
-           //TODO: add data under [search].data and append rows when paginate
-           //TODO: trigger update event to refresh the target Area.
-           //page.show(param.route); // navigate to the route and now there will be data for it.
-           debug.err ('FIXME:page.show(param.route); // navigate to the route and now there will be data for it.');
-       });
 
-       // ============================================================
-
+        // ============================================================
 
         // This will bootstrap resources from the server
         // and data for 'pageParam.route'
         socket.emit('loaded', pageParam, function(data){
-            contextAdd(data);
-            debug.log ('loaded, socketContext:',  socketContext);
+            socketContext.loaded = data;
+            debug.log ('loaded:',  data);
         });
 
+        socket.on('user', function( data ){
+            socketContext.user = data;
+            debug.log ('socketContext', socketContext);
+        });
+
+       socket.on('data', function( data ){
+            debug.log ('socket-io ON data:', data);
+            socketData[data.param.path] = data;
+            //TODO: add data under [search].data and append rows when paginate
+            //TODO: trigger update event to refresh the target Area.
+            //page.show(param.route); // navigate to the route and now there will be data for it.
+            debug.err ('FIXME:page.show(param.route); // navigate to the route and now there will be data for it.');
+       });
+
        return socket;
+
    });
 
 
@@ -107,6 +100,13 @@
      on link.tags
 
    Collection:
+   emit collection.add
+    on. collection.added
+
+   emit collection.pub
+     on collection.published
+
+   emit collection.ask
 
    emit collections.list    page, [authorList], [excludeTagList], [includeTagList]
    emit tags.list           page, [authorList], [excludeTagList],

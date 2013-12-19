@@ -1,6 +1,3 @@
-/**
-
- */
 
 define([
     'jquery',
@@ -13,18 +10,18 @@ define([
 ], function ($, debug, socket, tiny, dust ) {
     "use strict";
 
-    var socketContext = {};
-
     function myRender(tempateID, data, $target, contentAction, done ) {
         if (!tempateID) { return; }
-        var base = dust.makeBase({
-            user:socketContext.user,
-            pageParam:pageParam
-        });
+        var User = socket.userGet(),
+            base = dust.makeBase({
+                user: User,
+                pageParam:pageParam
+            });
         if( !$target ){
-            throw  'myRender: missing target';
+            throw  'myRender: NO target specified';
         }
-        data.user =   socketContext.user;
+        data.user =  User;
+
         try{
             dust.render(tempateID,  base.push(data), function(err, out) {
                 out = $.trim(out) || '--empty--';
@@ -90,10 +87,6 @@ define([
 
     tiny.sub("linkUpdated", function(event, data, Context, routeIO){
         myRender( Context.page.tempateID, data.link, $("#link_" + data.link._id  ) , Context.page.contentAction); // Context.page.contentAction
-    });
-
-    socket.on('user', function( data ){
-        socketContext.user = data;
     });
 
     return {
