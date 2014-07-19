@@ -1,11 +1,12 @@
 define([
     "tiny-pubsub",
+    "debug",
     "./detect_bottom",
     "content/buttons",
     'content/pages',
     "bootstrap-js",
     "./page"
-], function(tiny ){
+], function(tiny, debug ){
 
     // TODO add bottomless scroll.
     function page_bottom_detected(event, nowTS, window_height){

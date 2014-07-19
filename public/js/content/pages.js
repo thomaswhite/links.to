@@ -114,7 +114,7 @@ define([
      */
     function socketEvent(data){
         data = socketResponse(data);
-        var Context = pages.pageContext( null,null, null, data.param.route );
+        var Context = pageContext( null,null, null, data.param.route );
         tiny.pub(Context.page.eventDone, [ data, Context, data.param.route ] );
     }
 

@@ -20,7 +20,7 @@ function newUser  ( OpenID ){
         openIDs:[ OpenID._id ],
         active_openID : OpenID._id,
         active_provider : OpenID.provider,
-        shortID : ShorterID(),
+        shortID : box.utils.ShorterID(),
         created : new Date()
     };
     if( OpenID.gravatarURL ){
@@ -56,7 +56,7 @@ box.on('db.init', function(  Config, done ){
                     new_User.type = 'user';
                     new_User.justAdded = true;
                     waterfall.user = new_User;
-                    OpenIDs.updateById( waterfall.openID._id,  {$set: { owner:new_User._id }} );
+                    box.db.coll.openIDs.updateById( waterfall.openID._id,  {$set: { owner:new_User._id }} );
                     callback(err, waterfall );
                 });
             }

@@ -17,6 +17,23 @@
             socketData = {} // saved by pager URL
             ;
 
+        function contextGet(){
+           return socketContext;
+        }
+        function contextAdd( part ){
+           part = part || {};
+           for( var i in part ){
+               socketContext[i] = part[i];
+           }
+           return socketContext;
+        }
+        socket.contextGet = contextGet;
+        socket.contextAdd = contextAdd;
+        socket.userGet = function(){ return socketContext.user };
+
+        socket.on('user',     contextAdd);
+        socket.on('who-am-i', contextAdd);
+
         socket.on('connecting',     function() {    debug || debug.log('socket.io connecting...');});
         socket.on('reconnecting',   function() {    debug ||  debug.log('socket.io reconnecting...');});
         socket.on('connect',        function() {    debug ||  debug.log('socket.io connected!');});
@@ -29,7 +46,6 @@
         socket.on('collection.adding', function( data ){
             debug.log ('collection-adding', data);
         });
-
 
         socket.on('link.in-progress', function( data ){
             debug.log ('link.in-progress:', data);

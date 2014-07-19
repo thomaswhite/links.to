@@ -118,5 +118,5 @@ box.utils = {
 box.on('init', function (app, conf, done) {
     var ts = new Date().getTime();
     config = conf;
-    box.utils.later( done, null, '+' + ( new Date().getTime() - ts) + 'ms utils "Passport" initialised.');
+    box.utils.later( done, null, '+' + ( new Date().getTime() - ts) + 'ms utils initialised.');
 });
