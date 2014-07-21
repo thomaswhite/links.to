@@ -15,7 +15,7 @@ require('./upload');
 
 
 function top ( req, res ){
-    box.dust.render( res, 'main', { title: 'Home page' } );
+    box.dust.render( res, 'main', { title: 'Home page', pageParam:{} } );
 //    res.render('main', box.dust.makeBase({ title: 'title' }) );
 }
 

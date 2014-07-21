@@ -72,6 +72,7 @@ function update_links_display( id, all, callback ){
                 oUpdate,
                 { multi : true },
                 function( err, updated ){
+                    // todo: there was an error. Investgate and fix.
                     callback(err, oURL, updated );
                 }
             );
